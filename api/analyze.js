@@ -26,7 +26,7 @@ export default async function handler(req, res) {
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: "claude-3-5-sonnet-20241022",
+        model: "claude-3-haiku-20240307",
         max_tokens: 1000,
         messages: [{
           role: "user",
@@ -35,13 +35,8 @@ export default async function handler(req, res) {
       }),
     });
 
-    const data = await response.json();
-    if (data.error) return res.status(500).json({ error: data.error.message });
-
-    const text = data.content?.map(c => c.text || "").join("").trim();
-    const result = JSON.parse(text.replace(/```json|```/g, "").trim());
-    return res.status(200).json(result);
-  } catch (err) {
-    return res.status(500).json({ error: err.message });
-  }
-}
+    const raw = await response.text();
+    
+    if (!response.ok) {
+      return res.status(500).json({ error: `Anthropic error: ${response.status} - ${raw.slice(0,200)}` });
+    }
