@@ -345,17 +345,17 @@ export default function App() {
           {emailSent ? (
             <div style={{textAlign:"center"}}>
               <div style={{fontSize:56,marginBottom:16}}>📩</div>
-              <h2 style={{fontSize:20,fontWeight:800,color:"#111827",margin:"0 0 8px"}}>Confirma o teu email</h2>
+              <h2 style={{fontSize:20,fontWeight:800,color:"#111827",margin:"0 0 8px"}}>Conta criada! 🎉</h2>
               <p style={{fontSize:14,color:"#6b7280",lineHeight:1.6,marginBottom:20}}>
-                Enviámos um email para <strong>{authForm.email}</strong>.<br/>Clica no link para ativar a conta e começar os teus {TRIAL_DAYS} dias grátis.
+                Enviámos um email de boas-vindas para <strong>{authForm.email}</strong>. Podes entrar já de seguida.
               </p>
               <div style={{background:"#f0fdf4",border:"1px solid #bbf7d0",borderRadius:10,padding:"12px 16px",marginBottom:20,textAlign:"left"}}>
                 <div style={{fontSize:13,color:"#15803d",fontWeight:600}}>✓ Conta criada com sucesso</div>
-                <div style={{fontSize:13,color:"#15803d",fontWeight:600,marginTop:4}}>✓ Email de confirmação enviado</div>
-                <div style={{fontSize:13,color:"#15803d",fontWeight:600,marginTop:4}}>✓ {TRIAL_DAYS} dias grátis à tua espera</div>
+                <div style={{fontSize:13,color:"#15803d",fontWeight:600,marginTop:4}}>✓ {TRIAL_DAYS} dias grátis ativados</div>
+                <div style={{fontSize:13,color:"#15803d",fontWeight:600,marginTop:4}}>✓ Acesso imediato</div>
               </div>
-              <p style={{fontSize:12,color:"#9ca3af",marginBottom:12}}>Não recebeste? Verifica a pasta de spam.</p>
-              <button style={S.btnGhost} onClick={()=>{setEmailSent(false);setAuthMode("login");}}>Já confirmei — entrar</button>
+              <button style={{...S.btnPrimary,marginBottom:8}} onClick={()=>{setEmailSent(false);setAuthMode("login");}}>Entrar agora →</button>
+              <p style={{fontSize:11,color:"#9ca3af",textAlign:"center"}}>Verifica o email para o resumo da tua conta.</p>
             </div>
           ) : (
             <div>
