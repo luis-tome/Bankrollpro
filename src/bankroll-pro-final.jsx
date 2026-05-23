@@ -614,7 +614,7 @@ export default function App() {
                     <button key={u} style={{flex:1,padding:"10px 0",border:`1px solid ${parseFloat(form.units)===u?sc.color:"#e5e7eb"}`,borderRadius:8,background:parseFloat(form.units)===u?sc.color:"#f9fafb",color:parseFloat(form.units)===u?"#fff":"#9ca3af",cursor:"pointer",fontSize:13,fontWeight:700,marginTop:4}} onClick={()=>setForm(f=>({...f,units:u}))}>{u}</button>
                   ))}
                 </div>
-                <input style={{...S.input,marginTop:6,fontSize:13,padding:"8px 10px"}} type="number" step="0.25" min="0.25" placeholder="Outro ex: 0.75" value={[0.5,1,2,3].includes(parseFloat(form.units))?"":form.units} onChange={e=>setForm(f=>({...f,units:e.target.value===''?'':parseFloat(e.target.value)||''}))}/>
+                <input style={{...S.input,marginTop:6,fontSize:13,padding:"8px 10px"}} type="text" inputMode="decimal" placeholder="Outro ex: 0.75 ou 1.75" value={[0.5,1,2,3].includes(Number(form.units))?"":form.units} onChange={e=>{const v=e.target.value.replace(",","."); setForm(f=>({...f,units:v}));}}/>
               </div>
             </div>
 
