@@ -609,12 +609,11 @@ export default function App() {
               </div>
               <div style={{flex:1}}>
                 <label style={S.label}>Unidades</label>
-                <div style={{display:"flex",gap:4,marginTop:4}}>
-                  {[0.5,1,2,3].map(u=>(
-                    <button key={u} style={{flex:1,padding:"10px 0",border:`1px solid ${parseFloat(form.units)===u?sc.color:"#e5e7eb"}`,borderRadius:8,background:parseFloat(form.units)===u?sc.color:"#f9fafb",color:parseFloat(form.units)===u?"#fff":"#9ca3af",cursor:"pointer",fontSize:13,fontWeight:700,marginTop:4}} onClick={()=>setForm(f=>({...f,units:u}))}>{u}</button>
+                <div style={{display:"flex",flexWrap:"wrap",gap:4,marginTop:4}}>
+                  {[0.25,0.5,0.75,1,1.25,1.5,1.75,2,2.5,3].map(u=>(
+                    <button key={u} style={{padding:"8px 6px",border:`1px solid ${Number(form.units)===u?sc.color:"#e5e7eb"}`,borderRadius:8,background:Number(form.units)===u?sc.color:"#f9fafb",color:Number(form.units)===u?"#fff":"#9ca3af",cursor:"pointer",fontSize:12,fontWeight:700,minWidth:"18%"}} onClick={()=>setForm(f=>({...f,units:u}))}>{u}</button>
                   ))}
                 </div>
-                <input style={{...S.input,marginTop:6,fontSize:13,padding:"8px 10px"}} type="text" inputMode="decimal" placeholder="Outro ex: 0.75 ou 1.75" value={[0.5,1,2,3].includes(Number(form.units))?"":form.units} onChange={e=>{const v=e.target.value.replace(",","."); setForm(f=>({...f,units:v}));}}/>
               </div>
             </div>
 
