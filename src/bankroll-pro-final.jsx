@@ -22,6 +22,7 @@ const PROMO_DAYS = 15; // days after launch promo lasts
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const SPORTS = {
+  "Geral":       { icon:"🎯", color:"#6b7280", markets:["Outros"] },
   "Ténis":       { icon:"🎾", color:"#0ea5e9", markets:["Vencedor do Jogo","Handicap Games","Total Games O/U","Set Winner","Total Sets O/U","Resultado Correto Sets","1º Set Vencedor","Total Games 1º Set","Handicap Sets","Dupla Hipótese","Tie-Break no Jogo","1º Break de Serviço","Jogo em Deuce","Total Aces O/U","Total Double Faults O/U","Outros"] },
   "Futebol":     { icon:"⚽", color:"#10b981", markets:["1X2","Dupla Hipótese","Over/Under Golos","BTTS","Handicap Asiático","Handicap Europeu","Marcador Correto","1º Marcador","Total Cantos","Total Cartões","Over/Under 1ª Parte","Resultado ao Intervalo","Outros"] },
   "Basquetebol": { icon:"🏀", color:"#f97316", markets:["1X2","Handicap","Over/Under","1º Quarto","Moneyline","Outros"] },
@@ -73,6 +74,7 @@ export default function App() {
   const [editBet, setEditBet]     = useState(null);
   const [formMode, setFormMode]   = useState("immediate");
   const [betType, setBetType]       = useState("single");
+  const [betSport, setBetSport]     = useState("");
   const [form, setForm]           = useState({event:"",market:"Vencedor do Jogo",selection:"",odd:"",units:1,result:"WIN",notes:"",cashoutVal:""});
   const [subView, setSubView]     = useState("annual");
   const [feedback, setFeedback]   = useState(null);
@@ -92,7 +94,9 @@ export default function App() {
   const isActive  = br?.subscribed || trialLeft > 0 || isAdmin;
   const isInTrial = !br?.subscribed && trialLeft > 0;
   const isAdmin   = user?.email === ADMIN_EMAIL;
-  const markets   = SPORTS[br?.sport||"Ténis"]?.markets||["Outros"];
+  const effectiveSport = br?.sport==="Geral" ? (betSport||"Ténis") : (br?.sport||"Ténis");
+  const markets   = SPORTS[effectiveSport]?.markets||["Outros"];
+  const formSC    = SPORTS[effectiveSport]||sc;
   const userName  = user?.user_metadata?.name||user?.email?.split("@")[0]||"";
   const emptyForm = {event:"",market:markets[0]||"Vencedor do Jogo",selection:"",odd:"",units:1,result:"WIN",notes:"",cashoutVal:""};
 
@@ -168,7 +172,7 @@ export default function App() {
     if(odd<=1) return;
     const stake=unitVal*(parseFloat(form.units)||1);
     const result=formMode==="immediate"?form.result:"PENDING";
-    const payload={sport:br.sport,event:form.event,market:form.market,selection:form.selection,odd,stake,units:parseFloat(form.units),result,notes:form.notes,cashout_val:form.result==="CASHOUT"?parseFloat(form.cashoutVal)||null:null};
+    const payload={sport:br?.sport==="Geral"?(betSport||"Outros"):br.sport,event:form.event,market:form.market,selection:form.selection,odd,stake,units:parseFloat(form.units),result,notes:form.notes,cashout_val:form.result==="CASHOUT"?parseFloat(form.cashoutVal)||null:null};
     if(editBet){
       const{data}=await supabase.from("bets").update(payload).eq("id",editBet.id).select().single();
       if(data) setBets(prev=>prev.map(b=>b.id===data.id?{...data,odd:parseFloat(data.odd),stake:parseFloat(data.stake)}:b));
@@ -593,6 +597,18 @@ export default function App() {
               </div>
             )}
 
+            {br?.sport==="Geral" && (
+              <div>
+                <label style={S.label}>Desporto</label>
+                <div style={{display:"flex",flexWrap:"wrap",gap:6,marginTop:4,marginBottom:4}}>
+                  {Object.keys(SPORTS).filter(s=>s!=="Geral").map(s=>(
+                    <button key={s} style={{display:"flex",alignItems:"center",gap:4,padding:"6px 10px",border:`1px solid ${betSport===s?SPORTS[s].color:"#e5e7eb"}`,borderRadius:8,background:betSport===s?SPORTS[s].color+"15":"#f9fafb",color:betSport===s?SPORTS[s].color:"#9ca3af",cursor:"pointer",fontSize:11,fontWeight:700}} onClick={()=>{setBetSport(s);setForm(f=>({...f,market:SPORTS[s].markets[0]}));}}>
+                      <span>{SPORTS[s].icon}</span><span>{s}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
             <label style={S.label}>{betType==="multiple"?"Nome da múltipla":"Evento"}</label>
             <input style={S.input} placeholder={betType==="multiple"?"ex: Múltipla Ténis 3 jogos":"ex: Sinner vs Alcaraz"} value={form.event} onChange={e=>setForm(f=>({...f,event:e.target.value}))}/>
             {betType==="multiple" && (
@@ -1133,7 +1149,7 @@ export default function App() {
       </main>
 
       {/* FAB */}
-      <button style={{position:"fixed",bottom:24,right:18,width:56,height:56,borderRadius:"50%",border:"none",color:"#fff",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 16px rgba(0,0,0,.2)",zIndex:20,fontSize:28,lineHeight:1,background:sc.color}} onClick={()=>{setForm(emptyForm);setEditBet(null);setShowForm(true);}}>+</button>
+      <button style={{position:"fixed",bottom:24,right:18,width:56,height:56,borderRadius:"50%",border:"none",color:"#fff",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 16px rgba(0,0,0,.2)",zIndex:20,fontSize:28,lineHeight:1,background:sc.color}} onClick={()=>{setForm(emptyForm);setEditBet(null);setBetSport("");setShowForm(true);}}>+</button>
 
     </div>
   );
