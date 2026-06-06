@@ -91,9 +91,9 @@ export default function App() {
   const fmtP    = v => (v>=0?"+":"-")+cur.symbol+Math.abs(v).toFixed(2).replace(".",",");
   const fmtPct  = v => (v>=0?"+":"")+v.toFixed(1)+"%";
   const trialLeft = br?.user_trial_start ? daysLeft(br.user_trial_start) : (br?.trial_start ? daysLeft(br.trial_start) : TRIAL_DAYS);
+  const isAdmin   = user?.email === ADMIN_EMAIL;
   const isActive  = br?.subscribed || trialLeft > 0 || isAdmin;
   const isInTrial = !br?.subscribed && trialLeft > 0;
-  const isAdmin   = user?.email === ADMIN_EMAIL;
   const effectiveSport = br?.sport==="Geral" ? (betSport||"Ténis") : (br?.sport||"Ténis");
   const markets   = SPORTS[effectiveSport]?.markets||["Outros"];
   const formSC    = SPORTS[effectiveSport]||sc;
