@@ -43,14 +43,16 @@ const fmtDate = d => { const dt=new Date(d+"T00:00:00"); return dt.toLocaleDateS
 const padDate = dt => { const y=dt.getFullYear(),m=String(dt.getMonth()+1).padStart(2,"0"),d=String(dt.getDate()).padStart(2,"0"); return `${y}-${m}-${d}`; };
 
 async function getAIFeedback(bets, stats, bankroll, sport) {
-  const settled = bets.filter(b=>b.result!=="PENDING");
-  if(settled.length<3) return null;
-  const summary = { sport, totalBets:settled.length, wins:stats.wins, losses:stats.losses, roi:stats.roi.toFixed(1), strikeRate:stats.strikeRate.toFixed(1), avgOdd:stats.avgOdd.toFixed(2), pnl:stats.pnl.toFixed(2), bankroll:bankroll.toFixed(2) };
+  const settled = bets.filter(b=>b.result!=="PENDING"&&b.result!=="VOID");
+  if(settled.length<3) return {error:"Poucos registos"};
+  const effectiveSport = (!sport||sport==="Geral") ? "Desporto geral" : sport;
+  const summary = { sport:effectiveSport, totalBets:settled.length, wins:stats.wins, losses:stats.losses, roi:Number(stats.roi.toFixed(1)), strikeRate:Number(stats.strikeRate.toFixed(1)), avgOdd:Number(stats.avgOdd.toFixed(2)), pnl:Number(stats.pnl.toFixed(2)), bankroll:Number(bankroll.toFixed(2)) };
   try {
     const res = await fetch("/api/analyze",{ method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({summary}) });
-    if(!res.ok) return { error: `Erro ${res.status}` };
-    const data = await res.json();
+    const text = await res.text();
+    const data = JSON.parse(text);
     if(data.error) return { error: data.error };
+    if(!data.score) return { error: "Resposta inválida" };
     return data;
   } catch(e) { return { error: e.message }; }
 }
