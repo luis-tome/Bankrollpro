@@ -26,21 +26,28 @@ module.exports = async function handler(req, res) {
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: "claude-haiku-4-5",
+        model: "claude-3-haiku-20240307",
         max_tokens: 1000,
         messages: [{
           role: "user",
-          content: `És um analista de gestão desportiva para ${summary.sport}. Analisa e dá feedback em português de Portugal.\n\nDados: ${JSON.stringify(summary)}\n\nResponde APENAS com JSON sem markdown:\n{"score":<1-10>,"headline":"<máx 60 chars>","insights":["...","...","..."],"warnings":["..."],"tips":["...","..."]}`
+          content: `És um analista de gestão de apostas desportivas. Analisa os dados e dá feedback em português de Portugal.\n\nDados: ${JSON.stringify(summary)}\n\nResponde APENAS com um objeto JSON válido, sem markdown, sem texto antes ou depois:\n{"score":7,"headline":"Resumo em 60 chars","insights":["insight1","insight2","insight3"],"warnings":["aviso1"],"tips":["dica1","dica2"]}`
         }]
       }),
     });
 
     const raw = await response.text();
-    if (!response.ok) return res.status(500).json({ error: `Anthropic: ${raw.slice(0,200)}` });
+
+    if (!response.ok) {
+      return res.status(500).json({ error: `Anthropic ${response.status}: ${raw.slice(0,300)}` });
+    }
 
     const data = JSON.parse(raw);
     const text = data.content?.map(c => c.text || "").join("").trim();
-    const result = JSON.parse(text.replace(/```json|```/g, "").trim());
+    
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) return res.status(500).json({ error: "Sem JSON na resposta" });
+    
+    const result = JSON.parse(jsonMatch[0]);
     return res.status(200).json(result);
   } catch (err) {
     return res.status(500).json({ error: err.message });
