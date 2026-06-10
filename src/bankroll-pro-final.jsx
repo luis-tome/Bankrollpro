@@ -1059,8 +1059,8 @@ export default function App() {
             )}
 
             {feedback?.error && !loadingFB && (
-              <div style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:10,padding:"12px",textAlign:"center",fontSize:13,color:"#dc2626",marginTop:10}}>
-                Erro na análise. Tenta novamente mais tarde.
+              <div style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:10,padding:"12px",fontSize:12,color:"#dc2626",marginTop:10}}>
+                <strong>Erro:</strong> {feedback.error}
               </div>
             )}
 
