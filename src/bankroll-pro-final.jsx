@@ -1034,7 +1034,9 @@ export default function App() {
                     if(stats.settled<3) return;
                     setLoadingFB(true);setFeedback(null);
                     const fb=await getAIFeedback(bets,stats,currentBR,br?.sport);
+                    console.log("AI feedback:", JSON.stringify(fb));
                     if(fb&&!fb.error){setFeedback(fb);setAiUsage(u=>u+1);}
+                    else if(fb?.error){setFeedback({error:fb.error});}
                     setLoadingFB(false);
                   }}
                   disabled={loadingFB||stats.settled<3}>
