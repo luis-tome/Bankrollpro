@@ -48,8 +48,11 @@ async function getAIFeedback(bets, stats, bankroll, sport) {
   const summary = { sport, totalBets:settled.length, wins:stats.wins, losses:stats.losses, roi:stats.roi.toFixed(1), strikeRate:stats.strikeRate.toFixed(1), avgOdd:stats.avgOdd.toFixed(2), pnl:stats.pnl.toFixed(2), bankroll:bankroll.toFixed(2) };
   try {
     const res = await fetch("/api/analyze",{ method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({summary}) });
-    return await res.json();
-  } catch { return null; }
+    if(!res.ok) return { error: `Erro ${res.status}` };
+    const data = await res.json();
+    if(data.error) return { error: data.error };
+    return data;
+  } catch(e) { return { error: e.message }; }
 }
 
 export default function App() {
