@@ -1,4 +1,4 @@
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
@@ -26,7 +26,7 @@ export default async function handler(req, res) {
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: "claude-3-haiku-20240307",
+        model: "claude-haiku-4-5",
         max_tokens: 1000,
         messages: [{
           role: "user",
@@ -36,7 +36,13 @@ export default async function handler(req, res) {
     });
 
     const raw = await response.text();
-    
-    if (!response.ok) {
-      return res.status(500).json({ error: `Anthropic error: ${response.status} - ${raw.slice(0,200)}` });
-    }
+    if (!response.ok) return res.status(500).json({ error: `Anthropic: ${raw.slice(0,200)}` });
+
+    const data = JSON.parse(raw);
+    const text = data.content?.map(c => c.text || "").join("").trim();
+    const result = JSON.parse(text.replace(/```json|```/g, "").trim());
+    return res.status(200).json(result);
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+}
