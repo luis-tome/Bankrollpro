@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
 const SUPABASE_URL = "https://opeuermurrbzpglbkmrf.supabase.co";
@@ -20,6 +20,26 @@ const NORMAL_ANNUAL  = 22.99;
 const PROMO_DAYS = 15; // days after launch promo lasts
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const QUOTES = [
+  { text: "A disciplina é mais importante do que a estratégia. Sem gestão de banca, até o melhor tipster perde.", author: "Joseph Buchdahl" },
+  { text: "O apostador profissional não aposta para ganhar. Aposta para não perder.", author: "Nassim Nicholas Taleb" },
+  { text: "A maior vantagem que podes ter não é a melhor análise, é a melhor gestão de risco.", author: "Ed Thorp" },
+  { text: "Não é sobre ter razão. É sobre quanto ganhas quando tens razão e quanto perdes quando não tens.", author: "George Soros" },
+  { text: "O ROI diz-te se és bom. A gestão de banca diz-te se sobrevives.", author: "Patrick Veitch" },
+  { text: "Apostadores que quebram não perdem porque escolhem mal. Perdem porque apostam demasiado.", author: "Kelly Criterion" },
+  { text: "Trata cada aposta como um investimento, não como entretenimento.", author: "Pinnacle Sports" },
+  { text: "A paciência é a arma mais poderosa de qualquer apostador profissional.", author: "Zeljko Ranogajec" },
+];
+
+function useQuote(interval = 8000) {
+  const [idx, setIdx] = React.useState(0);
+  React.useEffect(() => {
+    const timer = setInterval(() => setIdx(i => (i + 1) % QUOTES.length), interval);
+    return () => clearInterval(timer);
+  }, [interval]);
+  return QUOTES[idx];
+}
 
 const SPORTS = {
   "Geral":       { icon:"🎯", color:"#6b7280", markets:["Outros"] },
@@ -282,7 +302,7 @@ export default function App() {
       </header>
 
       <div style={{padding:"28px 20px 80px",maxWidth:480,margin:"0 auto"}}>
-        <div style={{display:"inline-block",background:"#fef3c7",border:"1px solid #fde68a",color:"#92400e",borderRadius:6,padding:"3px 12px",fontSize:11,fontWeight:700,marginBottom:18}}>
+        <div style={{display:"inline-block",background:"#f8f9fa",border:"1px solid #e9ecef",color:"#92400e",borderRadius:6,padding:"3px 12px",fontSize:11,fontWeight:700,marginBottom:18}}>
           🔥 Oferta de lançamento — {PROMO_DAYS} dias
         </div>
 
@@ -293,6 +313,8 @@ export default function App() {
         <p style={{fontSize:14,color:"#6b7280",lineHeight:1.7,marginBottom:24}}>
           Controla bancas por desporto, acompanha ROI em tempo real e recebe análise com IA para evoluir a tua performance.
         </p>
+
+        <LandingQuote/>
 
         <div style={{background:"#fff",border:"1px solid #e5e7eb",borderRadius:14,padding:16,marginBottom:20,boxShadow:"0 2px 8px rgba(0,0,0,.06)"}}>
           <div style={{textAlign:"center",marginBottom:12,fontSize:12,color:"#dc2626",fontWeight:700}}>
@@ -486,7 +508,7 @@ export default function App() {
             </div>
 
             {isInTrial && !isAdmin && (
-              <div style={{background:"#fef3c7",border:"1px solid #fde68a",borderRadius:10,padding:"12px",marginBottom:14,fontSize:12,color:"#92400e"}}>
+              <div style={{background:"#f8f9fa",border:"1px solid #e9ecef",borderRadius:10,padding:"12px",marginBottom:14,fontSize:12,color:"#92400e"}}>
                 <div style={{fontWeight:700,marginBottom:2}}>⏰ Trial — {trialLeft} dias restantes</div>
                 <div style={{fontSize:11,marginBottom:10,color:"#b45309"}}>Subscreve agora e garantes o preço de lançamento</div>
                 <div style={{display:"flex",gap:8,marginBottom:8}}>
@@ -695,16 +717,16 @@ export default function App() {
           <span style={{fontSize:14,fontWeight:700,color:"#111827"}}>{br?.name||"BankrollPro"}</span>
         </div>
         <div style={{display:"flex",alignItems:"center",gap:6}}>
-          {isInTrial && !isAdmin && <span style={{borderRadius:6,padding:"3px 10px",fontSize:12,fontWeight:600,color:"#92400e",background:"#fef3c7",border:"1px solid #fde68a",cursor:"pointer"}} onClick={()=>setDrawerOpen(true)}>{trialLeft}d ⏰</span>}
+          {isInTrial && !isAdmin && <span style={{borderRadius:6,padding:"3px 10px",fontSize:12,fontWeight:600,color:"#92400e",background:"#f8f9fa",border:"1px solid #e9ecef",cursor:"pointer"}} onClick={()=>setDrawerOpen(true)}>{trialLeft}d ⏰</span>}
           <span style={{borderRadius:6,padding:"3px 10px",fontSize:13,fontWeight:800,color:sc.color,background:sc.color+"15",border:`1px solid ${sc.color}33`}}>{fmt(currentBR)}</span>
         </div>
       </header>
 
       {/* TRIAL URGENCY BAR */}
       {isInTrial && trialLeft<=3 && !isAdmin && (
-        <div style={{background:"#fef3c7",borderBottom:"1px solid #fde68a",padding:"8px 14px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-          <span style={{fontSize:12,color:"#92400e",fontWeight:700}}>⚠️ Trial termina em {trialLeft} {trialLeft===1?"dia":"dias"}</span>
-          <a href={STRIPE_ANNUAL} target="_blank" rel="noreferrer" style={{fontSize:11,fontWeight:800,textDecoration:"none",background:"#111827",color:"#fff",padding:"4px 10px",borderRadius:6}}>Subscrever €{PROMO_ANNUAL}/ano</a>
+        <div style={{background:"#111827",padding:"8px 14px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          <span style={{fontSize:12,color:"#e5e7eb",fontWeight:600}}>⏰ Trial termina em {trialLeft} {trialLeft===1?"dia":"dias"}</span>
+          <a href={STRIPE_ANNUAL} target="_blank" rel="noreferrer" style={{fontSize:11,fontWeight:800,textDecoration:"none",background:"#fff",color:"#111827",padding:"4px 10px",borderRadius:6}}>€{PROMO_ANNUAL}/ano →</a>
         </div>
       )}
 
@@ -752,6 +774,8 @@ export default function App() {
                 </div>
               ))}
             </div>
+
+            <DashboardQuote/>
 
             {stats.pending>0 && (
               <div style={{background:"#fff",border:"1px solid #f3f4f6",borderRadius:14,padding:16,marginBottom:10,boxShadow:"0 1px 3px rgba(0,0,0,.04)"}}>
@@ -991,15 +1015,13 @@ export default function App() {
                 <span style={{fontSize:28}}>🤖</span>
                 <div style={{flex:1}}>
                   <div style={{fontSize:16,fontWeight:800,color:"#111827"}}>Análise IA · {br?.sport}</div>
-                  <div style={{display:"inline-block",background:"#fef3c7",border:"1px solid #fde68a",borderRadius:20,padding:"2px 10px",fontSize:11,fontWeight:700,color:"#92400e",marginTop:4}}>Em breve</div>
+    
                 </div>
-                {(br?.subscribed || isAdmin) && (
-                  <div style={{textAlign:"right",flexShrink:0}}>
-                    <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700}}>Análises</div>
-                    <div style={{fontSize:16,fontWeight:900,color:sc.color}}>{isAdmin?"∞":aiUsage+"/"+(br?.plan==="annual"?AI_LIMIT_ANNUAL:AI_LIMIT_MONTHLY)}</div>
-                    <div style={{fontSize:10,color:"#9ca3af"}}>este mês</div>
-                  </div>
-                )}
+                <div style={{textAlign:"right",flexShrink:0}}>
+                  <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700}}>Análises</div>
+                  <div style={{fontSize:16,fontWeight:900,color:sc.color}}>{isAdmin?"∞":aiUsage+"/"+(br?.plan==="annual"?AI_LIMIT_ANNUAL:AI_LIMIT_MONTHLY)}</div>
+                  <div style={{fontSize:10,color:"#9ca3af"}}>este mês</div>
+                </div>
               </div>
               <p style={{color:"#6b7280",fontSize:13,lineHeight:1.6,marginBottom:16}}>
                 Análise personalizada do teu histórico com score de saúde da banca, identificação dos melhores mercados e recomendações.
@@ -1193,6 +1215,29 @@ function BRForm({ form, setForm, showReset }) {
           Repor bankroll para o valor acima
         </label>
       )}
+    </div>
+  );
+}
+
+// ── Quote Components ────────────────────────────────────────────────────────
+function DashboardQuote() {
+  const quote = useQuote(8000);
+  return (
+    <div style={{background:"linear-gradient(135deg,#f8fafc,#f1f5f9)",border:"1px solid #e2e8f0",borderRadius:14,padding:"16px 18px",marginBottom:10,position:"relative",overflow:"hidden"}}>
+      <div style={{position:"absolute",top:10,left:14,fontSize:32,color:"#e2e8f0",fontFamily:"Georgia,serif",lineHeight:1}}>"</div>
+      <p style={{fontSize:13,color:"#374151",lineHeight:1.6,fontStyle:"italic",margin:"0 0 10px",paddingLeft:16}}>{quote.text}</p>
+      <div style={{fontSize:11,fontWeight:700,color:"#6b7280"}}>— {quote.author}</div>
+    </div>
+  );
+}
+
+function LandingQuote() {
+  const quote = useQuote(8000);
+  return (
+    <div style={{background:"#fff",border:"1px solid #e5e7eb",borderRadius:14,padding:"16px 18px",marginBottom:20,boxShadow:"0 1px 4px rgba(0,0,0,.06)",position:"relative"}}>
+      <div style={{position:"absolute",top:8,left:14,fontSize:36,color:"#f3f4f6",fontFamily:"Georgia,serif",lineHeight:1}}>"</div>
+      <p style={{fontSize:13,color:"#374151",lineHeight:1.6,fontStyle:"italic",margin:"0 0 10px",paddingLeft:18}}>{quote.text}</p>
+      <div style={{fontSize:11,fontWeight:700,color:"#9ca3af"}}>— {quote.author}</div>
     </div>
   );
 }
