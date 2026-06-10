@@ -1035,11 +1035,15 @@ export default function App() {
                   onClick={async()=>{
                     if(stats.settled<3) return;
                     setLoadingFB(true);setFeedback(null);
-                    const fb=await getAIFeedback(bets,stats,currentBR,br?.sport);
-                    console.log("AI feedback:", JSON.stringify(fb));
-                    if(fb&&!fb.error){setFeedback(fb);setAiUsage(u=>u+1);}
-                    else if(fb?.error){setFeedback({error:fb.error});}
-                    setLoadingFB(false);
+                    try {
+                      const fb=await getAIFeedback(bets,stats,currentBR,br?.sport);
+                      if(fb&&!fb.error){setFeedback(fb);setAiUsage(u=>u+1);}
+                      else{setFeedback({error:fb?.error||"Erro desconhecido"});}
+                    } catch(e){
+                      setFeedback({error:e.message});
+                    } finally {
+                      setLoadingFB(false);
+                    }
                   }}
                   disabled={loadingFB||stats.settled<3}>
                   {loadingFB?"A analisar...":stats.settled<3?`Precisas de ${3-stats.settled} registo(s) liquidados`:"Analisar agora"}
