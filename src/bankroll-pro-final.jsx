@@ -84,6 +84,7 @@ export default function App() {
   const [subView, setSubView]     = useState("annual");
   const [feedback, setFeedback]   = useState(null);
   const [loadingFB, setLoadingFB] = useState(false);
+  const [aiUsage, setAiUsage]       = useState(0);
   const [diaryDate, setDiaryDate] = useState(today());
   const [reportMonth, setReportMonth] = useState(today().slice(0,7));
   const [showSuccess, setShowSuccess] = useState(false);
