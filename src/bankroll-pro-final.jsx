@@ -5,7 +5,7 @@ const SUPABASE_URL = "https://opeuermurrbzpglbkmrf.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9wZXVlcm11cnJienBnbGJrbXJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMjA2NTAsImV4cCI6MjA5NDU5NjY1MH0.M-VclAmrSl0gop_7IvXh7-HH7nj5DwMFLVCMIOa3Qfw";
 const STRIPE_MONTHLY = "https://buy.stripe.com/00wfZg8Z0dIb5TRbiTgQE01";
 const STRIPE_ANNUAL  = "https://buy.stripe.com/28E00iejkfQj0zx9aLgQE00";
-const TRIAL_DAYS = 7;
+const TRIAL_DAYS = 5;
 const MAX_BANKROLLS = 3;
 const ADMIN_EMAIL = "luistome.work@gmail.com";
 const SUPPORT_EMAIL = "tome.luis.pt@gmail.com";
@@ -453,12 +453,29 @@ export default function App() {
             <button style={{flex:1,padding:"8px 10px",borderRadius:8,border:"none",background:subView==="annual"?"#fff":"transparent",color:subView==="annual"?"#111827":"#9ca3af",cursor:"pointer",fontSize:13,fontWeight:700,boxShadow:subView==="annual"?"0 1px 3px rgba(0,0,0,.1)":"none"}} onClick={()=>setSubView("annual")}>Anual ⭐</button>
           </div>
 
-          <div style={{background:"#f9fafb",border:subView==="annual"?"2px solid #111827":"1px solid #e5e7eb",borderRadius:12,padding:20,textAlign:"center",marginBottom:12}}>
-            {subView==="annual" && <div style={{fontSize:11,color:"#059669",fontWeight:700,marginBottom:4}}>Melhor valor · Poupas €{(NORMAL_MONTHLY*12-PROMO_ANNUAL).toFixed(0)}</div>}
-            <div style={{fontSize:11,color:"#d1d5db",textDecoration:"line-through"}}>{subView==="monthly"?`€${NORMAL_MONTHLY}/mês`:`€${NORMAL_ANNUAL}/ano`}</div>
-            <div style={{fontSize:28,fontWeight:900,color:"#111827",letterSpacing:"-.5px"}}>{subView==="monthly"?`€${PROMO_MONTHLY}`:`€${PROMO_ANNUAL}`}<span style={{fontSize:13,fontWeight:400,color:"#9ca3af"}}>{subView==="monthly"?"/mês":"/ano"}</span></div>
-            <div style={{fontSize:11,color:"#9ca3af",marginTop:4,marginBottom:16}}>Depois {subView==="monthly"?`€${NORMAL_MONTHLY}/mês`:`€${NORMAL_ANNUAL}/ano`}</div>
-            <a href={subView==="monthly"?STRIPE_MONTHLY:STRIPE_ANNUAL} target="_blank" rel="noreferrer" style={{display:"block",background:"#111827",color:"#fff",textDecoration:"none",padding:"13px",borderRadius:8,fontSize:14,fontWeight:700,textAlign:"center"}}>
+          <div style={{background:"#f9fafb",border:subView==="annual"?"2px solid #111827":"1px solid #e5e7eb",borderRadius:12,padding:20,marginBottom:12}}>
+            {subView==="annual" && <div style={{fontSize:11,color:"#059669",fontWeight:700,marginBottom:8,textAlign:"center"}}>⭐ Melhor valor · Poupas €{(NORMAL_MONTHLY*12-PROMO_ANNUAL).toFixed(0)}</div>}
+            <div style={{textAlign:"center",marginBottom:16}}>
+              <div style={{fontSize:11,color:"#d1d5db",textDecoration:"line-through"}}>{subView==="monthly"?`€${NORMAL_MONTHLY}/mês`:`€${NORMAL_ANNUAL}/ano`}</div>
+              <div style={{fontSize:28,fontWeight:900,color:"#111827",letterSpacing:"-.5px"}}>{subView==="monthly"?`€${PROMO_MONTHLY}`:`€${PROMO_ANNUAL}`}<span style={{fontSize:13,fontWeight:400,color:"#9ca3af"}}>{subView==="monthly"?"/mês":"/ano"}</span></div>
+              <div style={{fontSize:11,color:"#9ca3af",marginTop:2}}>Depois {subView==="monthly"?`€${NORMAL_MONTHLY}/mês`:`€${NORMAL_ANNUAL}/ano`}</div>
+            </div>
+            <div style={{borderTop:"1px solid #e5e7eb",paddingTop:12,marginBottom:16}}>
+              {[
+                ["✓","Bancas ilimitadas (até 3)"],
+                ["✓","Diário, Relatório e Gráfico"],
+                ["✓","Múltiplos desportos e moedas"],
+                ["✓","Apostas simples e múltiplas"],
+                ["✓",`Análise IA — ${subView==="annual"?AI_LIMIT_ANNUAL:AI_LIMIT_MONTHLY} análises/mês`],
+                ["✓","Sem anúncios"],
+              ].map(([ico,txt])=>(
+                <div key={txt} style={{display:"flex",gap:8,marginBottom:6,fontSize:12,color:"#374151"}}>
+                  <span style={{color:"#059669",fontWeight:700,flexShrink:0}}>{ico}</span>
+                  <span>{txt}</span>
+                </div>
+              ))}
+            </div>
+            <a href={subView==="monthly"?STRIPE_MONTHLY:STRIPE_ANNUAL} target="_blank" rel="noreferrer" style={{display:"block",background:"#111827",color:"#fff",textDecoration:"none",padding:"13px",borderRadius:10,fontSize:14,fontWeight:700,textAlign:"center"}}>
               Subscrever agora →
             </a>
           </div>
