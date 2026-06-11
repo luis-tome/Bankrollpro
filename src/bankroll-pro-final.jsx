@@ -62,6 +62,42 @@ const monthLabel = d => new Date(d+"T00:00:00").toLocaleString("pt-PT",{month:"l
 const fmtDate = d => { const dt=new Date(d+"T00:00:00"); return dt.toLocaleDateString("pt-PT",{weekday:"long",day:"numeric",month:"long"}).replace(/^\w/,c=>c.toUpperCase()); };
 const padDate = dt => { const y=dt.getFullYear(),m=String(dt.getMonth()+1).padStart(2,"0"),d=String(dt.getDate()).padStart(2,"0"); return `${y}-${m}-${d}`; };
 
+function parseTelegramTips(text) {
+  const bets = [];
+  let currentEvent = null;
+  let currentSelection = null;
+
+  const lines = text.split("\n");
+  for (let line of lines) {
+    line = line.trim();
+    if (!line) continue;
+
+    if (line.includes("🎾") || line.includes("⚽") || line.includes("🏀") || line.includes("🏒") || line.includes("⚾") || line.includes("🏉") || line.includes("🥊")) {
+      currentEvent = line.replace(/[🎾⚽🏀🏒⚾🏉🥊]/g, "").trim();
+      currentSelection = null;
+    } else if (line.includes("🎯")) {
+      currentSelection = line.replace(/🎯/g, "").trim();
+    } else if (line.includes("💰") && currentEvent && currentSelection) {
+      const clean = line.replace(/💰/g, "").trim();
+      const unitsMatch = clean.match(/([\d.]+)un/i);
+      const oddMatch = clean.match(/@([\d.,]+)/);
+      if (unitsMatch && oddMatch) {
+        bets.push({
+          event: currentEvent,
+          selection: currentSelection,
+          units: parseFloat(unitsMatch[1]),
+          odd: parseFloat(oddMatch[1].replace(",", ".")),
+          market: "Outros",
+          result: "PENDING",
+          notes: "",
+        });
+      }
+      currentSelection = null;
+    }
+  }
+  return bets;
+}
+
 async function getAIFeedback(bets, stats, bankroll, sport) {
   const settled = bets.filter(b=>b.result!=="PENDING"&&b.result!=="VOID");
   if(settled.length<3) return {error:"Poucos registos"};
@@ -99,6 +135,9 @@ export default function App() {
   const [editBet, setEditBet]     = useState(null);
   const [formMode, setFormMode]   = useState("immediate");
   const [betType, setBetType]       = useState("single");
+  const [showImport, setShowImport] = useState(false);
+  const [importText, setImportText] = useState("");
+  const [importBets, setImportBets] = useState([]);
   const [betSport, setBetSport]     = useState("");
   const [form, setForm]           = useState({event:"",market:"Vencedor do Jogo",selection:"",odd:"",units:1,result:"WIN",notes:"",cashoutVal:""});
   const [subView, setSubView]     = useState("annual");
@@ -492,6 +531,68 @@ export default function App() {
   // ── MAIN APP ──
   return (
     <div style={{background:"#f7f8fa",minHeight:"100vh",fontFamily:"-apple-system,'Segoe UI',sans-serif",color:"#111827",paddingBottom:100}} onTouchStart={swipeStart} onTouchEnd={swipeEnd}>
+
+      {/* IMPORT MODAL */}
+      {showImport && (
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.4)",zIndex:200,display:"flex",alignItems:"flex-end",justifyContent:"center"}} onClick={()=>setShowImport(false)}>
+          <div style={{background:"#fff",borderRadius:"16px 16px 0 0",padding:24,width:"100%",maxWidth:500,maxHeight:"85vh",overflowY:"auto"}} onClick={e=>e.stopPropagation()}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+              <div>
+                <h3 style={{margin:0,fontSize:16,fontWeight:700,color:"#111827"}}>📋 Importar do Telegram</h3>
+                <p style={{margin:"4px 0 0",fontSize:12,color:"#9ca3af"}}>Cola o texto com as apostas do grupo</p>
+              </div>
+              <button style={{background:"none",border:"none",color:"#9ca3af",fontSize:22,cursor:"pointer"}} onClick={()=>setShowImport(false)}>×</button>
+            </div>
+
+            <textarea
+              style={{...S.input,height:140,resize:"none",fontFamily:"inherit",fontSize:13}}
+              placeholder={"🎾  SINNER v ALCARAZ\n🎯   SINNER VENCE\n💰  1un @1.85 (Pinnacle)"}
+              value={importText}
+              onChange={e=>{
+                setImportText(e.target.value);
+                setImportBets(parseTelegramTips(e.target.value));
+              }}
+            />
+
+            {importBets.length>0 && (
+              <div style={{marginTop:12}}>
+                <div style={{fontSize:11,color:"#6b7280",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,marginBottom:8}}>
+                  {importBets.length} aposta{importBets.length>1?"s":""} detectada{importBets.length>1?"s":""}
+                </div>
+                {importBets.map((b,i)=>(
+                  <div key={i} style={{background:"#f9fafb",border:"1px solid #f3f4f6",borderRadius:10,padding:"10px 12px",marginBottom:6}}>
+                    <div style={{fontSize:13,fontWeight:600,color:"#111827"}}>{b.event}</div>
+                    <div style={{fontSize:12,color:"#6b7280",marginTop:2}}>{b.selection} · @{b.odd} · {b.units}u</div>
+                  </div>
+                ))}
+                <button style={{...S.btnPrimary,marginTop:12,background:sc.color,border:"none"}}
+                  onClick={async()=>{
+                    for(const b of importBets){
+                      const stake=unitVal*b.units;
+                      await supabase.from("bets").insert({
+                        user_id:user.id,bankroll_id:activeBR,sport:br.sport,
+                        event:b.event,market:b.market,selection:b.selection,
+                        odd:b.odd,stake,units:b.units,result:"PENDING",
+                        notes:b.notes,created_at:new Date().toISOString()
+                      });
+                    }
+                    await loadBets(activeBR);
+                    setShowImport(false);
+                    setTab("diary");
+                  }}>
+                  Importar {importBets.length} aposta{importBets.length>1?"s":""}
+                </button>
+              </div>
+            )}
+
+            {importText.length>0 && importBets.length===0 && (
+              <div style={{marginTop:10,padding:"10px 12px",background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:8,fontSize:12,color:"#dc2626"}}>
+                Formato não reconhecido. Usa o formato com 🎾 🎯 💰
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* SUCCESS MODAL */}
       {showSuccess && (
@@ -1198,6 +1299,9 @@ export default function App() {
         )}
 
       </main>
+
+      {/* IMPORT BUTTON */}
+      <button style={{position:"fixed",bottom:90,right:18,width:44,height:44,borderRadius:"50%",border:"none",color:"#fff",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 16px rgba(0,0,0,.15)",zIndex:20,fontSize:18,background:"#374151"}} onClick={()=>{setShowImport(true);setImportText("");setImportBets([]);}}>📋</button>
 
       {/* FAB */}
       <button style={{position:"fixed",bottom:24,right:18,width:56,height:56,borderRadius:"50%",border:"none",color:"#fff",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 16px rgba(0,0,0,.2)",zIndex:20,fontSize:28,lineHeight:1,background:sc.color}} onClick={()=>{setForm(emptyForm);setEditBet(null);setBetSport("");setShowForm(true);}}>+</button>
