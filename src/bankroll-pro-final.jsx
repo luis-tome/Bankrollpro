@@ -8,6 +8,110 @@ const STRIPE_ANNUAL  = "https://buy.stripe.com/28E00iejkfQj0zx9aLgQE00";
 const TRIAL_DAYS = 5;
 const MAX_BANKROLLS = 3;
 const ADMIN_EMAIL = "luistome.work@gmail.com";
+
+const LANG = {
+  PT: {
+    // Nav
+    nav_dashboard:"Banca", nav_diary:"Diário", nav_report:"Relatório", nav_chart:"Gráfico", nav_ai:"IA", nav_info:"Info", nav_admin:"Admin",
+    // Dashboard
+    current_bankroll:t("current_bankroll"), pnl_total:t("pnl_total"), strike_rate:t("strike_rate"), avg_odd:t("avg_odd"), unit:t("unit"), pending:t("pending"),
+    wins:t("wins"), losses:t("losses"), total:t("total"), pending_title:t("pending"),
+    // Diary
+    day_profit:t("day_profit"), records:t("records"), no_records:{t("no_records")}, click_add:{t("click_add")},
+    // Report
+    initial_bankroll:t("initial_bankroll"), final_bankroll:t("final_bankroll"), entries:t("entries"), win_rate:"% Acertos",
+    month_profit:t("month_profit"), month_roi:t("month_roi"), per_day:t("per_day"),
+    day:t("day"), invest:t("invest"), returns:t("returns"), profit:t("profit"),
+    // Chart
+    evolution:t("evolution"), start:t("start"), current:t("current"), difference:t("difference"), per_month:t("per_month"),
+    // AI
+    ai_title:t("ai_title"), ai_desc:"Análise personalizada do teu histórico com score de saúde da banca, identificação dos melhores mercados e recomendações.",
+    analyze_now:{t("analyze_now")}, analyzing:{t("analyzing")}, need_more:"Precisas de {n} registo(s) liquidados",
+    analyses:"Análises", this_month:"este mês", limit_reached:"Limite mensal atingido · Renova no próximo mês",
+    exclusive:"🔒 Funcionalidade exclusiva para subscritores",
+    monthly_plan:"Plano Mensal", annual_plan:"Plano Anual ⭐",
+    insights:t("insights"), recommendations:t("recommendations"), alerts:"⚠️ Alertas",
+    error_analysis:"Erro na análise. Tenta novamente mais tarde.",
+    // Form
+    new_record:t("new_record"), edit_record:t("edit_record"),
+    immediate:t("immediate"), leave_pending:t("leave_pending"),
+    simple:t("simple"), multiple:t("multiple"),
+    event:"Evento", odd:"Odd", units:"Unidades", market:"Mercado", selection:"Seleção",
+    result:"Resultado", notes:"Notas (opcional)", cashout_val:"Valor cashout",
+    save_record:{t("save_record")}, save_changes:{t("save_changes")},
+    stake:"Stake", potential_return:"Retorno pot.",
+    other_value:"Outro valor...", multiple_selections:"Seleções (uma por linha)",
+    multiple_name:"Nome da múltipla",
+    // Drawer
+    your_bankrolls:t("your_bankrolls"), new_bankroll:"Nova banca", currency:"Moeda",
+    trial_days:"{n} dias de trial restantes", subscribe_now:"Subscreve agora ao preço de lançamento",
+    active_plan:"✓ Plano ativo", logout:{t("logout")},
+    // Bankroll form
+    bankroll_name:"Nome da banca", sport:"Desporto", bankroll_value:"Bankroll (€)", unit_pct:"Unidade (% do bankroll)",
+    unit_hint:"1 unidade = {val} · Recomendamos 1–2%", reset_bankroll:"Repor bankroll para o valor acima",
+    create_bankroll:"Criar banca", save:"Guardar",
+    // Import
+    import_title:{t("import_title")}, import_desc:{t("import_desc")},
+    detected:"{n} aposta(s) detectada(s)", import_btn:"Importar {n} aposta(s)",
+    unrecognized:"Formato não reconhecido. Usa o formato com 🎾 🎯 💰",
+    your_odds:"da tua casa",
+    // Buttons
+    settle_win:{t("settle_win")}, settle_loss:{t("settle_loss")}, cashout:"Cash", void_btn:"Void",
+    subscribe:"Subscrever →", best_value:"Melhor valor",
+    after_promo:"Depois {price}",
+    // Info
+    info_developed:"Desenvolvido por", info_rights:"Todos os direitos reservados",
+    info_current_plan:"Plano atual", info_contact:"✉️ Contactar Suporte",
+    info_included:"O que está incluído",
+    // Misc
+    pending_label:"Pendente", no_plan:"sem plano",
+    trial_expired:"Trial Expirado", in_trial:"Em Trial", paid:"Pago",
+  },
+  EN: {
+    nav_dashboard:"Bankroll", nav_diary:"Diary", nav_report:"Report", nav_chart:"Chart", nav_ai:"AI", nav_info:"Info", nav_admin:"Admin",
+    current_bankroll:"Current Bankroll", pnl_total:"Total P&L", strike_rate:"Strike Rate", avg_odd:"Avg Odd", unit:"Unit", pending:"Pending",
+    wins:"Wins", losses:"Losses", total:t("total"), pending_title:"Pending",
+    day_profit:"Day Profit", records:"Records", no_records:"No records for this day.", click_add:"Tap + to add",
+    initial_bankroll:"Initial Bankroll", final_bankroll:"Final Bankroll", entries:"Entries", win_rate:"Win Rate",
+    month_profit:"Month Profit", month_roi:"Month ROI", per_day:"Per Day",
+    day:"Day", invest:"Staked", returns:"Return", profit:"Profit",
+    evolution:"Bankroll Evolution", start:"Start", current:"Current", difference:"Difference", per_month:"Per Month",
+    ai_title:"AI Analysis", ai_desc:"Personalised analysis of your betting history — bankroll health score, best markets and recommendations.",
+    analyze_now:"Analyse now", analyzing:"Analysing...", need_more:"You need {n} more settled record(s)",
+    analyses:"Analyses", this_month:"this month", limit_reached:"Monthly limit reached · Resets next month",
+    exclusive:"🔒 Subscribers only feature",
+    monthly_plan:"Monthly Plan", annual_plan:"Annual Plan ⭐",
+    insights:t("insights"), recommendations:"Recommendations", alerts:"⚠️ Alerts",
+    error_analysis:"Analysis error. Please try again later.",
+    new_record:"New Record", edit_record:"Edit Record",
+    immediate:"Immediate result", leave_pending:"Leave pending",
+    simple:"Single", multiple:"Multiple",
+    event:"Event", odd:"Odd", units:"Units", market:"Market", selection:"Selection",
+    result:"Result", notes:"Notes (optional)", cashout_val:"Cashout value",
+    save_record:"Save record", save_changes:"Save changes",
+    stake:"Stake", potential_return:"Potential return",
+    other_value:"Other value...", multiple_selections:"Selections (one per line)",
+    multiple_name:"Multiple name",
+    your_bankrolls:"Your bankrolls", new_bankroll:"New bankroll", currency:"Currency",
+    trial_days:"{n} trial days remaining", subscribe_now:"Subscribe now at launch price",
+    active_plan:"✓ Active plan", logout:"Sign out",
+    bankroll_name:"Bankroll name", sport:"Sport", bankroll_value:"Bankroll (€)", unit_pct:"Unit (% of bankroll)",
+    unit_hint:"1 unit = {val} · We recommend 1–2%", reset_bankroll:"Reset bankroll to value above",
+    create_bankroll:"Create bankroll", save:"Save",
+    import_title:"📋 Import from Telegram", import_desc:"Paste the text with the picks from the group",
+    detected:"{n} bet(s) detected", import_btn:"Import {n} bet(s)",
+    unrecognized:"Format not recognised. Use format with 🎾 🎯 💰",
+    your_odds:"your odds",
+    settle_win:"✓ Win", settle_loss:"✗ Loss", cashout:"Cashout", void_btn:"Void",
+    subscribe:"Subscribe →", best_value:"Best value",
+    after_promo:"Then {price}",
+    info_developed:"Developed by", info_rights:"All rights reserved",
+    info_current_plan:"Current plan", info_contact:"✉️ Contact Support",
+    info_included:"What's included",
+    pending_label:"Pending", no_plan:"no plan",
+    trial_expired:"Trial Expired", in_trial:"In Trial", paid:"Paid",
+  }
+};
 const SUPPORT_EMAIL = "tome.luis.pt@gmail.com";
 const AI_LIMIT_MONTHLY = 3;
 const AI_LIMIT_ANNUAL = 10;
@@ -91,7 +195,7 @@ function parseTelegramTips(text) {
         if (om) {
           const odd = parseFloat(om[1].replace(",","."));
           const units = um ? parseFloat(um[1].replace(",",".")) : 1;
-          if (odd > 1) bets.push({ event:"BINGO", selection:bingoSelections.join(" + "), units, odd, market:"Múltipla", result:"PENDING", notes:"" });
+          if (odd > 1) bets.push({ event:"BINGO", selection:bingoSelections.join(" + "), units, odd, market:t("multiple"), result:"PENDING", notes:"" });
         }
         bingoMode = false; bingoSelections = [];
       }
@@ -144,6 +248,8 @@ export default function App() {
   const [bets, setBets]           = useState([]);
   const [tab, setTab]             = useState("dashboard");
   const [currency, setCurrency]   = useState("EUR");
+  const [lang, setLang]           = useState("PT");
+  const t = k => LANG[lang][k] || LANG.PT[k] || k;
   const [authForm, setAuthForm]   = useState({name:"",email:"",password:""});
   const [authErr, setAuthErr]     = useState("");
   const [emailSent, setEmailSent] = useState(false);
@@ -399,7 +505,7 @@ export default function App() {
         </div>
 
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:24}}>
-          {[["📊","Múltiplas bancas","Até 3, separadas por desporto"],["🤖","Análise IA","Feedback do teu histórico real"],["📅","Diário & Relatório","Cada dia, cada mês com precisão"],["⚡","Registo rápido","Imediato ou pendente — tu decides"]].map(([ico,t,d])=>(
+          {[["📊","Múltiplas bancas","Até 3, separadas por desporto"],["🤖",t("ai_title"),"Feedback do teu histórico real"],["📅","Diário & Relatório","Cada dia, cada mês com precisão"],["⚡","Registo rápido","Imediato ou pendente — tu decides"]].map(([ico,t,d])=>(
             <div key={t} style={{background:"#fff",border:"1px solid #f3f4f6",borderRadius:12,padding:"14px 12px",boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
               <span style={{fontSize:24,marginBottom:8,display:"block"}}>{ico}</span>
               <div style={{fontSize:13,fontWeight:700,color:"#111827",marginBottom:4}}>{t}</div>
@@ -682,7 +788,15 @@ export default function App() {
               </div>
             )}
 
-            <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,fontWeight:800,marginBottom:8}}>Moeda</div>
+            <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,fontWeight:800,marginBottom:8}}>Idioma / Language</div>
+            <div style={{display:"flex",gap:6,marginBottom:16}}>
+              {["PT","EN"].map(l=>(
+                <button key={l} style={{flex:1,padding:"7px 4px",border:`1px solid ${lang===l?"#111827":"#e5e7eb"}`,background:lang===l?"#111827":"#fff",color:lang===l?"#fff":"#6b7280",borderRadius:8,cursor:"pointer",fontSize:12,fontWeight:700}} onClick={()=>setLang(l)}>
+                  {l==="PT"?"🇵🇹 PT":"🇬🇧 EN"}
+                </button>
+              ))}
+            </div>
+            <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,fontWeight:800,marginBottom:8}}>{t("currency")}</div>
             <div style={{display:"flex",gap:6,marginBottom:16}}>
               {Object.entries(CURRENCIES).map(([code,cur])=>(
                 <button key={code} style={{flex:1,padding:"7px 4px",border:`1px solid ${currency===code?"#111827":"#e5e7eb"}`,background:currency===code?"#111827":"#fff",color:currency===code?"#fff":"#6b7280",borderRadius:8,cursor:"pointer",fontSize:11,fontWeight:700}} onClick={()=>setCurrency(code)}>
@@ -762,7 +876,7 @@ export default function App() {
         <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.4)",zIndex:100,display:"flex",alignItems:"center",justifyContent:"center",padding:20}}>
           <div style={{background:"#fff",borderRadius:16,padding:24,width:"100%",maxWidth:440,maxHeight:"92vh",overflowY:"auto",boxShadow:"0 20px 60px rgba(0,0,0,.2)"}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
-              <h3 style={{margin:0,fontSize:16,fontWeight:700,color:"#111827"}}>{editBet?"Editar Registo":`${sc.icon} Novo Registo`}</h3>
+              <h3 style={{margin:0,fontSize:16,fontWeight:700,color:"#111827"}}>{editBet?t("edit_record"):`${sc.icon} Novo Registo`}</h3>
               <button style={{background:"none",border:"none",color:"#9ca3af",fontSize:22,cursor:"pointer"}} onClick={()=>{setShowForm(false);setEditBet(null);setForm(emptyForm);}}>×</button>
             </div>
 
@@ -839,7 +953,7 @@ export default function App() {
               <div>
                 <label style={S.label}>Resultado</label>
                 <div style={{display:"flex",gap:6,marginTop:4,flexWrap:"wrap"}}>
-                  {[["WIN","✓ Green","#059669","#f0fdf4","#bbf7d0"],["LOSS","✗ Red","#dc2626","#fef2f2","#fca5a5"],["PENDING","⏳ Pendente","#7c3aed","#faf5ff","#c4b5fd"],["CASHOUT","💰 Cash","#2563eb","#eff6ff","#93c5fd"],["VOID","Void","#92400e","#fefce8","#fde68a"]].map(([r,l,c,bg,border])=>(
+                  {[["WIN",{t("settle_win")},"#059669","#f0fdf4","#bbf7d0"],["LOSS",{t("settle_loss")},"#dc2626","#fef2f2","#fca5a5"],["PENDING","⏳ Pendente","#7c3aed","#faf5ff","#c4b5fd"],["CASHOUT","💰 Cash","#2563eb","#eff6ff","#93c5fd"],["VOID","Void","#92400e","#fefce8","#fde68a"]].map(([r,l,c,bg,border])=>(
                     <button key={r} style={{flex:1,minWidth:"30%",padding:"8px 4px",borderRadius:8,border:`1px solid ${form.result===r?c:border}`,background:form.result===r?bg:"#fff",color:form.result===r?c:"#9ca3af",cursor:"pointer",fontSize:11,fontWeight:700}} onClick={()=>setForm(f=>({...f,result:r}))}>{l}</button>
                   ))}
                 </div>
@@ -854,7 +968,7 @@ export default function App() {
 
             <label style={S.label}>Notas (opcional)</label>
             <input style={S.input} placeholder="Raciocínio, contexto..." value={form.notes} onChange={e=>setForm(f=>({...f,notes:e.target.value}))}/>
-            <button style={{...S.btnPrimary,marginTop:18,background:sc.color,border:"none"}} onClick={handleSaveBet}>{editBet?"Guardar alterações":"Guardar registo"}</button>
+            <button style={{...S.btnPrimary,marginTop:18,background:sc.color,border:"none"}} onClick={handleSaveBet}>{editBet?{t("save_changes")}:{t("save_record")}}</button>
           </div>
         </div>
       )}
@@ -886,7 +1000,7 @@ export default function App() {
 
       {/* NAV */}
       <nav style={{display:"flex",background:"#fff",borderBottom:"1px solid #f0f0f0",overflowX:"auto",scrollbarWidth:"none"}}>
-        {[["dashboard","Banca"],["diary","Diário"],["report","Relatório"],["chart","Gráfico"],["ai","IA"],["sobre","Info"]].concat(isAdmin?[["admin","Admin"]]:[]).map(([v,l])=>(
+        {[["dashboard",t("nav_dashboard")],["diary",t("nav_diary")],["report",t("nav_report")],["chart",t("nav_chart")],["ai",t("nav_ai")],["sobre",t("nav_info")]].concat(isAdmin?[["admin",t("nav_admin")]]:[]).map(([v,l])=>(
           <button key={v} style={{flex:1,padding:"11px 4px",border:"none",borderBottom:`2px solid ${tab===v?sc.color:"transparent"}`,background:"transparent",color:tab===v?sc.color:"#9ca3af",cursor:"pointer",fontSize:11,fontWeight:700,whiteSpace:"nowrap"}} onClick={()=>setTab(v)}>{l}</button>
         ))}
       </nav>
@@ -911,7 +1025,7 @@ export default function App() {
                 </div>
               </div>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:0,borderTop:"1px solid #f3f4f6",paddingTop:14}}>
-                {[["Acerto",stats.strikeRate.toFixed(1)+"%"],["Odd Média",stats.avgOdd.toFixed(2)],["Unidade",fmt(unitVal)],["Pendentes",stats.pending]].map(([l,v])=>(
+                {[[t("strike_rate"),stats.strikeRate.toFixed(1)+"%"],[t("avg_odd"),stats.avgOdd.toFixed(2)],[t("unit"),fmt(unitVal)],[t("pending"),stats.pending]].map(([l,v])=>(
                   <div key={l} style={{textAlign:"center"}}>
                     <div style={{fontSize:9,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,marginBottom:3}}>{l}</div>
                     <div style={{fontSize:15,fontWeight:800,color:"#111827"}}>{v}</div>
@@ -921,7 +1035,7 @@ export default function App() {
             </div>
 
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:10}}>
-              {[["Acertos",stats.wins,"#059669","#f0fdf4"],["Erros",stats.losses,"#dc2626","#fef2f2"],["Total",stats.settled,"#374151","#f9fafb"]].map(([l,v,c,bg])=>(
+              {[[t("wins"),stats.wins,"#059669","#f0fdf4"],[t("losses"),stats.losses,"#dc2626","#fef2f2"],[t("total"),stats.settled,"#374151","#f9fafb"]].map(([l,v,c,bg])=>(
                 <div key={l} style={{background:bg,border:`1px solid ${c}22`,borderRadius:14,padding:"12px 10px",textAlign:"center",boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
                   <div style={{fontSize:22,fontWeight:900,color:c}}>{v}</div>
                   <div style={{fontSize:10,color:c,textTransform:"uppercase",letterSpacing:.8,fontWeight:700,marginTop:2}}>{l}</div>
@@ -1029,7 +1143,7 @@ export default function App() {
             </div>
 
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:10}}>
-              {[["Banca Inicial",fmt(parseFloat(br?.bankroll||0))],["Banca Final",fmt(currentBR)],["Entradas",reportBets.length]].map(([l,v])=>(
+              {[[t("initial_bankroll"),fmt(parseFloat(br?.bankroll||0))],[t("final_bankroll"),fmt(currentBR)],[t("entries"),reportBets.length]].map(([l,v])=>(
                 <div key={l} style={{background:"#fff",border:"1px solid #f3f4f6",borderRadius:14,padding:12,textAlign:"center",boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
                   <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,marginBottom:5}}>{l}</div>
                   <div style={{fontSize:14,fontWeight:800,color:"#111827"}}>{v}</div>
@@ -1038,7 +1152,7 @@ export default function App() {
             </div>
 
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:10}}>
-              {[["Acertos",reportWins,"#059669"],["Erros",reportLoss,"#dc2626"],["% Acertos",reportWins+reportLoss>0?((reportWins/(reportWins+reportLoss))*100).toFixed(1)+"%":"—","#374151"]].map(([l,v,c])=>(
+              {[[t("wins"),reportWins,"#059669"],[t("losses"),reportLoss,"#dc2626"],["% Acertos",reportWins+reportLoss>0?((reportWins/(reportWins+reportLoss))*100).toFixed(1)+"%":"—","#374151"]].map(([l,v,c])=>(
                 <div key={l} style={{background:"#fff",border:"1px solid #f3f4f6",borderRadius:14,padding:12,textAlign:"center",boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
                   <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,marginBottom:5}}>{l}</div>
                   <div style={{fontSize:18,fontWeight:800,color:c}}>{v}</div>
@@ -1071,7 +1185,7 @@ export default function App() {
                 <div style={{background:"#fff",border:"1px solid #f3f4f6",borderRadius:14,padding:16,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
                   <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,marginBottom:14,fontWeight:800}}>Por dia</div>
                   <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:0,borderBottom:"1px solid #f3f4f6",paddingBottom:6,marginBottom:6}}>
-                    {["Dia","Invest.","Retorno","Lucro"].map(h=><div key={h} style={{fontSize:9,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,textAlign:"center"}}>{h}</div>)}
+                    {[t("day"),t("invest"),t("returns"),t("profit")].map(h=><div key={h} style={{fontSize:9,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,textAlign:"center"}}>{h}</div>)}
                   </div>
                   {Object.entries(byDay).sort(([a],[b])=>a>b?1:-1).map(([d,v])=>(
                     <div key={d} style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:0,padding:"6px 0",borderBottom:"1px solid #f9fafb"}}>
@@ -1223,7 +1337,7 @@ export default function App() {
                     }
                   }}
                   disabled={loadingFB||stats.settled<3}>
-                  {loadingFB?"A analisar...":stats.settled<3?`Precisas de ${3-stats.settled} registo(s) liquidados`:"Analisar agora"}
+                  {loadingFB?{t("analyzing")}:stats.settled<3?`Precisas de ${3-stats.settled} registo(s) liquidados`:{t("analyze_now")}}
                 </button>
               )}
             </div>
@@ -1316,7 +1430,7 @@ export default function App() {
 
             <div style={{background:"#fff",border:"1px solid #f3f4f6",borderRadius:14,padding:16,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
               <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,fontWeight:800,marginBottom:14}}>O que está incluído</div>
-              {[["📊","Múltiplas bancas","Até 3 bancas separadas por desporto"],["📅","Diário de apostas","Registo completo com resultado imediato ou pendente"],["📈","Relatório mensal","Métricas detalhadas por mês e por dia"],["📉","Gráfico de evolução","Acompanha a evolução da tua banca visualmente"],["🤖","Análise IA","Feedback personalizado baseado no teu histórico real"],["💱","Múltiplas moedas","€, R$ e $"]].map(([ico,t,d])=>(
+              {[["📊","Múltiplas bancas","Até 3 bancas separadas por desporto"],["📅","Diário de apostas","Registo completo com resultado imediato ou pendente"],["📈","Relatório mensal","Métricas detalhadas por mês e por dia"],["📉","Gráfico de evolução","Acompanha a evolução da tua banca visualmente"],["🤖",t("ai_title"),"Feedback personalizado baseado no teu histórico real"],["💱","Múltiplas moedas","€, R$ e $"]].map(([ico,t,d])=>(
                 <div key={t} style={{display:"flex",gap:12,padding:"10px 0",borderBottom:"1px solid #f9fafb"}}>
                   <span style={{fontSize:20,flexShrink:0}}>{ico}</span>
                   <div>
