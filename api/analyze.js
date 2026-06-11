@@ -39,6 +39,13 @@ module.exports = async function handler(req, res) {
     ? byUnits.map(u => `  - ${u.units}: ${u.count} apostas, ${u.wins}W/${u.losses}L, P&L ${u.pnl > 0 ? "+" : ""}${u.pnl}`).join("\n")
     : "  (sem dados por unidades)";
 
+  const contextBets = payload.betsWithContext || [];
+  const contextLines = contextBets.length
+    ? contextBets.map(b => `  - ${b.market} @${b.odd} → ${b.result} (P&L ${b.pnl > 0 ? "+" : ""}${b.pnl}) | contexto: "${b.notes}"`).join("\n")
+    : null;
+
+  const hasContext = contextBets.length > 0;
+
   const prompt = `És um analista de apostas desportivas experiente. Analisa os dados reais deste apostador e dá feedback direto, específico e accionável. Sem frases genéricas. Foca em padrões concretos que explicam onde está a ganhar e a perder dinheiro.
 
 DADOS DO APOSTADOR (${payload.sport || "Desporto geral"}):
@@ -60,6 +67,12 @@ ${oddLines}
 
 Resultados por tamanho de aposta:
 ${unitLines}
+${hasContext ? `
+Apostas com contexto adicional (${contextBets.length} de ${overview.totalBets} têm notas preenchidas):
+${contextLines}
+
+IMPORTANTE: Usa o campo "contexto" para identificar padrões cruzados. Ex: se várias apostas com "favorito @1.x" têm resultados negativos, menciona isso especificamente.` : `
+NOTA: O apostador não tem notas preenchidas nas apostas. A análise fica limitada aos totais por mercado e odds. Menciona nos tips que preencher o campo "Notas" com contexto (ex: "Alcaraz @1.23, terra, indoor") permite análises muito mais precisas.`}
 
 INSTRUÇÕES:
 - score: 1-10 baseado na saúde real da banca e edge demonstrado
