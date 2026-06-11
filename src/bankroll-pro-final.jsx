@@ -219,12 +219,25 @@ async function getAIFeedback(bets, stats, bankroll, sport) {
     .map(([market,v])=>({market,...v,pnl:Number(v.pnl.toFixed(2)),sr:v.wins+v.losses>0?Number((v.wins/(v.wins+v.losses)*100).toFixed(0)):0}))
     .sort((a,b)=>a.pnl-b.pnl);
 
+  // Apostas com notas para análise contextual
+  const betsWithContext = settled
+    .filter(b => b.notes && b.notes.trim().length > 0)
+    .map(b => ({
+      market: b.market || "Outros",
+      selection: b.selection || "",
+      odd: b.odd,
+      result: b.result,
+      pnl: b.result==="WIN" ? Number((b.stake*(b.odd-1)).toFixed(2)) : b.result==="LOSS" ? Number((-b.stake).toFixed(2)) : Number(((b.cashout_val||0)-b.stake).toFixed(2)),
+      notes: b.notes.trim()
+    }));
+
   const payload = {
     sport: effectiveSport,
     overview: { totalBets:settled.length, wins:stats.wins, losses:stats.losses, roi:Number(stats.roi.toFixed(1)), strikeRate:Number(stats.strikeRate.toFixed(1)), avgOdd:Number(stats.avgOdd.toFixed(2)), pnl:Number(stats.pnl.toFixed(2)), bankroll:Number(bankroll.toFixed(2)) },
     byMarket: marketSummary,
     byOddRange: oddRangeSummary,
-    byUnits: Object.entries(byUnits).map(([u,v])=>({units:u,...v,pnl:Number(v.pnl.toFixed(2))}))
+    byUnits: Object.entries(byUnits).map(([u,v])=>({units:u,...v,pnl:Number(v.pnl.toFixed(2))})),
+    betsWithContext: betsWithContext.length > 0 ? betsWithContext : null
   };
 
   try {
@@ -1266,9 +1279,16 @@ export default function App() {
                   <div style={{fontSize:10,color:"#9ca3af"}}>este mês</div>
                 </div>
               </div>
-              <p style={{color:"#6b7280",fontSize:13,lineHeight:1.6,marginBottom:16}}>
+              <p style={{color:"#6b7280",fontSize:13,lineHeight:1.6,marginBottom:12}}>
                 Análise personalizada do teu histórico com score de saúde da banca, identificação dos melhores mercados e recomendações.
               </p>
+              <div style={{background:"#f8f9fa",border:"1px solid #e9ecef",borderRadius:10,padding:"10px 14px",marginBottom:16,display:"flex",gap:10,alignItems:"flex-start"}}>
+                <span style={{fontSize:16,flexShrink:0}}>💡</span>
+                <div>
+                  <div style={{fontSize:12,fontWeight:700,color:"#374151",marginBottom:3}}>Análise mais precisa</div>
+                  <div style={{fontSize:12,color:"#6b7280",lineHeight:1.5}}>Preenche o campo <strong>Notas</strong> nas apostas com contexto extra — ex: <em>"Alcaraz @1.23, terra"</em> ou <em>"indoor, top 10"</em>. A IA usa esse contexto para identificar padrões cruzados.</div>
+                </div>
+              </div>
 
               {!br?.subscribed && !isAdmin && (
                 <div style={{background:"#f0fdf4",border:"1px solid #bbf7d0",borderRadius:10,padding:"14px 16px",marginBottom:16}}>
