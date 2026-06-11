@@ -185,16 +185,59 @@ async function getAIFeedback(bets, stats, bankroll, sport) {
   const settled = bets.filter(b=>b.result!=="PENDING"&&b.result!=="VOID");
   if(settled.length<3) return {error:"Poucos registos"};
   const effectiveSport = (!sport||sport==="Geral") ? "Desporto geral" : sport;
-  const summary = { sport:effectiveSport, totalBets:settled.length, wins:stats.wins, losses:stats.losses, roi:Number(stats.roi.toFixed(1)), strikeRate:Number(stats.strikeRate.toFixed(1)), avgOdd:Number(stats.avgOdd.toFixed(2)), pnl:Number(stats.pnl.toFixed(2)), bankroll:Number(bankroll.toFixed(2)) };
+
+  const byMarket = {};
+  const byOddRange = {"1.01-1.50":[],"1.51-2.00":[],"2.01-3.00":[],"3.01+":[]};
+  const byUnits = {};
+
+  settled.forEach(b => {
+    const mkt = b.market || "Outros";
+    if(!byMarket[mkt]) byMarket[mkt] = {wins:0,losses:0,cashouts:0,pnl:0,count:0};
+    byMarket[mkt].count++;
+    if(b.result==="WIN"){ byMarket[mkt].wins++; byMarket[mkt].pnl+=b.stake*(b.odd-1); }
+    else if(b.result==="LOSS"){ byMarket[mkt].losses++; byMarket[mkt].pnl-=b.stake; }
+    else if(b.result==="CASHOUT"){ byMarket[mkt].cashouts++; byMarket[mkt].pnl+=(b.cashout_val||0)-b.stake; }
+
+    const o = b.odd;
+    const range = o<=1.50?"1.01-1.50":o<=2.00?"1.51-2.00":o<=3.00?"2.01-3.00":"3.01+";
+    byOddRange[range].push({result:b.result, pnl:b.result==="WIN"?b.stake*(b.odd-1):b.result==="LOSS"?-b.stake:(b.cashout_val||0)-b.stake});
+
+    const u = b.units<=0.5?"0.5u":b.units<=1?"1u":b.units<=2?"1.5-2u":">2u";
+    if(!byUnits[u]) byUnits[u]={wins:0,losses:0,pnl:0,count:0};
+    byUnits[u].count++;
+    if(b.result==="WIN"){byUnits[u].wins++;byUnits[u].pnl+=b.stake*(b.odd-1);}
+    else if(b.result==="LOSS"){byUnits[u].losses++;byUnits[u].pnl-=b.stake;}
+  });
+
+  const oddRangeSummary = Object.entries(byOddRange).map(([range,arr])=>({
+    range, count:arr.length,
+    wins:arr.filter(x=>x.pnl>0).length,
+    pnl:Number(arr.reduce((s,x)=>s+x.pnl,0).toFixed(2))
+  })).filter(x=>x.count>0);
+
+  const marketSummary = Object.entries(byMarket)
+    .map(([market,v])=>({market,...v,pnl:Number(v.pnl.toFixed(2)),sr:v.wins+v.losses>0?Number((v.wins/(v.wins+v.losses)*100).toFixed(0)):0}))
+    .sort((a,b)=>a.pnl-b.pnl);
+
+  const payload = {
+    sport: effectiveSport,
+    overview: { totalBets:settled.length, wins:stats.wins, losses:stats.losses, roi:Number(stats.roi.toFixed(1)), strikeRate:Number(stats.strikeRate.toFixed(1)), avgOdd:Number(stats.avgOdd.toFixed(2)), pnl:Number(stats.pnl.toFixed(2)), bankroll:Number(bankroll.toFixed(2)) },
+    byMarket: marketSummary,
+    byOddRange: oddRangeSummary,
+    byUnits: Object.entries(byUnits).map(([u,v])=>({units:u,...v,pnl:Number(v.pnl.toFixed(2))}))
+  };
+
   try {
-    const res = await fetch("/api/analyze",{ method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({summary}) });
+    const res = await fetch("/api/analyze",{ method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({payload}) });
     const text = await res.text();
     const data = JSON.parse(text);
     if(data.error) return { error: data.error };
-    if(!data.score) return { error: "Resposta inválida" };
+    if(!data.score) return { error: "Resposta invalida" };
     return data;
   } catch(e) { return { error: e.message }; }
 }
+
+
 
 export default function App() {
   const [screen, setScreen]       = useState("loading");
