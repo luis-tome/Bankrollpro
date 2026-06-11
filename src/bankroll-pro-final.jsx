@@ -1,6 +1,17 @@
 import React, { useState, useMemo, useEffect, useRef } from "react";
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
+// Global error catcher - remove after debugging
+if (typeof window !== "undefined") {
+  window.onerror = function(msg, src, line, col, err) {
+    document.body.innerHTML = '<div style="padding:20px;background:#1a1d27;color:#f87171;font-family:monospace;min-height:100vh"><h2>JS Error</h2><pre style="white-space:pre-wrap;color:#fbbf24">' + msg + '\n\nLine: ' + line + ':' + col + '\n\n' + (err && err.stack ? err.stack : '') + '</pre></div>';
+    return false;
+  };
+  window.addEventListener("unhandledrejection", function(e) {
+    document.body.innerHTML = '<div style="padding:20px;background:#1a1d27;color:#f87171;font-family:monospace;min-height:100vh"><h2>Promise Error</h2><pre style="white-space:pre-wrap;color:#fbbf24">' + (e.reason && e.reason.stack ? e.reason.stack : String(e.reason)) + '</pre></div>';
+  });
+}
+
 const SUPABASE_URL = "https://opeuermurrbzpglbkmrf.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9wZXVlcm11cnJienBnbGJrbXJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMjA2NTAsImV4cCI6MjA5NDU5NjY1MH0.M-VclAmrSl0gop_7IvXh7-HH7nj5DwMFLVCMIOa3Qfw";
 const STRIPE_MONTHLY = "https://buy.stripe.com/00wfZg8Z0dIb5TRbiTgQE01";
