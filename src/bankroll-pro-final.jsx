@@ -475,7 +475,7 @@ export default function App() {
 
   if(screen==="landing") return (
     <div style={{background:"#f7f8fa",minHeight:"100vh",fontFamily:"-apple-system,'Segoe UI',sans-serif",color:"#111827"}}>
-      <header style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"16px 20px",background:"#fff",borderBottom:`1px solid ${"#fff"Border}`}}>
+      <header style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"16px 20px",background:"#fff",borderBottom:"1px solid #fff"}}>
         <div style={{display:"flex",alignItems:"center",gap:10}}>
           <div style={{width:32,height:32,background:"#f7f8fa",borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center",fontSize:16}}>📊</div>
           <span style={{fontSize:16,fontWeight:800,color:"#111827"}}>BankrollPro</span>
@@ -521,7 +521,7 @@ export default function App() {
 
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:24}}>
           {[["📊","Múltiplas bancas","Até 3, separadas por desporto"],["🤖","Análise IA","Feedback do teu histórico real"],["📅","Diário & Relatório","Cada dia, cada mês com precisão"],["⚡","Registo rápido","Imediato ou pendente — tu decides"]].map(([ico,t,d])=>(
-            <div key={t} style={{background:"#fff",border:`1px solid ${"#fff"Border}`,borderRadius:12,padding:"14px 12px",boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
+            <div key={t} style={{background:"#fff",border:"1px solid #fff",borderRadius:12,padding:"14px 12px",boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
               <span style={{fontSize:24,marginBottom:8,display:"block"}}>{ico}</span>
               <div style={{fontSize:13,fontWeight:700,color:"#111827",marginBottom:4}}>{t}</div>
               <div style={{fontSize:12,color:"#6b7280",lineHeight:1.4}}>{d}</div>
@@ -550,7 +550,7 @@ export default function App() {
 
   if(screen==="auth") return (
     <div style={{background:"#f7f8fa",minHeight:"100vh",fontFamily:"-apple-system,'Segoe UI',sans-serif"}}>
-      <div style={{padding:"14px 18px",background:"#fff",borderBottom:`1px solid ${"#fff"Border}`}}>
+      <div style={{padding:"14px 18px",background:"#fff",borderBottom:"1px solid #fff"}}>
         <button style={{background:"transparent",border:"none",color:"#6b7280",cursor:"pointer",fontSize:13,padding:0,fontWeight:600}} onClick={()=>setScreen("landing")}>← Voltar</button>
       </div>
       <div style={{display:"flex",alignItems:"center",justifyContent:"center",minHeight:"calc(100vh - 56px)",padding:20}}>
@@ -698,7 +698,7 @@ export default function App() {
                   {importBets.length} aposta{importBets.length>1?"s":""} detectada{importBets.length>1?"s":""}
                 </div>
                 {importBets.map((b,i)=>(
-                  <div key={i} style={{background:"#f7f8fa",border:`1px solid ${"#fff"Border}`,borderRadius:10,padding:"10px 12px",marginBottom:6}}>
+                  <div key={i} style={{background:"#f7f8fa",border:"1px solid #fff",borderRadius:10,padding:"10px 12px",marginBottom:6}}>
                     <div style={{fontSize:13,fontWeight:600,color:"#111827",marginBottom:6}}>{b.event}</div>
                     <div style={{fontSize:12,color:"#6b7280",marginBottom:6}}>{b.selection} · {b.units}u</div>
                     <div style={{display:"flex",alignItems:"center",gap:8}}>
@@ -766,7 +766,7 @@ export default function App() {
         <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.4)",zIndex:100,display:"flex"}} onClick={()=>setDrawerOpen(false)}>
           <div style={{width:300,maxWidth:"85vw",background:"#fff",height:"100%",display:"flex",flexDirection:"column",padding:20,overflowY:"auto",boxShadow:"4px 0 24px rgba(0,0,0,.06)"}} onClick={e=>e.stopPropagation()}>
 
-            <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:16,paddingBottom:16,borderBottom:`1px solid ${"#fff"Border}`}}>
+            <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:16,paddingBottom:16,borderBottom:"1px solid #fff"}}>
               <div style={{width:40,height:40,borderRadius:"50%",background:"#f7f8fa",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,fontWeight:800,color:"#111827",flexShrink:0}}>{userName[0]?.toUpperCase()||"U"}</div>
               <div style={{flex:1}}>
                 <div style={{fontSize:14,fontWeight:700,color:"#111827"}}>{userName}</div>
@@ -815,7 +815,7 @@ export default function App() {
             <div style={{fontSize:10,color:"#111827",textTransform:"uppercase",letterSpacing:1,fontWeight:800,marginBottom:8}}>{lang==="PT"?"Aparência":"Appearance"}</div>
             <div style={{display:"flex",gap:6,marginBottom:16}}>
               {[["☀️",lang==="PT"?"Claro":"Light",false],["🌙",lang==="PT"?"Escuro":"Dark",true]].map(([ico,lbl,val])=>(
-                <button key={lbl} style={{flex:1,padding:"8px 4px",border:`1px solid ${darkMode===val?sc.color:"#e5e7eb"}`,background:darkMode===val?sc.color:"#fff",color:darkMode===val?"#fff":"#111827",borderRadius:8,cursor:"pointer",fontSize:11,fontWeight:700,display:"flex",flexDirection:"column",alignItems:"center",gap:2}}
+                <button key={lbl} style={{flex:1,padding:"8px 4px",border:"1px solid #e5e7eb",background:darkMode===val?sc.color:"#fff",color:darkMode===val?"#fff":"#111827",borderRadius:8,cursor:"pointer",fontSize:11,fontWeight:700,display:"flex",flexDirection:"column",alignItems:"center",gap:2}}
                   onClick={()=>{ try{localStorage.setItem("bpDark",String(val));}catch(e){} setDarkMode(val); }}>
                   <span style={{fontSize:16}}>{ico}</span><span>{lbl}</span>
                 </button>
@@ -1021,7 +1021,7 @@ export default function App() {
 
         {tab==="dashboard" && (
           <div>
-            <div style={{background:"#fff",border:`1px solid ${"#fff"Border}`,borderRadius:14,padding:20,marginBottom:10,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
+            <div style={{background:"#fff",border:"1px solid #fff",borderRadius:14,padding:20,marginBottom:10,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:16}}>
                 <div>
                   <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,marginBottom:4}}>{tx("bankroll")}</div>
@@ -1034,7 +1034,7 @@ export default function App() {
                   <div style={{fontSize:12,color:stats.roi>=0?"#059669":"#dc2626",fontWeight:600,marginTop:4}}>ROI {fmtPct(stats.roi)}</div>
                 </div>
               </div>
-              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:0,borderTop:`1px solid ${"#fff"Border}`,paddingTop:14}}>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:0,borderTop:"1px solid #fff",paddingTop:14}}>
                 {[[tx("strike"),stats.strikeRate.toFixed(1)+"%"],[tx("avgOdd"),stats.avgOdd.toFixed(2)],[tx("unit"),fmt(unitVal)],[tx("pending"),stats.pending]].map(([l,v])=>(
                   <div key={l} style={{textAlign:"center"}}>
                     <div style={{fontSize:9,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,marginBottom:3}}>{l}</div>
@@ -1056,7 +1056,7 @@ export default function App() {
             <DashboardQuote/>
 
             {stats.pending>0 && (
-              <div style={{background:"#fff",border:`1px solid ${"#fff"Border}`,borderRadius:14,padding:16,marginBottom:10,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
+              <div style={{background:"#fff",border:"1px solid #fff",borderRadius:14,padding:16,marginBottom:10,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
                 <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,marginBottom:14,fontWeight:800}}>{tx("pending").toUpperCase()} · {stats.pending}</div>
                 {bets.filter(b=>b.result==="PENDING").map(b=>(
                   <div key={b.id} style={{display:"flex",alignItems:"center",padding:"10px 0",borderBottom:"1px solid #f3f4f6",gap:10}}>
@@ -1068,7 +1068,7 @@ export default function App() {
                     <div style={{display:"flex",gap:6}}>
                       <button style={S.bWin} onClick={()=>settleBet(b.id,"WIN")}>✓</button>
                       <button style={S.bLoss} onClick={()=>settleBet(b.id,"LOSS")}>✗</button>
-                      <button style={{padding:"5px 8px",borderRadius:8,border:`1px solid ${"#fff"Border}`,background:"transparent",color:"#d1d5db",cursor:"pointer",fontSize:13}} onClick={()=>openEditBet(b)}>✏️</button>
+                      <button style={{padding:"5px 8px",borderRadius:8,border:"1px solid #fff",background:"transparent",color:"#d1d5db",cursor:"pointer",fontSize:13}} onClick={()=>openEditBet(b)}>✏️</button>
                     </div>
                   </div>
                 ))}
@@ -1079,13 +1079,13 @@ export default function App() {
 
         {tab==="diary" && (
           <div>
-            <div style={{display:"flex",alignItems:"center",background:"#fff",border:`1px solid ${"#fff"Border}`,borderRadius:12,padding:"10px 14px",marginBottom:10,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
+            <div style={{display:"flex",alignItems:"center",background:"#fff",border:"1px solid #fff",borderRadius:12,padding:"10px 14px",marginBottom:10,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
               <button style={{background:"none",border:"1px solid #e5e7eb",borderRadius:8,width:32,height:32,cursor:"pointer",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center",color:"#111827",flexShrink:0}} onClick={()=>{ const dt=new Date(diaryDate+"T00:00:00"); dt.setDate(dt.getDate()-1); setDiaryDate(padDate(dt)); }}>‹</button>
               <div style={{flex:1,textAlign:"center",fontSize:13,fontWeight:700,color:"#111827"}}>{fmtDate(diaryDate)}</div>
               <button style={{background:"none",border:"1px solid #e5e7eb",borderRadius:8,width:32,height:32,cursor:"pointer",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center",color:"#111827",flexShrink:0}} onClick={()=>{ const dt=new Date(diaryDate+"T00:00:00"); dt.setDate(dt.getDate()+1); setDiaryDate(padDate(dt)); }}>›</button>
             </div>
 
-            <div style={{background:"#fff",border:`1px solid ${"#fff"Border}`,borderRadius:14,padding:16,marginBottom:10,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
+            <div style={{background:"#fff",border:"1px solid #fff",borderRadius:14,padding:16,marginBottom:10,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                 <div>
                   <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,marginBottom:4}}>{tx("dayProfit")}</div>
@@ -1110,7 +1110,7 @@ export default function App() {
               const isWin=b.result==="WIN",isLoss=b.result==="LOSS",isPending=b.result==="PENDING";
               const borderColor=isWin?"#059669":isLoss?"#dc2626":isPending?"#7c3aed":"#d1d5db";
               return (
-                <div key={b.id} style={{background:"#fff",border:`1px solid ${"#fff"Border}`,borderRadius:14,padding:14,marginBottom:8,boxShadow:"0 1px 2px rgba(0,0,0,.04)",borderLeft:`3px solid ${borderColor}`}}>
+                <div key={b.id} style={{background:"#fff",border:"1px solid #fff",borderRadius:14,padding:14,marginBottom:8,boxShadow:"0 1px 2px rgba(0,0,0,.04)",borderLeft:`3px solid ${borderColor}`}}>
                   <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
                     <div style={{flex:1,minWidth:0}}>
                       <div style={{fontSize:13,fontWeight:700,color:"#111827"}}>{b.event||b.selection}</div>
@@ -1126,7 +1126,7 @@ export default function App() {
                       {isWin && <div style={{fontSize:11,color:"#111827"}}>Retorno {fmt(b.stake*b.odd)}</div>}
                     </div>
                   </div>
-                  <div style={{display:"flex",gap:6,marginTop:10,paddingTop:10,borderTop:`1px solid ${"#fff"Border}`}}>
+                  <div style={{display:"flex",gap:6,marginTop:10,paddingTop:10,borderTop:"1px solid #fff"}}>
                     {isPending && (
                       <div style={{display:"flex",gap:6,flex:1,flexWrap:"wrap"}}>
                         <button style={S.bWin} onClick={()=>settleBet(b.id,"WIN")}>{tx("settleWin")}</button>
@@ -1135,8 +1135,8 @@ export default function App() {
                         <button style={S.bVoid} onClick={()=>settleBet(b.id,"VOID")}>{lang==="PT"?"Void":"Void"}</button>
                       </div>
                     )}
-                    <button style={{padding:"5px 8px",borderRadius:8,border:`1px solid ${"#fff"Border}`,background:"transparent",color:"#d1d5db",cursor:"pointer",fontSize:13,marginLeft:"auto"}} onClick={()=>openEditBet(b)}>✏️</button>
-                    <button style={{padding:"5px 8px",borderRadius:8,border:`1px solid ${"#fff"Border}`,background:"transparent",color:"#d1d5db",cursor:"pointer",fontSize:13}} onClick={()=>deleteBet(b.id)}>🗑</button>
+                    <button style={{padding:"5px 8px",borderRadius:8,border:"1px solid #fff",background:"transparent",color:"#d1d5db",cursor:"pointer",fontSize:13,marginLeft:"auto"}} onClick={()=>openEditBet(b)}>✏️</button>
+                    <button style={{padding:"5px 8px",borderRadius:8,border:"1px solid #fff",background:"transparent",color:"#d1d5db",cursor:"pointer",fontSize:13}} onClick={()=>deleteBet(b.id)}>🗑</button>
                   </div>
                 </div>
               );
@@ -1146,7 +1146,7 @@ export default function App() {
 
         {tab==="report" && (
           <div>
-            <div style={{display:"flex",alignItems:"center",background:"#fff",border:`1px solid ${"#fff"Border}`,borderRadius:12,padding:"10px 14px",marginBottom:10,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
+            <div style={{display:"flex",alignItems:"center",background:"#fff",border:"1px solid #fff",borderRadius:12,padding:"10px 14px",marginBottom:10,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
               <button style={{background:"none",border:"1px solid #e5e7eb",borderRadius:8,width:32,height:32,cursor:"pointer",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center",color:"#111827",flexShrink:0}} onClick={()=>{ const d=new Date(reportMonth+"-01"); d.setMonth(d.getMonth()-1); setReportMonth(d.toISOString().slice(0,7)); }}>‹</button>
               <div style={{flex:1,textAlign:"center",fontSize:14,fontWeight:700,color:"#111827"}}>{monthLabel(reportMonth+"-01")}</div>
               <button style={{background:"none",border:"1px solid #e5e7eb",borderRadius:8,width:32,height:32,cursor:"pointer",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center",color:"#111827",flexShrink:0}} onClick={()=>{ const d=new Date(reportMonth+"-01"); d.setMonth(d.getMonth()+1); setReportMonth(d.toISOString().slice(0,7)); }}>›</button>
@@ -1154,7 +1154,7 @@ export default function App() {
 
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:10}}>
               {[[tx("initialBR"),fmt(parseFloat(br?.bankroll||0))],[tx("finalBR"),fmt(currentBR)],[tx("entries"),reportBets.length]].map(([l,v])=>(
-                <div key={l} style={{background:"#fff",border:`1px solid ${"#fff"Border}`,borderRadius:14,padding:12,textAlign:"center",boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
+                <div key={l} style={{background:"#fff",border:"1px solid #fff",borderRadius:14,padding:12,textAlign:"center",boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
                   <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,marginBottom:5}}>{l}</div>
                   <div style={{fontSize:14,fontWeight:800,color:"#111827"}}>{v}</div>
                 </div>
@@ -1163,7 +1163,7 @@ export default function App() {
 
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:10}}>
               {[[tx("wins"),reportWins,"#059669"],[tx("losses"),reportLoss,"#dc2626"],[(lang==="PT"?lang==="PT"?"% Acertos":"% Wins":"% Wins"),reportWins+reportLoss>0?((reportWins/(reportWins+reportLoss))*100).toFixed(1)+"%":"—","#374151"]].map(([l,v,c])=>(
-                <div key={l} style={{background:"#fff",border:`1px solid ${"#fff"Border}`,borderRadius:14,padding:12,textAlign:"center",boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
+                <div key={l} style={{background:"#fff",border:"1px solid #fff",borderRadius:14,padding:12,textAlign:"center",boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
                   <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,marginBottom:5}}>{l}</div>
                   <div style={{fontSize:18,fontWeight:800,color:c}}>{v}</div>
                 </div>
@@ -1175,7 +1175,7 @@ export default function App() {
                 <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,marginBottom:5}}>{tx("monthProfit")}</div>
                 <div style={{fontSize:22,fontWeight:900,color:reportPnl>=0?"#059669":"#dc2626"}}>{fmtP(reportPnl)}</div>
               </div>
-              <div style={{background:"#fff",border:`1px solid ${"#fff"Border}`,borderRadius:14,padding:16,textAlign:"center",boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
+              <div style={{background:"#fff",border:"1px solid #fff",borderRadius:14,padding:16,textAlign:"center",boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
                 <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,marginBottom:5}}>{tx("monthROI")}</div>
                 <div style={{fontSize:22,fontWeight:900,color:reportROI>=0?"#059669":"#dc2626"}}>{fmtPct(reportROI)}</div>
               </div>
@@ -1192,9 +1192,9 @@ export default function App() {
                 else if(b.result==="CASHOUT"){byDay[d].returned+=(b.cashout_val||0);byDay[d].pnl+=(b.cashout_val||0)-b.stake;}
               });
               return (
-                <div style={{background:"#fff",border:`1px solid ${"#fff"Border}`,borderRadius:14,padding:16,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
+                <div style={{background:"#fff",border:"1px solid #fff",borderRadius:14,padding:16,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
                   <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,marginBottom:14,fontWeight:800}}>{tx("perDay")}</div>
-                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:0,borderBottom:`1px solid ${"#fff"Border}`,paddingBottom:6,marginBottom:6}}>
+                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:0,borderBottom:"1px solid #fff",paddingBottom:6,marginBottom:6}}>
                     {[tx("day"),tx("invested"),tx("returned"),tx("profit")].map(h=><div key={h} style={{fontSize:9,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,textAlign:"center"}}>{h}</div>)}
                   </div>
                   {Object.entries(byDay).sort(([a],[b])=>a>b?1:-1).map(([d,v])=>(
@@ -1213,7 +1213,7 @@ export default function App() {
 
         {tab==="chart" && (
           <div>
-            <div style={{background:"#fff",border:`1px solid ${"#fff"Border}`,borderRadius:14,padding:20,marginBottom:10,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
+            <div style={{background:"#fff",border:"1px solid #fff",borderRadius:14,padding:20,marginBottom:10,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
               <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,marginBottom:14,fontWeight:800}}>{tx("evolution")}</div>
               {pts.length>1 ? (
                 <svg viewBox={`0 0 ${svgW} ${svgH}`} style={{width:"100%",height:160,display:"block"}}>
@@ -1265,7 +1265,7 @@ export default function App() {
               if(!entries.length) return null;
               const maxAbs=Math.max(...entries.map(([,v])=>Math.abs(v)),1);
               return (
-                <div style={{background:"#fff",border:`1px solid ${"#fff"Border}`,borderRadius:14,padding:16,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
+                <div style={{background:"#fff",border:"1px solid #fff",borderRadius:14,padding:16,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
                   <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,marginBottom:14,fontWeight:800}}>{tx("perMonth")}</div>
                   {entries.map(([m,v])=>(
                     <div key={m} style={{marginBottom:10}}>
@@ -1286,7 +1286,7 @@ export default function App() {
 
         {tab==="ai" && (
           <div>
-            <div style={{background:"#fff",border:`1px solid ${"#fff"Border}`,borderRadius:14,padding:20,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
+            <div style={{background:"#fff",border:"1px solid #fff",borderRadius:14,padding:20,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
               <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:16}}>
                 <span style={{fontSize:28}}>🤖</span>
                 <div style={{flex:1}}>
@@ -1357,7 +1357,7 @@ export default function App() {
             </div>
 
             {loadingFB && (
-              <div style={{background:"#fff",border:`1px solid ${"#fff"Border}`,borderRadius:14,padding:40,textAlign:"center",boxShadow:"0 1px 2px rgba(0,0,0,.04)",marginTop:10}}>
+              <div style={{background:"#fff",border:"1px solid #fff",borderRadius:14,padding:40,textAlign:"center",boxShadow:"0 1px 2px rgba(0,0,0,.04)",marginTop:10}}>
                 <div style={{...S.spinner,border:"2px solid #e5e7eb",borderTop:"2px solid #111827"}}/>
                 <div style={{fontSize:13,color:"#9ca3af",marginTop:16}}>{lang==="PT"?lang==="PT"?"A analisar o teu histórico...":"Analysing your history...":"Analysing your history..."}</div>
               </div>
@@ -1372,7 +1372,7 @@ export default function App() {
             {!feedback && !loadingFB && (
               <div style={{marginTop:10,display:"flex",flexDirection:"column",gap:8}}>
                 {lang==="PT"?["Score de saúde da banca","Identificação dos melhores mercados","Alertas de risco personalizados","Recomendações baseadas no histórico"]:["Bankroll health score","Best markets identification","Personalised risk alerts","Recommendations based on history"].map(f=>(
-                  <div key={f} style={{display:"flex",alignItems:"center",gap:10,background:"#fff",border:`1px solid ${"#fff"Border}`,borderRadius:10,padding:"10px 14px",boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
+                  <div key={f} style={{display:"flex",alignItems:"center",gap:10,background:"#fff",border:"1px solid #fff",borderRadius:10,padding:"10px 14px",boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
                     <span style={{color:sc.color,fontWeight:700}}>→</span>
                     <span style={{fontSize:13,color:"#111827"}}>{f}</span>
                   </div>
@@ -1382,7 +1382,7 @@ export default function App() {
 
             {feedback && !feedback.error && !loadingFB && (
               <div>
-                <div style={{background:"#fff",border:`1px solid ${"#fff"Border}`,borderRadius:14,padding:20,textAlign:"center",boxShadow:"0 1px 2px rgba(0,0,0,.04)",marginTop:10}}>
+                <div style={{background:"#fff",border:"1px solid #fff",borderRadius:14,padding:20,textAlign:"center",boxShadow:"0 1px 2px rgba(0,0,0,.04)",marginTop:10}}>
                   <div style={{width:90,height:90,borderRadius:"50%",border:`3px solid ${sc.color}44`,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",margin:"0 auto",background:"#f7f8fa"}}>
                     <div style={{fontSize:32,fontWeight:900,color:(feedback.score||0)>=7?"#059669":(feedback.score||0)>=4?"#d97706":"#dc2626"}}>{feedback.score||"—"}</div>
                     <div style={{fontSize:10,color:"#111827"}}>/10</div>
@@ -1395,19 +1395,19 @@ export default function App() {
                     {feedback.warnings.map((w,i)=><p key={i} style={{color:"#78350f",fontSize:13,margin:"6px 0",lineHeight:1.5}}>{w}</p>)}
                   </div>
                 )}
-                <div style={{background:"#fff",border:`1px solid ${"#fff"Border}`,borderRadius:14,padding:16,marginTop:10,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
+                <div style={{background:"#fff",border:"1px solid #fff",borderRadius:14,padding:16,marginTop:10,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
                   <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,marginBottom:14,fontWeight:800}}>{tx("insights")}</div>
                   {(feedback.insights||[]).map((ins,i)=>(
-                    <div key={i} style={{display:"flex",padding:"8px 0",borderBottom:`1px solid ${"#fff"Border}`}}>
+                    <div key={i} style={{display:"flex",padding:"8px 0",borderBottom:"1px solid #fff"}}>
                       <span style={{color:sc.color,marginRight:10,flexShrink:0,fontWeight:700}}>→</span>
                       <span style={{color:"#111827",fontSize:13,lineHeight:1.5}}>{ins}</span>
                     </div>
                   ))}
                 </div>
-                <div style={{background:"#fff",border:`1px solid ${"#fff"Border}`,borderRadius:14,padding:16,marginTop:10,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
+                <div style={{background:"#fff",border:"1px solid #fff",borderRadius:14,padding:16,marginTop:10,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
                   <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,marginBottom:14,fontWeight:800}}>{tx("recommendations")}</div>
                   {(feedback.tips||[]).map((t,i)=>(
-                    <div key={i} style={{display:"flex",padding:"8px 0",borderBottom:`1px solid ${"#fff"Border}`}}>
+                    <div key={i} style={{display:"flex",padding:"8px 0",borderBottom:"1px solid #fff"}}>
                       <span style={{color:"#059669",marginRight:10,flexShrink:0,fontWeight:700}}>✓</span>
                       <span style={{color:"#111827",fontSize:13,lineHeight:1.5}}>{t}</span>
                     </div>
@@ -1420,16 +1420,16 @@ export default function App() {
 
         {tab==="sobre" && (
           <div>
-            <div style={{background:"#fff",border:`1px solid ${"#fff"Border}`,borderRadius:14,padding:24,textAlign:"center",boxShadow:"0 1px 2px rgba(0,0,0,.04)",marginBottom:10}}>
+            <div style={{background:"#fff",border:"1px solid #fff",borderRadius:14,padding:24,textAlign:"center",boxShadow:"0 1px 2px rgba(0,0,0,.04)",marginBottom:10}}>
               <div style={{fontSize:48,marginBottom:12}}>📊</div>
               <div style={{fontSize:20,fontWeight:900,color:"#111827",marginBottom:4}}>BankrollPro</div>
               <div style={{fontSize:13,color:"#9ca3af",marginBottom:16}}>Gestão profissional de banca desportiva</div>
-              <div style={{background:"#f7f8fa",border:`1px solid ${"#fff"Border}`,borderRadius:10,padding:"12px 16px",marginBottom:16,textAlign:"left"}}>
+              <div style={{background:"#f7f8fa",border:"1px solid #fff",borderRadius:10,padding:"12px 16px",marginBottom:16,textAlign:"left"}}>
                 <div style={{fontSize:11,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,marginBottom:8}}>Desenvolvido por</div>
                 <div style={{fontSize:14,fontWeight:700,color:"#111827"}}>BankrollPro Team</div>
                 <div style={{fontSize:12,color:"#6b7280",marginTop:2}}>Todos os direitos reservados</div>
               </div>
-              <div style={{background:"#f7f8fa",border:`1px solid ${"#fff"Border}`,borderRadius:10,padding:"12px 16px",marginBottom:20,textAlign:"left"}}>
+              <div style={{background:"#f7f8fa",border:"1px solid #fff",borderRadius:10,padding:"12px 16px",marginBottom:20,textAlign:"left"}}>
                 <div style={{fontSize:11,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,marginBottom:8}}>Plano atual</div>
                 <div style={{fontSize:14,fontWeight:700,color:br?.subscribed?"#059669":"#d97706"}}>{br?.subscribed?lang==="PT"?`Plano ${br?.plan==="annual"?"Anual":"Mensal"} · Ativo`:`${br?.plan==="annual"?"Annual":"Monthly"} Plan · Active`:lang==="PT"?`Trial · ${trialLeft} dias restantes`:`Trial · ${trialLeft} days remaining`}</div>
                 {br?.subscribed&&<div style={{fontSize:12,color:"#6b7280",marginTop:2}}>Análises IA: {br?.plan==="annual"?AI_LIMIT_ANNUAL:AI_LIMIT_MONTHLY}/mês</div>}
@@ -1440,7 +1440,7 @@ export default function App() {
               </a>
             </div>
 
-            <div style={{background:"#fff",border:`1px solid ${"#fff"Border}`,borderRadius:14,padding:16,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
+            <div style={{background:"#fff",border:"1px solid #fff",borderRadius:14,padding:16,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
               <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,fontWeight:800,marginBottom:14}}>{lang==="PT"?"O que está incluído":"What's included"}</div>
               {[lang==="PT"?[["📊","Múltiplas bancas","Até 3 bancas separadas por desporto"],["📅","Diário de apostas","Registo completo com resultado imediato ou pendente"],["📈","Relatório mensal","Métricas detalhadas por mês e por dia"],["📉","Gráfico de evolução","Acompanha a evolução da tua banca visualmente"],["🤖","Análise IA","Feedback personalizado baseado no teu histórico real"],["💱","Múltiplas moedas","€, R\$ e \$"]]:[["📊","Multiple bankrolls","Up to 3, separated by sport"],["📅","Betting diary","Full log with immediate or pending results"],["📈","Monthly report","Detailed metrics per month and day"],["📉","Evolution chart","Track your bankroll visually"],["🤖","AI Analysis","Personalised feedback based on your real history"],["💱","Multiple currencies","€, R\$ and \$"]]].map(([ico,t,d])=>(
                 <div key={t} style={{display:"flex",gap:12,padding:"10px 0",borderBottom:"1px solid #f3f4f6"}}>
@@ -1502,7 +1502,7 @@ function BRForm({ form, setForm, showReset, lang="PT", T={card:"#fff",cardBorder
 function DashboardQuote() {
   const quote = useQuote(8000);
   return (
-    <div style={{background:darkMode?"linear-gradient(135deg,#1a1d27,#22263a)":"linear-gradient(135deg,#f8fafc,#f1f5f9)",border:`1px solid ${"#fff"Border}`,borderRadius:14,padding:"16px 18px",marginBottom:10,position:"relative",overflow:"hidden"}}>
+    <div style={{background:darkMode?"linear-gradient(135deg,#1a1d27,#22263a)":"linear-gradient(135deg,#f8fafc,#f1f5f9)",border:"1px solid #fff",borderRadius:14,padding:"16px 18px",marginBottom:10,position:"relative",overflow:"hidden"}}>
       <div style={{position:"absolute",top:10,left:14,fontSize:32,color:"#e2e8f0",fontFamily:"Georgia,serif",lineHeight:1}}>"</div>
       <p style={{fontSize:13,color:"#111827",lineHeight:1.6,fontStyle:"italic",margin:"0 0 10px",paddingLeft:16}}>{quote.text}</p>
       <div style={{fontSize:11,fontWeight:700,color:"#111827"}}>— {quote.author}</div>
@@ -1547,13 +1547,13 @@ function AdminPanel({ supabase, fmt, daysLeft }) {
       <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,fontWeight:800,marginBottom:14}}>Painel de Administração</div>
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:12}}>
         {[["Total Utilizadores",data?.total,"#111827"],["Subscritores Pagos",data?.paid,"#059669"],["Em Trial",data?.trial,"#d97706"],["Trial Expirado",data?.expired,"#dc2626"]].map(([l,v,c])=>(
-          <div key={l} style={{background:"#fff",border:`1px solid ${"#fff"Border}`,borderRadius:14,padding:"14px 16px",boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
+          <div key={l} style={{background:"#fff",border:"1px solid #fff",borderRadius:14,padding:"14px 16px",boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
             <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,marginBottom:5}}>{l}</div>
             <div style={{fontSize:28,fontWeight:900,color:c}}>{v||0}</div>
           </div>
         ))}
       </div>
-      <div style={{background:"#fff",border:`1px solid ${"#fff"Border}`,borderRadius:14,padding:16,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
+      <div style={{background:"#fff",border:"1px solid #fff",borderRadius:14,padding:16,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
         <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,fontWeight:800,marginBottom:14}}>Utilizadores</div>
         {data?.users.map(u=>{
           const tl=daysLeft(u.user_trial_start||u.trial_start);
