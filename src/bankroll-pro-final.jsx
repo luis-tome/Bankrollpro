@@ -1310,7 +1310,7 @@ export default function App() {
                 <span style={{fontSize:16,flexShrink:0}}>💡</span>
                 <div>
                   <div style={{fontSize:12,fontWeight:700,color:T.text,marginBottom:3}}>{lang==="PT"?"Análise mais precisa":"More precise analysis"}</div>
-                  <div style={{fontSize:12,color:"#6b7280",lineHeight:1.5}}>{lang==="PT"?"Preenche o campo":"Fill in the"} <strong>{tx("notes").replace(" (opcional)","").replace(" (optional)","")}</strong> {lang==="PT"?"nas apostas com contexto extra":"field in bets with extra context"} — ex: <em>"Alcaraz @1.23, {lang===\"PT\"?\"terra\":\"clay\"}"</em> {lang==="PT"?"ou":"or"} <em>"{lang==="PT"?"indoor, top 10":"indoor, top 10"}"</em>. {lang==="PT"?"A IA usa esse contexto para identificar padrões cruzados.":"The AI uses this context to identify cross-patterns."}</div>
+                  <div style={{fontSize:12,color:T.text2,lineHeight:1.5}}>{lang==="PT"?"Preenche o campo":"Fill in the"} <strong>{tx("notes").replace(" (opcional)","").replace(" (optional)","")}</strong> {lang==="PT"?"nas apostas com contexto extra":"field in bets with extra context"} — ex: <em>{lang==="PT"?'"Alcaraz @1.23, terra"':' "Alcaraz @1.23, clay"'}</em> {lang==="PT"?"ou":"or"} <em>'indoor, top 10'</em>. {lang==="PT"?"A IA usa esse contexto para identificar padrões cruzados.":"The AI uses this context to identify cross-patterns."}</div>
                 </div>
               </div>
 
