@@ -66,66 +66,55 @@ function parseTelegramTips(text) {
   const bets = [];
   let currentEvent = null;
   let currentSelection = null;
+  let bingoMode = false;
+  let bingoSelections = [];
 
-  // Remove sport header lines (tournament names with flags etc)
-  const sportEmojis = /[🎾⚽🏀🏒⚾🏉🥊🎱🏸🏓]/g;
-  const headerEmojis = /[🙋👋📢📣🔔🔥💎⭐🌟]/g;
+  const SPORT = ["🎾","⚽","🏀","🏒","⚾","🏉","🥊","🏸","🎱","🏓"];
+  const hasSport = l => SPORT.some(e => l.includes(e));
+  const cleanSport = l => { let r=l; SPORT.forEach(e=>{r=r.split(e).join("");}); return r.trim(); };
 
-  const lines = text.split("\n");
-  for (let line of lines) {
+  for (let line of text.split("\n")) {
     line = line.trim();
     if (!line) continue;
 
-    // Skip header lines (tournament/competition names)
-    if (headerEmojis.test(line)) { headerEmojis.lastIndex=0; continue; }
-    headerEmojis.lastIndex=0;
+    // Detect BINGO/múltipla especial
+    if (line.includes("🎲") && line.toUpperCase().includes("BINGO")) {
+      bingoMode = true; bingoSelections = []; continue;
+    }
 
-    // Event line — has sport emoji OR looks like "Team A v/vs Team B"
-    const hasSportEmoji = sportEmojis.test(line);
-    sportEmojis.lastIndex=0;
-    const looksLikeMatch = /vs?|v/i.test(line) && !line.includes("🎯") && !line.includes("💰");
-
-    if (hasSportEmoji || looksLikeMatch) {
-      currentEvent = line.replace(sportEmojis, "").replace(headerEmojis, "").trim();
-      sportEmojis.lastIndex=0; headerEmojis.lastIndex=0;
-      currentSelection = null;
-
-    // Selection line — has 🎯 OR is a line after event without @ sign
-    } else if (line.includes("🎯")) {
-      currentSelection = line.replace(/🎯/g, "").trim();
-
-    // Odds line — has 💰 OR has @ sign with number
-    } else if ((line.includes("💰") || /@[\d.,]+/.test(line)) && currentEvent) {
-      const clean = line.replace(/💰/g, "").trim();
-      const unitsMatch = clean.match(/([\d.,]+)\s*un/i);
-      const oddMatch = clean.match(/@\s*([\d.,]+)/);
-
-      // If no selection yet, this line might contain both selection and odd
-      if (!currentSelection) {
-        const beforeAt = clean.split("@")[0].trim();
-        if (beforeAt && !unitsMatch) currentSelection = beforeAt;
-      }
-
-      if (oddMatch && currentSelection) {
-        const units = unitsMatch ? parseFloat(unitsMatch[1].replace(",",".")) : 1;
-        const odd = parseFloat(oddMatch[1].replace(",","."));
-        if (odd > 1) {
-          bets.push({
-            event: currentEvent,
-            selection: currentSelection,
-            units,
-            odd,
-            market: "Outros",
-            result: "PENDING",
-            notes: "",
-          });
+    if (bingoMode) {
+      if (hasSport(line) && !line.includes("💰")) {
+        bingoSelections.push(cleanSport(line));
+      } else if (line.includes("💰") && line.includes("@") && bingoSelections.length) {
+        const um = line.match(/([\d.,]+)\s*un/i);
+        const om = line.match(/@\s*([\d.,]+)/);
+        if (om) {
+          const odd = parseFloat(om[1].replace(",","."));
+          const units = um ? parseFloat(um[1].replace(",",".")) : 1;
+          if (odd > 1) bets.push({ event:"BINGO", selection:bingoSelections.join(" + "), units, odd, market:"Múltipla", result:"PENDING", notes:"" });
         }
+        bingoMode = false; bingoSelections = [];
+      }
+      continue;
+    }
+
+    // Event line
+    if (hasSport(line) && !line.includes("🎯") && !line.includes("💰")) {
+      currentEvent = cleanSport(line);
+      currentSelection = null;
+    // Selection line
+    } else if (line.includes("🎯")) {
+      currentSelection = line.replace(/🎯/g,"").trim();
+    // Odds line
+    } else if (line.includes("💰") && line.includes("@") && currentEvent && currentSelection) {
+      const um = line.match(/([\d.,]+)\s*un/i);
+      const om = line.match(/@\s*([\d.,]+)/);
+      if (om) {
+        const odd = parseFloat(om[1].replace(",","."));
+        const units = um ? parseFloat(um[1].replace(",",".")) : 1;
+        if (odd > 1) bets.push({ event:currentEvent, selection:currentSelection, units, odd, market:"Outros", result:"PENDING", notes:"" });
       }
       currentSelection = null;
-
-    // Plain text line after event — treat as selection if no odd sign
-    } else if (currentEvent && !currentSelection && line.length > 2 && !/@/.test(line)) {
-      currentSelection = line;
     }
   }
   return bets;
