@@ -13,7 +13,7 @@ const I18N = {
   PT:{
     tabs:["Banca","Diário","Relatório","Gráfico","IA","Info"],
     logout:"Terminar sessão",currency:"Moeda",language:"Idioma",
-    bankroll:"Banca Atual",pnl:"P&L Total",roi:"ROI",
+    bankroll:tx("bankroll"),pnl:tx("pnl"),roi:"ROI",
     wins:"Acertos",losses:"Erros",total:"Total",pending:"Pendente",
     strike:"Taxa de Acerto",avgOdd:"Odd Média",unit:"Unidade",
     dayProfit:"Lucro do dia",records:"Registos",
@@ -27,8 +27,8 @@ const I18N = {
     insights:"Insights",recommendations:"Recomendações",alerts:"⚠️ Alertas",
     newRecord:"Novo Registo",editRecord:"Editar Registo",
     immediate:"Resultado imediato",leavePending:"Deixar pendente",
-    single:"Simples",multiple:"Múltipla",
-    event:"Evento",odd:"Odd",units:"Unidades",market:"Mercado",selection:"Seleção",
+    single:"Simples",multiple:tx("multiple"),
+    event:tx("event"),odd:"Odd",units:"Unidades",market:"Mercado",selection:"Seleção",
     result:"Resultado",notes:"Notas (opcional)",saveRecord:"Guardar registo",saveChanges:"Guardar alterações",
     stake:"Stake",potReturn:"Retorno pot.",
     yourBankrolls:"As tuas bancas",newBankroll:"Nova banca",
@@ -155,7 +155,7 @@ function parseTelegramTips(text) {
         if (om) {
           const odd = parseFloat(om[1].replace(",","."));
           const units = um ? parseFloat(um[1].replace(",",".")) : 1;
-          if (odd > 1) bets.push({ event:"BINGO", selection:bingoSelections.join(" + "), units, odd, market:"Múltipla", result:"PENDING", notes:"" });
+          if (odd > 1) bets.push({ event:"BINGO", selection:bingoSelections.join(" + "), units, odd, market:tx("multiple"), result:"PENDING", notes:"" });
         }
         bingoMode = false; bingoSelections = [];
       }
@@ -362,7 +362,7 @@ export default function App() {
   }
 
   async function deleteBankroll(id){
-    if(!window.confirm("Apagar esta banca e todos os registos? Esta ação não pode ser revertida.")) return;
+    if(!window.confirm(lang==="PT"?"Apagar esta banca e todos os registos? Esta ação não pode ser revertida.":"Delete this bankroll and all records? This action cannot be undone.")) return;
     await supabase.from("bets").delete().eq("bankroll_id",id);
     await supabase.from("profiles").delete().eq("id",id);
     const remaining=bankrolls.filter(b=>b.id!==id);
@@ -395,7 +395,7 @@ export default function App() {
   }
 
   async function deleteBet(id){
-    if(!window.confirm("Apagar este registo?")) return;
+    if(!window.confirm(lang==="PT"?"Apagar este registo?":"Delete this record?")) return;
     await supabase.from("bets").delete().eq("id",id);
     setBets(prev=>prev.filter(b=>b.id!==id));
   }
@@ -607,7 +607,7 @@ export default function App() {
           <div style={{background:"#f0fdf4",border:"1px solid #bbf7d0",borderRadius:8,padding:"8px 12px",fontSize:12,color:"#15803d",marginBottom:12,fontWeight:600,textAlign:"center"}}>
             🎯 Trial de 7 dias ativado · Preço de lançamento garantido
           </div>
-          <BRForm form={brForm} setForm={setBRForm} showReset={false}/>
+          <BRForm form={brForm} setForm={setBRForm} showReset={false} lang={lang}/>
           <button style={{...S.btnPrimary,marginTop:20}} onClick={()=>handleCreateBR(false)}>Criar banca</button>
         </div>
       </div>
@@ -657,7 +657,7 @@ export default function App() {
           <div style={{background:"#f0fdf4",border:"1px solid #bbf7d0",borderRadius:8,padding:"10px 12px",fontSize:12,color:"#15803d",textAlign:"center",marginBottom:8}}>
             ✓ Acesso imediato · ✓ Cancela quando quiseres
           </div>
-          <button style={S.btnGhost} onClick={()=>supabase.auth.signOut()}>Terminar sessão</button>
+          <button style={S.btnGhost} onClick={()=>supabase.auth.signOut()}>{tx("logout")}</button>
         </div>
       </div>
     </div>
@@ -806,7 +806,7 @@ export default function App() {
               ))}
             </div>
 
-            <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,fontWeight:800,marginBottom:8}}>As tuas bancas</div>
+            <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,fontWeight:800,marginBottom:8}}>{tx("yourBankrolls")}</div>
             {bankrolls.map(b=>{
               const bsc=SPORTS[b.sport];
               return (
@@ -827,16 +827,16 @@ export default function App() {
             {bankrolls.length<MAX_BANKROLLS && (
               <button style={{display:"flex",alignItems:"center",width:"100%",padding:"10px",border:"1px dashed #e5e7eb",background:"transparent",cursor:"pointer",borderRadius:10,fontSize:13,marginTop:4,color:"#6b7280"}} onClick={()=>{setBRForm({name:"",sport:"Ténis",bankroll:"",unit_pct:"2",reset:false});setShowNewBR(true);setDrawerOpen(false);}}>
                 <span style={{marginRight:8,color:"#9ca3af",fontSize:18}}>+</span>
-                Nova banca ({bankrolls.length}/{MAX_BANKROLLS})
+                {lang==="PT"?"Nova banca":"New bankroll"} ({bankrolls.length}/{MAX_BANKROLLS})
               </button>
             )}
 
             <div style={{flex:1}}/>
 
             {br?.subscribed && (
-              <div style={{background:"#f0fdf4",border:"1px solid #bbf7d0",borderRadius:8,padding:"10px 12px",marginTop:16,fontSize:12,color:"#15803d",fontWeight:600,textAlign:"center"}}>✓ Plano ativo</div>
+              <div style={{background:"#f0fdf4",border:"1px solid #bbf7d0",borderRadius:8,padding:"10px 12px",marginTop:16,fontSize:12,color:"#15803d",fontWeight:600,textAlign:"center"}}>{tx("activePlan")}</div>
             )}
-            <button style={{...S.btnGhost,marginTop:10,fontSize:12}} onClick={()=>supabase.auth.signOut()}>Terminar sessão</button>
+            <button style={{...S.btnGhost,marginTop:10,fontSize:12}} onClick={()=>supabase.auth.signOut()}>{tx("logout")}</button>
           </div>
         </div>
       )}
@@ -845,10 +845,10 @@ export default function App() {
         <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.4)",zIndex:100,display:"flex",alignItems:"center",justifyContent:"center",padding:20}}>
           <div style={{background:"#fff",borderRadius:16,padding:24,width:"100%",maxWidth:400,maxHeight:"90vh",overflowY:"auto",boxShadow:"0 20px 60px rgba(0,0,0,.2)"}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
-              <h3 style={{margin:0,fontSize:16,fontWeight:700,color:"#111827"}}>Nova Banca</h3>
+              <h3 style={{margin:0,fontSize:16,fontWeight:700,color:"#111827"}}>{lang==="PT"?"Nova Banca":"New Bankroll"}</h3>
               <button style={{background:"none",border:"none",color:"#9ca3af",fontSize:22,cursor:"pointer"}} onClick={()=>setShowNewBR(false)}>×</button>
             </div>
-            <BRForm form={brForm} setForm={setBRForm} showReset={false}/>
+            <BRForm form={brForm} setForm={setBRForm} showReset={false} lang={lang}/>
             <button style={{...S.btnPrimary,marginTop:16}} onClick={()=>handleCreateBR(false)}>Criar banca</button>
           </div>
         </div>
@@ -858,12 +858,12 @@ export default function App() {
         <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.4)",zIndex:100,display:"flex",alignItems:"center",justifyContent:"center",padding:20}}>
           <div style={{background:"#fff",borderRadius:16,padding:24,width:"100%",maxWidth:400,maxHeight:"90vh",overflowY:"auto",boxShadow:"0 20px 60px rgba(0,0,0,.2)"}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
-              <h3 style={{margin:0,fontSize:16,fontWeight:700,color:"#111827"}}>Editar Banca</h3>
+              <h3 style={{margin:0,fontSize:16,fontWeight:700,color:"#111827"}}>{lang==="PT"?"Editar Banca":"Edit Bankroll"}</h3>
               <button style={{background:"none",border:"none",color:"#9ca3af",fontSize:22,cursor:"pointer"}} onClick={()=>setShowEditBR(false)}>×</button>
             </div>
-            <BRForm form={brForm} setForm={setBRForm} showReset={true}/>
+            <BRForm form={brForm} setForm={setBRForm} showReset={true} lang={lang}/>
             <div style={{display:"flex",gap:8,marginTop:16}}>
-              <button style={{...S.btnPrimary,flex:1}} onClick={()=>handleCreateBR(true)}>Guardar</button>
+              <button style={{...S.btnPrimary,flex:1}} onClick={()=>handleCreateBR(true)}>{lang==="PT"?"Guardar":"Save"}</button>
               <button style={{padding:"13px 16px",border:"1px solid #fca5a5",background:"#fef2f2",color:"#dc2626",borderRadius:8,cursor:"pointer",fontSize:13,fontWeight:700}} onClick={()=>deleteBankroll(editBRTarget?.id)}>🗑</button>
             </div>
           </div>
@@ -874,26 +874,26 @@ export default function App() {
         <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.4)",zIndex:100,display:"flex",alignItems:"center",justifyContent:"center",padding:20}}>
           <div style={{background:"#fff",borderRadius:16,padding:24,width:"100%",maxWidth:440,maxHeight:"92vh",overflowY:"auto",boxShadow:"0 20px 60px rgba(0,0,0,.2)"}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
-              <h3 style={{margin:0,fontSize:16,fontWeight:700,color:"#111827"}}>{editBet?"Editar Registo":`${sc.icon} Novo Registo`}</h3>
+              <h3 style={{margin:0,fontSize:16,fontWeight:700,color:"#111827"}}>{editBet?tx("editRecord"):`${sc.icon} ${tx("newRecord")}`}</h3>
               <button style={{background:"none",border:"none",color:"#9ca3af",fontSize:22,cursor:"pointer"}} onClick={()=>{setShowForm(false);setEditBet(null);setForm(emptyForm);}}>×</button>
             </div>
 
             {!editBet && (
               <div>
                 <div style={{display:"flex",gap:6,marginBottom:8}}>
-                  <button style={{flex:1,padding:"7px",border:`1px solid ${betType==="single"?sc.color:"#e5e7eb"}`,borderRadius:8,background:betType==="single"?sc.color:"#f9fafb",color:betType==="single"?"#fff":"#9ca3af",cursor:"pointer",fontSize:12,fontWeight:700}} onClick={()=>setBetType("single")}>Simples</button>
-                  <button style={{flex:1,padding:"7px",border:`1px solid ${betType==="multiple"?sc.color:"#e5e7eb"}`,borderRadius:8,background:betType==="multiple"?sc.color:"#f9fafb",color:betType==="multiple"?"#fff":"#9ca3af",cursor:"pointer",fontSize:12,fontWeight:700}} onClick={()=>setBetType("multiple")}>Múltipla</button>
+                  <button style={{flex:1,padding:"7px",border:`1px solid ${betType==="single"?sc.color:"#e5e7eb"}`,borderRadius:8,background:betType==="single"?sc.color:"#f9fafb",color:betType==="single"?"#fff":"#9ca3af",cursor:"pointer",fontSize:12,fontWeight:700}} onClick={()=>setBetType("single")}>{tx("single")}</button>
+                  <button style={{flex:1,padding:"7px",border:`1px solid ${betType==="multiple"?sc.color:"#e5e7eb"}`,borderRadius:8,background:betType==="multiple"?sc.color:"#f9fafb",color:betType==="multiple"?"#fff":"#9ca3af",cursor:"pointer",fontSize:12,fontWeight:700}} onClick={()=>setBetType("multiple")}>{tx("multiple")}</button>
                 </div>
                 <div style={{display:"flex",gap:6}}>
-                  <button style={{flex:1,padding:"7px",border:`1px solid ${formMode==="immediate"?sc.color:"#e5e7eb"}`,borderRadius:8,background:formMode==="immediate"?sc.color:"#f9fafb",color:formMode==="immediate"?"#fff":"#9ca3af",cursor:"pointer",fontSize:12,fontWeight:700}} onClick={()=>setFormMode("immediate")}>Resultado imediato</button>
-                  <button style={{flex:1,padding:"7px",border:`1px solid ${formMode==="pending"?sc.color:"#e5e7eb"}`,borderRadius:8,background:formMode==="pending"?sc.color:"#f9fafb",color:formMode==="pending"?"#fff":"#9ca3af",cursor:"pointer",fontSize:12,fontWeight:700}} onClick={()=>setFormMode("pending")}>Deixar pendente</button>
+                  <button style={{flex:1,padding:"7px",border:`1px solid ${formMode==="immediate"?sc.color:"#e5e7eb"}`,borderRadius:8,background:formMode==="immediate"?sc.color:"#f9fafb",color:formMode==="immediate"?"#fff":"#9ca3af",cursor:"pointer",fontSize:12,fontWeight:700}} onClick={()=>setFormMode("immediate")}>{tx("immediate")}</button>
+                  <button style={{flex:1,padding:"7px",border:`1px solid ${formMode==="pending"?sc.color:"#e5e7eb"}`,borderRadius:8,background:formMode==="pending"?sc.color:"#f9fafb",color:formMode==="pending"?"#fff":"#9ca3af",cursor:"pointer",fontSize:12,fontWeight:700}} onClick={()=>setFormMode("pending")}>{tx("leavePending")}</button>
                 </div>
               </div>
             )}
 
             {br?.sport==="Geral" && (
               <div>
-                <label style={S.label}>Desporto</label>
+                <label style={S.label}>{lang==="PT"?"Desporto":"Sport"}</label>
                 <div style={{display:"flex",flexWrap:"wrap",gap:6,marginTop:4,marginBottom:4}}>
                   {Object.keys(SPORTS).filter(s=>s!=="Geral").map(s=>(
                     <button key={s} style={{display:"flex",alignItems:"center",gap:4,padding:"6px 10px",border:`1px solid ${betSport===s?SPORTS[s].color:"#e5e7eb"}`,borderRadius:8,background:betSport===s?SPORTS[s].color+"15":"#f9fafb",color:betSport===s?SPORTS[s].color:"#9ca3af",cursor:"pointer",fontSize:11,fontWeight:700}} onClick={()=>{setBetSport(s);setForm(f=>({...f,market:SPORTS[s].markets[0]}));}}>
@@ -903,22 +903,22 @@ export default function App() {
                 </div>
               </div>
             )}
-            <label style={S.label}>{betType==="multiple"?"Nome da múltipla":"Evento"}</label>
-            <input style={S.input} placeholder={betType==="multiple"?"ex: Múltipla Ténis 3 jogos":"ex: Sinner vs Alcaraz"} value={form.event} onChange={e=>setForm(f=>({...f,event:e.target.value}))}/>
+            <label style={S.label}>{betType==="multiple"?"Nome da múltipla":tx("event")}</label>
+            <input style={S.input} placeholder={betType==="multiple"?lang==="PT"?"ex: Múltipla Ténis 3 jogos":"e.g. Tennis Multi 3 games":lang==="PT"?"ex: Sinner vs Alcaraz":"e.g. Sinner vs Alcaraz"} value={form.event} onChange={e=>setForm(f=>({...f,event:e.target.value}))}/>
             {betType==="multiple" && (
               <div>
                 <label style={S.label}>Seleções (uma por linha)</label>
-                <textarea style={{...S.input,height:80,resize:"none",fontFamily:"inherit"}} placeholder="ex: Sinner a ganhar" value={form.selections||""} onChange={e=>{const v=e.target.value;setForm(f=>({...f,selections:v,selection:v.split(/\r?\n/).filter(Boolean).join(" + ")}));}}/>
+                <textarea style={{...S.input,height:80,resize:"none",fontFamily:"inherit"}} placeholder=lang==="PT"?"ex: Sinner a ganhar":"e.g. Sinner to win" value={form.selections||""} onChange={e=>{const v=e.target.value;setForm(f=>({...f,selections:v,selection:v.split(/\r?\n/).filter(Boolean).join(" + ")}));}}/>
               </div>
             )}
 
             <div style={{display:"flex",gap:10}}>
               <div style={{flex:1}}>
-                <label style={S.label}>Odd</label>
+                <label style={S.label}>{tx("odd")}</label>
                 <input style={S.input} type="number" step="0.01" min="1.01" placeholder="1.85" value={form.odd} onChange={e=>setForm(f=>({...f,odd:e.target.value}))}/>
               </div>
               <div style={{flex:1}}>
-                <label style={S.label}>Unidades</label>
+                <label style={S.label}>{tx("units")}</label>
                 <div style={{display:"flex",flexWrap:"wrap",gap:4,marginTop:4}}>
                   {[0.25,0.5,0.75,1,1.25,1.5,1.75,2,2.5,3].map(u=>(
                     <button key={u} style={{padding:"8px 6px",border:`1px solid ${Number(form.units)===u?sc.color:"#e5e7eb"}`,borderRadius:8,background:Number(form.units)===u?sc.color:"#f9fafb",color:Number(form.units)===u?"#fff":"#9ca3af",cursor:"pointer",fontSize:12,fontWeight:700,minWidth:"18%"}} onClick={()=>setForm(f=>({...f,units:u}))}>{u}</button>
@@ -929,42 +929,42 @@ export default function App() {
 
             {form.odd && parseFloat(form.odd)>1 && (
               <div style={{display:"flex",alignItems:"center",flexWrap:"wrap",gap:8,border:`1px solid ${sc.color}33`,background:sc.color+"08",borderRadius:8,padding:"10px 12px",fontSize:13,marginTop:8}}>
-                <span>Stake: <strong style={{color:sc.color}}>{fmt(unitVal*(parseFloat(form.units)||1))}</strong></span>
-                <span style={{marginLeft:"auto"}}>Retorno: <strong style={{color:"#059669"}}>{fmt(unitVal*(parseFloat(form.units)||1)*parseFloat(form.odd))}</strong></span>
+                <span>{tx("stake")}: <strong style={{color:sc.color}}>{fmt(unitVal*(parseFloat(form.units)||1))}</strong></span>
+                <span style={{marginLeft:"auto"}}>{lang==="PT"?"Retorno":"Return"}: <strong style={{color:"#059669"}}>{fmt(unitVal*(parseFloat(form.units)||1)*parseFloat(form.odd))}</strong></span>
               </div>
             )}
 
             {betType==="single" && (
               <div>
-                <label style={S.label}>Mercado</label>
+                <label style={S.label}>{tx("market")}</label>
                 <select style={S.input} value={form.market} onChange={e=>setForm(f=>({...f,market:e.target.value}))}>
                   {markets.map(m=><option key={m}>{m}</option>)}
                 </select>
-                <label style={S.label}>Seleção</label>
+                <label style={S.label}>{tx("selection")}</label>
                 <input style={S.input} placeholder="ex: Sinner / Over 22.5 Games" value={form.selection} onChange={e=>setForm(f=>({...f,selection:e.target.value}))}/>
               </div>
             )}
 
             {(formMode==="immediate"||editBet) && (
               <div>
-                <label style={S.label}>Resultado</label>
+                <label style={S.label}>{tx("result")}</label>
                 <div style={{display:"flex",gap:6,marginTop:4,flexWrap:"wrap"}}>
-                  {[["WIN","✓ Green","#059669","#f0fdf4","#bbf7d0"],["LOSS","✗ Red","#dc2626","#fef2f2","#fca5a5"],["PENDING","⏳ Pendente","#7c3aed","#faf5ff","#c4b5fd"],["CASHOUT","💰 Cash","#2563eb","#eff6ff","#93c5fd"],["VOID","Void","#92400e","#fefce8","#fde68a"]].map(([r,l,c,bg,border])=>(
+                  {[["WIN","✓ Green","#059669","#f0fdf4","#bbf7d0"],["LOSS","✗ Red","#dc2626","#fef2f2","#fca5a5"],["PENDING",tx("pending"),"#7c3aed","#faf5ff","#c4b5fd"],["CASHOUT","💰 Cash","#2563eb","#eff6ff","#93c5fd"],["VOID","Void","#92400e","#fefce8","#fde68a"]].map(([r,l,c,bg,border])=>(
                     <button key={r} style={{flex:1,minWidth:"30%",padding:"8px 4px",borderRadius:8,border:`1px solid ${form.result===r?c:border}`,background:form.result===r?bg:"#fff",color:form.result===r?c:"#9ca3af",cursor:"pointer",fontSize:11,fontWeight:700}} onClick={()=>setForm(f=>({...f,result:r}))}>{l}</button>
                   ))}
                 </div>
                 {form.result==="CASHOUT" && (
                   <div>
-                    <label style={S.label}>Valor cashout</label>
+                    <label style={S.label}>{lang==="PT"?"Valor cashout":"Cashout value"}</label>
                     <input style={S.input} type="number" placeholder="ex: 12.50" value={form.cashoutVal} onChange={e=>setForm(f=>({...f,cashoutVal:e.target.value}))}/>
                   </div>
                 )}
               </div>
             )}
 
-            <label style={S.label}>Notas (opcional)</label>
-            <input style={S.input} placeholder="Raciocínio, contexto..." value={form.notes} onChange={e=>setForm(f=>({...f,notes:e.target.value}))}/>
-            <button style={{...S.btnPrimary,marginTop:18,background:sc.color,border:"none"}} onClick={handleSaveBet}>{editBet?"Guardar alterações":"Guardar registo"}</button>
+            <label style={S.label}>{tx("notes")}</label>
+            <input style={S.input} placeholder=lang==="PT"?"Raciocínio, contexto...":"Reasoning, context..." value={form.notes} onChange={e=>setForm(f=>({...f,notes:e.target.value}))}/>
+            <button style={{...S.btnPrimary,marginTop:18,background:sc.color,border:"none"}} onClick={handleSaveBet}>{editBet?tx("saveChanges"):tx("saveRecord")}</button>
           </div>
         </div>
       )}
@@ -1005,18 +1005,18 @@ export default function App() {
             <div style={{background:"#fff",border:"1px solid #f3f4f6",borderRadius:14,padding:20,marginBottom:10,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:16}}>
                 <div>
-                  <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,marginBottom:4}}>Banca Atual</div>
+                  <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,marginBottom:4}}>{tx("bankroll")}</div>
                   <div style={{fontSize:34,fontWeight:900,color:"#111827",letterSpacing:"-1.5px",lineHeight:1}}>{fmt(currentBR)}</div>
-                  <div style={{fontSize:13,marginTop:6,color:currentBR>=(br?.bankroll||0)?"#059669":"#dc2626",fontWeight:600}}>{fmtPct(((currentBR-(br?.bankroll||0))/(br?.bankroll||1))*100)} desde o início</div>
+                  <div style={{fontSize:13,marginTop:6,color:currentBR>=(br?.bankroll||0)?"#059669":"#dc2626",fontWeight:600}}>{fmtPct(((currentBR-(br?.bankroll||0))/(br?.bankroll||1))*100)} {lang==="PT"?"desde o início":"since start"}</div>
                 </div>
                 <div style={{textAlign:"right"}}>
-                  <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,marginBottom:4}}>P&L Total</div>
+                  <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,marginBottom:4}}>{tx("pnl")}</div>
                   <div style={{fontSize:22,fontWeight:800,color:stats.pnl>=0?"#059669":"#dc2626",letterSpacing:"-1px"}}>{fmtP(stats.pnl)}</div>
                   <div style={{fontSize:12,color:stats.roi>=0?"#059669":"#dc2626",fontWeight:600,marginTop:4}}>ROI {fmtPct(stats.roi)}</div>
                 </div>
               </div>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:0,borderTop:"1px solid #f3f4f6",paddingTop:14}}>
-                {[[tx("strike"),stats.strikeRate.toFixed(1)+"%"],["Odd Média",stats.avgOdd.toFixed(2)],[tx("unit"),fmt(unitVal)],[tx("pending"),stats.pending]].map(([l,v])=>(
+                {[[tx("strike"),stats.strikeRate.toFixed(1)+"%"],[tx("avgOdd"),stats.avgOdd.toFixed(2)],[tx("unit"),fmt(unitVal)],[tx("pending"),stats.pending]].map(([l,v])=>(
                   <div key={l} style={{textAlign:"center"}}>
                     <div style={{fontSize:9,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,marginBottom:3}}>{l}</div>
                     <div style={{fontSize:15,fontWeight:800,color:"#111827"}}>{v}</div>
@@ -1026,7 +1026,7 @@ export default function App() {
             </div>
 
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:10}}>
-              {[["Acertos",stats.wins,"#059669","#f0fdf4"],["Erros",stats.losses,"#dc2626","#fef2f2"],["Total",stats.settled,"#374151","#f9fafb"]].map(([l,v,c,bg])=>(
+              {[[tx("wins"),stats.wins,"#059669","#f0fdf4"],[tx("losses"),stats.losses,"#dc2626","#fef2f2"],[tx("total"),stats.settled,"#374151","#f9fafb"]].map(([l,v,c,bg])=>(
                 <div key={l} style={{background:bg,border:`1px solid ${c}22`,borderRadius:14,padding:"12px 10px",textAlign:"center",boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
                   <div style={{fontSize:22,fontWeight:900,color:c}}>{v}</div>
                   <div style={{fontSize:10,color:c,textTransform:"uppercase",letterSpacing:.8,fontWeight:700,marginTop:2}}>{l}</div>
@@ -1038,7 +1038,7 @@ export default function App() {
 
             {stats.pending>0 && (
               <div style={{background:"#fff",border:"1px solid #f3f4f6",borderRadius:14,padding:16,marginBottom:10,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
-                <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,marginBottom:14,fontWeight:800}}>Pendentes · {stats.pending}</div>
+                <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,marginBottom:14,fontWeight:800}}>{tx("pending").toUpperCase()} · {stats.pending}</div>
                 {bets.filter(b=>b.result==="PENDING").map(b=>(
                   <div key={b.id} style={{display:"flex",alignItems:"center",padding:"10px 0",borderBottom:"1px solid #f9fafb",gap:10}}>
                     <div style={{flex:1,minWidth:0}}>
@@ -1069,11 +1069,11 @@ export default function App() {
             <div style={{background:"#fff",border:"1px solid #f3f4f6",borderRadius:14,padding:16,marginBottom:10,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                 <div>
-                  <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,marginBottom:4}}>Lucro do dia</div>
+                  <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,marginBottom:4}}>{tx("dayProfit")}</div>
                   <div style={{fontSize:26,fontWeight:900,color:diaryPnl>=0?"#059669":"#dc2626",letterSpacing:"-1px"}}>{fmtP(diaryPnl)}</div>
                 </div>
                 <div style={{textAlign:"right"}}>
-                  <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,marginBottom:4}}>Registos</div>
+                  <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,marginBottom:4}}>{tx("records")}</div>
                   <div style={{fontSize:26,fontWeight:900,color:"#374151"}}>{diaryBets.length}</div>
                 </div>
               </div>
@@ -1082,8 +1082,8 @@ export default function App() {
             {diaryBets.length===0 && (
               <div style={{textAlign:"center",padding:"32px 0"}}>
                 <div style={{fontSize:36,marginBottom:8}}>{sc.icon}</div>
-                <div style={{fontSize:14,color:"#9ca3af"}}>Sem registos neste dia.</div>
-                <div style={{fontSize:12,color:"#d1d5db",marginTop:4}}>Clica em + para adicionar</div>
+                <div style={{fontSize:14,color:"#9ca3af"}}>{tx("noRecords")}</div>
+                <div style={{fontSize:12,color:"#d1d5db",marginTop:4}}>{tx("addHint")}</div>
               </div>
             )}
 
@@ -1102,7 +1102,7 @@ export default function App() {
                     </div>
                     <div style={{textAlign:"right",flexShrink:0,marginLeft:10}}>
                       <div style={{fontSize:13,fontWeight:800,color:isWin?"#059669":isLoss?"#dc2626":isPending?"#7c3aed":b.result==="CASHOUT"?"#2563eb":"#9ca3af"}}>
-                        {isWin?fmtP(b.stake*(b.odd-1)):isLoss?fmtP(-b.stake):isPending?"Pendente":b.result==="CASHOUT"?fmtP((b.cashout_val||0)-b.stake):"—"}
+                        {isWin?fmtP(b.stake*(b.odd-1)):isLoss?fmtP(-b.stake):isPending?tx("pending"):b.result==="CASHOUT"?fmtP((b.cashout_val||0)-b.stake):"—"}
                       </div>
                       {isWin && <div style={{fontSize:11,color:"#9ca3af"}}>Retorno {fmt(b.stake*b.odd)}</div>}
                     </div>
@@ -1110,10 +1110,10 @@ export default function App() {
                   <div style={{display:"flex",gap:6,marginTop:10,paddingTop:10,borderTop:"1px solid #f3f4f6"}}>
                     {isPending && (
                       <div style={{display:"flex",gap:6,flex:1,flexWrap:"wrap"}}>
-                        <button style={S.bWin} onClick={()=>settleBet(b.id,"WIN")}>✓ Green</button>
-                        <button style={S.bLoss} onClick={()=>settleBet(b.id,"LOSS")}>✗ Red</button>
-                        <button style={S.bCash} onClick={()=>{const v=parseFloat(prompt("Valor do cashout:"));if(v>=0)settleBet(b.id,"CASHOUT",v);}}>Cash</button>
-                        <button style={S.bVoid} onClick={()=>settleBet(b.id,"VOID")}>Void</button>
+                        <button style={S.bWin} onClick={()=>settleBet(b.id,"WIN")}>{tx("settleWin")}</button>
+                        <button style={S.bLoss} onClick={()=>settleBet(b.id,"LOSS")}>{tx("settleLoss")}</button>
+                        <button style={S.bCash} onClick={()=>{const v=parseFloat(prompt("Valor do cashout:"));if(v>=0)settleBet(b.id,"CASHOUT",v);}}>{lang==="PT"?"Cash":"Cash"}</button>
+                        <button style={S.bVoid} onClick={()=>settleBet(b.id,"VOID")}>{lang==="PT"?"Void":"Void"}</button>
                       </div>
                     )}
                     <button style={{padding:"5px 8px",borderRadius:8,border:"1px solid #f3f4f6",background:"transparent",color:"#d1d5db",cursor:"pointer",fontSize:13,marginLeft:"auto"}} onClick={()=>openEditBet(b)}>✏️</button>
@@ -1134,7 +1134,7 @@ export default function App() {
             </div>
 
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:10}}>
-              {[["Banca Inicial",fmt(parseFloat(br?.bankroll||0))],["Banca Final",fmt(currentBR)],["Entradas",reportBets.length]].map(([l,v])=>(
+              {[[tx("initialBR"),fmt(parseFloat(br?.bankroll||0))],[tx("finalBR"),fmt(currentBR)],[tx("entries"),reportBets.length]].map(([l,v])=>(
                 <div key={l} style={{background:"#fff",border:"1px solid #f3f4f6",borderRadius:14,padding:12,textAlign:"center",boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
                   <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,marginBottom:5}}>{l}</div>
                   <div style={{fontSize:14,fontWeight:800,color:"#111827"}}>{v}</div>
@@ -1143,7 +1143,7 @@ export default function App() {
             </div>
 
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:10}}>
-              {[["Acertos",reportWins,"#059669"],["Erros",reportLoss,"#dc2626"],["% Acertos",reportWins+reportLoss>0?((reportWins/(reportWins+reportLoss))*100).toFixed(1)+"%":"—","#374151"]].map(([l,v,c])=>(
+              {[[tx("wins"),reportWins,"#059669"],[tx("losses"),reportLoss,"#dc2626"],[(lang==="PT"?lang==="PT"?"% Acertos":"% Wins":"% Wins"),reportWins+reportLoss>0?((reportWins/(reportWins+reportLoss))*100).toFixed(1)+"%":"—","#374151"]].map(([l,v,c])=>(
                 <div key={l} style={{background:"#fff",border:"1px solid #f3f4f6",borderRadius:14,padding:12,textAlign:"center",boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
                   <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,marginBottom:5}}>{l}</div>
                   <div style={{fontSize:18,fontWeight:800,color:c}}>{v}</div>
@@ -1153,11 +1153,11 @@ export default function App() {
 
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:10}}>
               <div style={{background:reportPnl>=0?"#f0fdf4":"#fef2f2",border:`1px solid ${reportPnl>=0?"#bbf7d0":"#fca5a5"}`,borderRadius:14,padding:16,textAlign:"center"}}>
-                <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,marginBottom:5}}>Lucro do Mês</div>
+                <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,marginBottom:5}}>{tx("monthProfit")}</div>
                 <div style={{fontSize:22,fontWeight:900,color:reportPnl>=0?"#059669":"#dc2626"}}>{fmtP(reportPnl)}</div>
               </div>
               <div style={{background:"#fff",border:"1px solid #f3f4f6",borderRadius:14,padding:16,textAlign:"center",boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
-                <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,marginBottom:5}}>ROI do Mês</div>
+                <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,marginBottom:5}}>{tx("monthROI")}</div>
                 <div style={{fontSize:22,fontWeight:900,color:reportROI>=0?"#059669":"#dc2626"}}>{fmtPct(reportROI)}</div>
               </div>
             </div>
@@ -1174,9 +1174,9 @@ export default function App() {
               });
               return (
                 <div style={{background:"#fff",border:"1px solid #f3f4f6",borderRadius:14,padding:16,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
-                  <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,marginBottom:14,fontWeight:800}}>Por dia</div>
+                  <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,marginBottom:14,fontWeight:800}}>{tx("perDay")}</div>
                   <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:0,borderBottom:"1px solid #f3f4f6",paddingBottom:6,marginBottom:6}}>
-                    {["Dia","Invest.","Retorno","Lucro"].map(h=><div key={h} style={{fontSize:9,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,textAlign:"center"}}>{h}</div>)}
+                    {[tx("day"),tx("invested"),tx("returned"),tx("profit")].map(h=><div key={h} style={{fontSize:9,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,textAlign:"center"}}>{h}</div>)}
                   </div>
                   {Object.entries(byDay).sort(([a],[b])=>a>b?1:-1).map(([d,v])=>(
                     <div key={d} style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:0,padding:"6px 0",borderBottom:"1px solid #f9fafb"}}>
@@ -1195,7 +1195,7 @@ export default function App() {
         {tab==="chart" && (
           <div>
             <div style={{background:"#fff",border:"1px solid #f3f4f6",borderRadius:14,padding:20,marginBottom:10,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
-              <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,marginBottom:14,fontWeight:800}}>Evolução da Banca</div>
+              <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,marginBottom:14,fontWeight:800}}>{tx("evolution")}</div>
               {pts.length>1 ? (
                 <svg viewBox={`0 0 ${svgW} ${svgH}`} style={{width:"100%",height:160,display:"block"}}>
                   <defs>
@@ -1219,15 +1219,15 @@ export default function App() {
               )}
               <div style={{display:"flex",justifyContent:"space-between",marginTop:12}}>
                 <div style={{textAlign:"center"}}>
-                  <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,marginBottom:4}}>Início</div>
+                  <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,marginBottom:4}}>{tx("start")}</div>
                   <div style={{fontSize:14,fontWeight:700,color:"#374151"}}>{fmt(parseFloat(br?.bankroll||0))}</div>
                 </div>
                 <div style={{textAlign:"center"}}>
-                  <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,marginBottom:4}}>Atual</div>
+                  <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,marginBottom:4}}>{tx("current")}</div>
                   <div style={{fontSize:14,fontWeight:700,color:currentBR>=parseFloat(br?.bankroll||0)?"#059669":"#dc2626"}}>{fmt(currentBR)}</div>
                 </div>
                 <div style={{textAlign:"center"}}>
-                  <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,marginBottom:4}}>Diferença</div>
+                  <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,marginBottom:4}}>{tx("diff")}</div>
                   <div style={{fontSize:14,fontWeight:700,color:stats.pnl>=0?"#059669":"#dc2626"}}>{fmtP(stats.pnl)}</div>
                 </div>
               </div>
@@ -1247,7 +1247,7 @@ export default function App() {
               const maxAbs=Math.max(...entries.map(([,v])=>Math.abs(v)),1);
               return (
                 <div style={{background:"#fff",border:"1px solid #f3f4f6",borderRadius:14,padding:16,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
-                  <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,marginBottom:14,fontWeight:800}}>Por Mês</div>
+                  <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,marginBottom:14,fontWeight:800}}>{tx("perMonth")}</div>
                   {entries.map(([m,v])=>(
                     <div key={m} style={{marginBottom:10}}>
                       <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
@@ -1271,12 +1271,12 @@ export default function App() {
               <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:16}}>
                 <span style={{fontSize:28}}>🤖</span>
                 <div style={{flex:1}}>
-                  <div style={{fontSize:16,fontWeight:800,color:"#111827"}}>Análise IA · {br?.sport}</div>
+                  <div style={{fontSize:16,fontWeight:800,color:"#111827"}}>{tx("aiTitle")} · {br?.sport}</div>
                 </div>
                 <div style={{textAlign:"right",flexShrink:0}}>
                   <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700}}>Análises</div>
                   <div style={{fontSize:16,fontWeight:900,color:sc.color}}>{isAdmin?"∞":aiUsage+"/"+(br?.plan==="annual"?AI_LIMIT_ANNUAL:AI_LIMIT_MONTHLY)}</div>
-                  <div style={{fontSize:10,color:"#9ca3af"}}>este mês</div>
+                  <div style={{fontSize:10,color:"#9ca3af"}}>{lang==="PT"?"este mês":"this month"}</div>
                 </div>
               </div>
               <p style={{color:"#6b7280",fontSize:13,lineHeight:1.6,marginBottom:12}}>
@@ -1285,8 +1285,8 @@ export default function App() {
               <div style={{background:"#f8f9fa",border:"1px solid #e9ecef",borderRadius:10,padding:"10px 14px",marginBottom:16,display:"flex",gap:10,alignItems:"flex-start"}}>
                 <span style={{fontSize:16,flexShrink:0}}>💡</span>
                 <div>
-                  <div style={{fontSize:12,fontWeight:700,color:"#374151",marginBottom:3}}>Análise mais precisa</div>
-                  <div style={{fontSize:12,color:"#6b7280",lineHeight:1.5}}>Preenche o campo <strong>Notas</strong> nas apostas com contexto extra — ex: <em>"Alcaraz @1.23, terra"</em> ou <em>"indoor, top 10"</em>. A IA usa esse contexto para identificar padrões cruzados.</div>
+                  <div style={{fontSize:12,fontWeight:700,color:"#374151",marginBottom:3}}>{lang==="PT"?"Análise mais precisa":"More precise analysis"}</div>
+                  <div style={{fontSize:12,color:"#6b7280",lineHeight:1.5}}>{lang==="PT"?"Preenche o campo":"Fill in the"} <strong>{tx("notes").replace(" (opcional)","").replace(" (optional)","")}</strong> {lang==="PT"?"nas apostas com contexto extra":"field in bets with extra context"} — ex: <em>"Alcaraz @1.23, {lang===\"PT\"?\"terra\":\"clay\"}"</em> {lang==="PT"?"ou":"or"} <em>"{lang==="PT"?"indoor, top 10":"indoor, top 10"}"</em>. {lang==="PT"?"A IA usa esse contexto para identificar padrões cruzados.":"The AI uses this context to identify cross-patterns."}</div>
                 </div>
               </div>
 
@@ -1332,7 +1332,7 @@ export default function App() {
                     }
                   }}
                   disabled={loadingFB||stats.settled<3}>
-                  {loadingFB?"A analisar...":stats.settled<3?`Precisas de ${3-stats.settled} registo(s) liquidados`:"Analisar agora"}
+                  {loadingFB?tx("analyzing"):stats.settled<3?(lang==="PT"?`Precisas de ${3-stats.settled} registo(s) liquidados`:`Need ${3-stats.settled} more settled bet(s)`):tx("analyzeNow")}
                 </button>
               )}
             </div>
@@ -1340,7 +1340,7 @@ export default function App() {
             {loadingFB && (
               <div style={{background:"#fff",border:"1px solid #f3f4f6",borderRadius:14,padding:40,textAlign:"center",boxShadow:"0 1px 2px rgba(0,0,0,.04)",marginTop:10}}>
                 <div style={S.spinner}/>
-                <div style={{fontSize:13,color:"#9ca3af",marginTop:16}}>A analisar o teu histórico...</div>
+                <div style={{fontSize:13,color:"#9ca3af",marginTop:16}}>{lang==="PT"?lang==="PT"?"A analisar o teu histórico...":"Analysing your history...":"Analysing your history..."}</div>
               </div>
             )}
 
@@ -1352,7 +1352,7 @@ export default function App() {
 
             {!feedback && !loadingFB && (
               <div style={{marginTop:10,display:"flex",flexDirection:"column",gap:8}}>
-                {["Score de saúde da banca","Identificação dos melhores mercados","Alertas de risco personalizados","Recomendações baseadas no histórico"].map(f=>(
+                {lang==="PT"?["Score de saúde da banca","Identificação dos melhores mercados","Alertas de risco personalizados","Recomendações baseadas no histórico"]:["Bankroll health score","Best markets identification","Personalised risk alerts","Recommendations based on history"].map(f=>(
                   <div key={f} style={{display:"flex",alignItems:"center",gap:10,background:"#fff",border:"1px solid #f3f4f6",borderRadius:10,padding:"10px 14px",boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
                     <span style={{color:sc.color,fontWeight:700}}>→</span>
                     <span style={{fontSize:13,color:"#374151"}}>{f}</span>
@@ -1372,12 +1372,12 @@ export default function App() {
                 </div>
                 {feedback.warnings?.length>0 && (
                   <div style={{background:"#fffbeb",border:"1px solid #fde68a",borderRadius:14,padding:16,marginTop:10}}>
-                    <div style={{fontSize:10,color:"#92400e",textTransform:"uppercase",letterSpacing:1,marginBottom:10,fontWeight:800}}>⚠️ Alertas</div>
+                    <div style={{fontSize:10,color:"#92400e",textTransform:"uppercase",letterSpacing:1,marginBottom:10,fontWeight:800}}>{tx("alerts")}</div>
                     {feedback.warnings.map((w,i)=><p key={i} style={{color:"#78350f",fontSize:13,margin:"6px 0",lineHeight:1.5}}>{w}</p>)}
                   </div>
                 )}
                 <div style={{background:"#fff",border:"1px solid #f3f4f6",borderRadius:14,padding:16,marginTop:10,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
-                  <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,marginBottom:14,fontWeight:800}}>Insights</div>
+                  <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,marginBottom:14,fontWeight:800}}>{tx("insights")}</div>
                   {(feedback.insights||[]).map((ins,i)=>(
                     <div key={i} style={{display:"flex",padding:"8px 0",borderBottom:"1px solid #f3f4f6"}}>
                       <span style={{color:sc.color,marginRight:10,flexShrink:0,fontWeight:700}}>→</span>
@@ -1386,7 +1386,7 @@ export default function App() {
                   ))}
                 </div>
                 <div style={{background:"#fff",border:"1px solid #f3f4f6",borderRadius:14,padding:16,marginTop:10,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
-                  <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,marginBottom:14,fontWeight:800}}>Recomendações</div>
+                  <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,marginBottom:14,fontWeight:800}}>{tx("recommendations")}</div>
                   {(feedback.tips||[]).map((t,i)=>(
                     <div key={i} style={{display:"flex",padding:"8px 0",borderBottom:"1px solid #f3f4f6"}}>
                       <span style={{color:"#059669",marginRight:10,flexShrink:0,fontWeight:700}}>✓</span>
@@ -1412,7 +1412,7 @@ export default function App() {
               </div>
               <div style={{background:"#f9fafb",border:"1px solid #f3f4f6",borderRadius:10,padding:"12px 16px",marginBottom:20,textAlign:"left"}}>
                 <div style={{fontSize:11,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,marginBottom:8}}>Plano atual</div>
-                <div style={{fontSize:14,fontWeight:700,color:br?.subscribed?"#059669":"#d97706"}}>{br?.subscribed?`Plano ${br?.plan==="annual"?"Anual":"Mensal"} · Ativo`:`Trial · ${trialLeft} dias restantes`}</div>
+                <div style={{fontSize:14,fontWeight:700,color:br?.subscribed?"#059669":"#d97706"}}>{br?.subscribed?lang==="PT"?`Plano ${br?.plan==="annual"?"Anual":"Mensal"} · Ativo`:`${br?.plan==="annual"?"Annual":"Monthly"} Plan · Active`:lang==="PT"?`Trial · ${trialLeft} dias restantes`:`Trial · ${trialLeft} days remaining`}</div>
                 {br?.subscribed&&<div style={{fontSize:12,color:"#6b7280",marginTop:2}}>Análises IA: {br?.plan==="annual"?AI_LIMIT_ANNUAL:AI_LIMIT_MONTHLY}/mês</div>}
               </div>
               <a href={`mailto:tome.luis.pt@gmail.com?subject=Suporte BankrollPro&body=Olá BankrollPro Team,%0A%0A`}
@@ -1422,8 +1422,8 @@ export default function App() {
             </div>
 
             <div style={{background:"#fff",border:"1px solid #f3f4f6",borderRadius:14,padding:16,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
-              <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,fontWeight:800,marginBottom:14}}>O que está incluído</div>
-              {[["📊","Múltiplas bancas","Até 3 bancas separadas por desporto"],["📅","Diário de apostas","Registo completo com resultado imediato ou pendente"],["📈","Relatório mensal","Métricas detalhadas por mês e por dia"],["📉","Gráfico de evolução","Acompanha a evolução da tua banca visualmente"],["🤖","Análise IA","Feedback personalizado baseado no teu histórico real"],["💱","Múltiplas moedas","€, R$ e $"]].map(([ico,t,d])=>(
+              <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,fontWeight:800,marginBottom:14}}>{lang==="PT"?"O que está incluído":"What's included"}</div>
+              {[lang==="PT"?[["📊","Múltiplas bancas","Até 3 bancas separadas por desporto"],["📅","Diário de apostas","Registo completo com resultado imediato ou pendente"],["📈","Relatório mensal","Métricas detalhadas por mês e por dia"],["📉","Gráfico de evolução","Acompanha a evolução da tua banca visualmente"],["🤖","Análise IA","Feedback personalizado baseado no teu histórico real"],["💱","Múltiplas moedas","€, R\$ e \$"]]:[["📊","Multiple bankrolls","Up to 3, separated by sport"],["📅","Betting diary","Full log with immediate or pending results"],["📈","Monthly report","Detailed metrics per month and day"],["📉","Evolution chart","Track your bankroll visually"],["🤖","AI Analysis","Personalised feedback based on your real history"],["💱","Multiple currencies","€, R\$ and \$"]]].map(([ico,t,d])=>(
                 <div key={t} style={{display:"flex",gap:12,padding:"10px 0",borderBottom:"1px solid #f9fafb"}}>
                   <span style={{fontSize:20,flexShrink:0}}>{ico}</span>
                   <div>
@@ -1450,12 +1450,12 @@ export default function App() {
   );
 }
 
-function BRForm({ form, setForm, showReset }) {
+function BRForm({ form, setForm, showReset, lang="PT" }) {
   return (
     <div>
-      <label style={S.label}>Nome da banca</label>
+      <label style={S.label}>{lang==="PT"?"Nome da banca":"Bankroll name"}</label>
       <input style={S.input} placeholder="ex: Ténis Principal" value={form.name} onChange={e=>setForm(f=>({...f,name:e.target.value}))}/>
-      <label style={S.label}>Desporto</label>
+      <label style={S.label}>{lang==="PT"?"Desporto":"Sport"}</label>
       <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:6,marginTop:4}}>
         {Object.keys(SPORTS).map(s=>(
           <button key={s} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:3,padding:"8px 4px",border:`1px solid ${form.sport===s?SPORTS[s].color:"#e5e7eb"}`,borderRadius:10,background:"#f9fafb",cursor:"pointer",color:form.sport===s?SPORTS[s].color:"#9ca3af",fontSize:10,fontWeight:600}} onClick={()=>setForm(f=>({...f,sport:s}))}>
@@ -1464,15 +1464,15 @@ function BRForm({ form, setForm, showReset }) {
           </button>
         ))}
       </div>
-      <label style={S.label}>Bankroll {showReset?"(novo valor se repuser)":""} (€)</label>
+      <label style={S.label}>{lang==="PT"?`Bankroll ${showReset?"(novo valor se repuser)":""} (€)`:`Bankroll ${showReset?"(reset value)":""} (€)`}</label>
       <input style={S.input} type="number" placeholder="ex: 500" value={form.bankroll} onChange={e=>setForm(f=>({...f,bankroll:e.target.value}))}/>
-      <label style={S.label}>Unidade (% do bankroll)</label>
+      <label style={S.label}>{lang==="PT"?"Unidade (% do bankroll)":"Unit (% of bankroll)"}</label>
       <input style={S.input} type="number" step="0.5" min="0.5" max="10" value={form.unit_pct} onChange={e=>setForm(f=>({...f,unit_pct:e.target.value}))}/>
-      {form.bankroll && <p style={{fontSize:12,color:"#9ca3af",margin:"6px 0 0"}}>1 unidade = <strong>€{((parseFloat(form.bankroll)||0)*(parseFloat(form.unit_pct)||2)/100).toFixed(2)}</strong> · Recomendamos 1–2%</p>}
+      {form.bankroll && <p style={{fontSize:12,color:"#9ca3af",margin:"6px 0 0"}}>{lang==="PT"?"1 unidade":"1 unit"} = <strong>€{((parseFloat(form.bankroll)||0)*(parseFloat(form.unit_pct)||2)/100).toFixed(2)}</strong> · {lang==="PT"?"Recomendamos 1–2%":"We recommend 1–2%"}</p>}
       {showReset && (
         <label style={{display:"flex",alignItems:"center",gap:8,marginTop:14,cursor:"pointer",fontSize:12,color:"#dc2626",fontWeight:600}}>
           <input type="checkbox" checked={form.reset||false} onChange={e=>setForm(f=>({...f,reset:e.target.checked}))} style={{width:16,height:16}}/>
-          Repor bankroll para o valor acima
+          {lang==="PT"?"Repor bankroll para o valor acima":"Reset bankroll to value above"}
         </label>
       )}
     </div>
