@@ -561,8 +561,22 @@ export default function App() {
                 </div>
                 {importBets.map((b,i)=>(
                   <div key={i} style={{background:"#f9fafb",border:"1px solid #f3f4f6",borderRadius:10,padding:"10px 12px",marginBottom:6}}>
-                    <div style={{fontSize:13,fontWeight:600,color:"#111827"}}>{b.event}</div>
-                    <div style={{fontSize:12,color:"#6b7280",marginTop:2}}>{b.selection} · @{b.odd} · {b.units}u</div>
+                    <div style={{fontSize:13,fontWeight:600,color:"#111827",marginBottom:6}}>{b.event}</div>
+                    <div style={{fontSize:12,color:"#6b7280",marginBottom:6}}>{b.selection} · {b.units}u</div>
+                    <div style={{display:"flex",alignItems:"center",gap:8}}>
+                      <span style={{fontSize:11,color:"#9ca3af",fontWeight:600,whiteSpace:"nowrap"}}>Odd:</span>
+                      <input
+                        type="number" step="0.01" min="1.01"
+                        value={b.odd}
+                        onChange={e=>{
+                          const newBets=[...importBets];
+                          newBets[i]={...newBets[i],odd:parseFloat(e.target.value)||b.odd};
+                          setImportBets(newBets);
+                        }}
+                        style={{...S.input,padding:"5px 8px",fontSize:13,width:80,textAlign:"center"}}
+                      />
+                      <span style={{fontSize:11,color:"#9ca3af"}}>da tua casa</span>
+                    </div>
                   </div>
                 ))}
                 <button style={{...S.btnPrimary,marginTop:12,background:sc.color,border:"none"}}
