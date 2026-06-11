@@ -308,7 +308,6 @@ export default function App() {
   const formSC    = SPORTS[effectiveSport]||sc;
   const userName  = user?.user_metadata?.name||user?.email?.split("@")[0]||"";
   const emptyForm = {event:"",market:markets[0]||"Vencedor do Jogo",selection:"",odd:"",units:1,result:"WIN",notes:"",cashoutVal:""};
-  const SI = {...S.input, background:"#fff", border:"1.5px solid #e5e7eb", color:"#111827"};
   
 
   useEffect(()=>{
@@ -812,19 +811,6 @@ export default function App() {
             </div>
 
 
-            <div style={{fontSize:10,color:"#111827",textTransform:"uppercase",letterSpacing:1,fontWeight:800,marginBottom:8}}>{lang==="PT"?"Aparência":"Appearance"}</div>
-            <div style={{display:"flex",gap:6,marginBottom:16}}>
-              {[["☀️",lang==="PT"?"Claro":"Light",false],["🌙",lang==="PT"?"Escuro":"Dark",true]].map(([ico,lbl,val])=>(
-                <button key={lbl} style={{flex:1,padding:"8px 4px",border:"1px solid #e5e7eb",background:darkMode===val?sc.color:"#fff",color:darkMode===val?"#fff":"#111827",borderRadius:8,cursor:"pointer",fontSize:11,fontWeight:700,display:"flex",flexDirection:"column",alignItems:"center",gap:2}}
-                  onClick={()=>{ try{localStorage.setItem("bpDark",String(val));}catch(e){} setDarkMode(val); }}>
-                  <span style={{fontSize:16}}>{ico}</span><span>{lbl}</span>
-                </button>
-              ))}
-              <button style={{flex:1,padding:"8px 4px",border:"1px solid #e5e7eb",background:"#fff",color:"#111827",borderRadius:8,cursor:"pointer",fontSize:11,fontWeight:700,display:"flex",flexDirection:"column",alignItems:"center",gap:2}}
-                onClick={()=>{ try{localStorage.removeItem("bpDark");}catch(e){} setDarkMode(window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches); }}>
-                <span style={{fontSize:16}}>⚙️</span><span>Auto</span>
-              </button>
-            </div>
             <div style={{fontSize:10,color:"#111827",textTransform:"uppercase",letterSpacing:1,fontWeight:800,marginBottom:8}}>{tx("yourBankrolls")}</div>
             {bankrolls.map(b=>{
               const bsc=SPORTS[b.sport];
@@ -1470,7 +1456,6 @@ export default function App() {
 }
 
 function BRForm({ form, setForm, showReset, lang="PT", T={card:"#fff",cardBorder:"#e5e7eb",inputBg:"#fff",inputBorder:"#e5e7eb",text:"#111827",text2:"#6b7280",bg3:"#f9fafb"} }) {
-  const SI = {...S.input, background:"#fff", border:"1.5px solid #e5e7eb", color:"#111827"};
   return (
     <div>
       <label style={{...S.label,color:"#111827"}}>{lang==="PT"?"Nome da banca":"Bankroll name"}</label>
@@ -1502,7 +1487,7 @@ function BRForm({ form, setForm, showReset, lang="PT", T={card:"#fff",cardBorder
 function DashboardQuote() {
   const quote = useQuote(8000);
   return (
-    <div style={{background:darkMode?"linear-gradient(135deg,#1a1d27,#22263a)":"linear-gradient(135deg,#f8fafc,#f1f5f9)",border:"1px solid #fff",borderRadius:14,padding:"16px 18px",marginBottom:10,position:"relative",overflow:"hidden"}}>
+    <div style={{background:"linear-gradient(135deg,#f8fafc,#f1f5f9)",border:"1px solid #fff",borderRadius:14,padding:"16px 18px",marginBottom:10,position:"relative",overflow:"hidden"}}>
       <div style={{position:"absolute",top:10,left:14,fontSize:32,color:"#e2e8f0",fontFamily:"Georgia,serif",lineHeight:1}}>"</div>
       <p style={{fontSize:13,color:"#111827",lineHeight:1.6,fontStyle:"italic",margin:"0 0 10px",paddingLeft:16}}>{quote.text}</p>
       <div style={{fontSize:11,fontWeight:700,color:"#111827"}}>— {quote.author}</div>
