@@ -280,13 +280,14 @@ function AppInner() {
   const [currency, setCurrency]   = useState("EUR");
   const [lang, setLang]           = useState("PT");
   const tx = k => (I18N[lang]||I18N.PT)[k]||k;
-  const [darkMode, setDarkMode] = useState(()=>{
+  const [darkMode, setDarkMode] = useState(false);
+  useEffect(()=>{
     try {
       const saved = localStorage.getItem("bpDark");
-      if(saved !== null) return saved === "true";
-      return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-    } catch(e) { return false; }
-  });
+      if(saved !== null) { setDarkMode(saved === "true"); return; }
+      if(window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) setDarkMode(true);
+    } catch(e) {}
+  },[]);
   const toggleDark = () => setDarkMode(v => { try { localStorage.setItem("bpDark", String(!v)); } catch(e){} return !v; });
   const [authForm, setAuthForm]   = useState({name:"",email:"",password:""});
   const [authErr, setAuthErr]     = useState("");
@@ -849,7 +850,21 @@ function AppInner() {
               ))}
             </div>
 
-            <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,fontWeight:800,marginBottom:8}}>{tx("yourBankrolls")}</div>
+
+            <div style={{fontSize:10,color:T.text3,textTransform:"uppercase",letterSpacing:1,fontWeight:800,marginBottom:8}}>{lang==="PT"?"Aparência":"Appearance"}</div>
+            <div style={{display:"flex",gap:6,marginBottom:16}}>
+              {[["☀️",lang==="PT"?"Claro":"Light",false],["🌙",lang==="PT"?"Escuro":"Dark",true]].map(([ico,lbl,val])=>(
+                <button key={lbl} style={{flex:1,padding:"8px 4px",border:`1px solid ${darkMode===val?sc.color:T.inputBorder}`,background:darkMode===val?sc.color:T.inputBg,color:darkMode===val?"#fff":T.text2,borderRadius:8,cursor:"pointer",fontSize:11,fontWeight:700,display:"flex",flexDirection:"column",alignItems:"center",gap:2}}
+                  onClick={()=>{ try{localStorage.setItem("bpDark",String(val));}catch(e){} setDarkMode(val); }}>
+                  <span style={{fontSize:16}}>{ico}</span><span>{lbl}</span>
+                </button>
+              ))}
+              <button style={{flex:1,padding:"8px 4px",border:`1px solid ${T.inputBorder}`,background:T.inputBg,color:T.text2,borderRadius:8,cursor:"pointer",fontSize:11,fontWeight:700,display:"flex",flexDirection:"column",alignItems:"center",gap:2}}
+                onClick={()=>{ try{localStorage.removeItem("bpDark");}catch(e){} setDarkMode(window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches); }}>
+                <span style={{fontSize:16}}>⚙️</span><span>Auto</span>
+              </button>
+            </div>
+            <div style={{fontSize:10,color:T.text3,textTransform:"uppercase",letterSpacing:1,fontWeight:800,marginBottom:8}}>{tx("yourBankrolls")}</div>
             {bankrolls.map(b=>{
               const bsc=SPORTS[b.sport];
               return (
