@@ -907,8 +907,8 @@ export default function App() {
             <input style={S.input} placeholder={betType==="multiple"?lang==="PT"?"ex: Múltipla Ténis 3 jogos":"e.g. Tennis Multi 3 games":lang==="PT"?"ex: Sinner vs Alcaraz":"e.g. Sinner vs Alcaraz"} value={form.event} onChange={e=>setForm(f=>({...f,event:e.target.value}))}/>
             {betType==="multiple" && (
               <div>
-                <label style={S.label}>Seleções (uma por linha)</label>
-                <textarea style={{...S.input,height:80,resize:"none",fontFamily:"inherit"}} placeholder=lang==="PT"?"ex: Sinner a ganhar":"e.g. Sinner to win" value={form.selections||""} onChange={e=>{const v=e.target.value;setForm(f=>({...f,selections:v,selection:v.split(/\r?\n/).filter(Boolean).join(" + ")}));}}/>
+                <label style={S.label}>{lang==="PT"?"Seleções (uma por linha)":"Selections (one per line)"}</label>
+                <textarea style={{...S.input,height:80,resize:"none",fontFamily:"inherit"}} placeholder={lang==="PT"?"ex: Sinner a ganhar":"e.g. Sinner to win"} value={form.selections||""} onChange={e=>{const v=e.target.value;setForm(f=>({...f,selections:v,selection:v.split(/\r?\n/).filter(Boolean).join(" + ")}));}}/>
               </div>
             )}
 
@@ -963,7 +963,7 @@ export default function App() {
             )}
 
             <label style={S.label}>{tx("notes")}</label>
-            <input style={S.input} placeholder=lang==="PT"?"Raciocínio, contexto...":"Reasoning, context..." value={form.notes} onChange={e=>setForm(f=>({...f,notes:e.target.value}))}/>
+            <input style={S.input} placeholder={lang==="PT"?"Raciocínio, contexto...":"Reasoning, context..."} value={form.notes} onChange={e=>setForm(f=>({...f,notes:e.target.value}))}/>
             <button style={{...S.btnPrimary,marginTop:18,background:sc.color,border:"none"}} onClick={handleSaveBet}>{editBet?tx("saveChanges"):tx("saveRecord")}</button>
           </div>
         </div>
