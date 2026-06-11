@@ -986,7 +986,8 @@ export default function App() {
                 {bets.filter(b=>b.result==="PENDING").map(b=>(
                   <div key={b.id} style={{display:"flex",alignItems:"center",padding:"10px 0",borderBottom:"1px solid #f9fafb",gap:10}}>
                     <div style={{flex:1,minWidth:0}}>
-                      <div style={{fontSize:13,fontWeight:600,color:"#111827",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{b.selection||b.event}</div>
+                      <div style={{fontSize:13,fontWeight:600,color:"#111827",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{b.event||b.selection}</div>
+                      {b.event && b.selection && <div style={{fontSize:11,color:"#9ca3af",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{b.selection}</div>}
                       <div style={{fontSize:11,color:"#9ca3af"}}>@{b.odd.toFixed(2)} · {fmt(b.stake)}</div>
                     </div>
                     <div style={{display:"flex",gap:6}}>
@@ -1037,8 +1038,9 @@ export default function App() {
                 <div key={b.id} style={{background:"#fff",border:"1px solid #f3f4f6",borderRadius:14,padding:14,marginBottom:8,boxShadow:"0 1px 2px rgba(0,0,0,.04)",borderLeft:`3px solid ${borderColor}`}}>
                   <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
                     <div style={{flex:1,minWidth:0}}>
-                      <div style={{fontSize:13,fontWeight:700,color:"#111827"}}>{b.event}</div>
-                      <div style={{fontSize:12,color:"#6b7280",marginTop:1}}>{b.market} · <strong style={{color:"#374151"}}>{b.selection}</strong></div>
+                      <div style={{fontSize:13,fontWeight:700,color:"#111827"}}>{b.event||b.selection}</div>
+                      {b.event && <div style={{fontSize:12,color:"#6b7280",marginTop:1}}>{b.market} · <strong style={{color:"#374151"}}>{b.selection}</strong></div>}
+                      {!b.event && b.market && <div style={{fontSize:12,color:"#6b7280",marginTop:1}}>{b.market}</div>}
                       <div style={{fontSize:12,color:"#9ca3af",marginTop:2}}>ODD {b.odd.toFixed(2)} · Stake {fmt(b.stake)}</div>
                       {b.notes && <div style={{fontSize:11,color:"#9ca3af",fontStyle:"italic",marginTop:2}}>"{b.notes}"</div>}
                     </div>
