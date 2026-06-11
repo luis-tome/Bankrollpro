@@ -263,12 +263,14 @@ export default function App() {
   const [currency, setCurrency]   = useState("EUR");
   const [lang, setLang]           = useState("PT");
   const tx = k => (I18N[lang]||I18N.PT)[k]||k;
-  const [darkMode, setDarkMode]   = useState(()=>{
-    const saved = typeof localStorage !== "undefined" ? localStorage.getItem("bpDark") : null;
-    if(saved !== null) return saved === "true";
-    return typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const [darkMode, setDarkMode] = useState(()=>{
+    try {
+      const saved = localStorage.getItem("bpDark");
+      if(saved !== null) return saved === "true";
+      return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+    } catch(e) { return false; }
   });
-  const toggleDark = () => setDarkMode(v => { localStorage.setItem("bpDark", !v); return !v; });
+  const toggleDark = () => setDarkMode(v => { try { localStorage.setItem("bpDark", String(!v)); } catch(e){} return !v; });
   const [authForm, setAuthForm]   = useState({name:"",email:"",password:""});
   const [authErr, setAuthErr]     = useState("");
   const [emailSent, setEmailSent] = useState(false);
@@ -515,7 +517,7 @@ export default function App() {
           Controla bancas por desporto, acompanha ROI em tempo real e recebe análise com IA para evoluir a tua performance.
         </p>
 
-        <LandingQuote/>
+        <LandingQuote T={T}/>
 
         <div style={{background:T.card,border:`1px solid ${T.inputBorder}`,borderRadius:14,padding:16,marginBottom:20,boxShadow:"0 2px 8px rgba(0,0,0,.06)"}}>
           <div style={{textAlign:"center",marginBottom:12,fontSize:12,color:"#dc2626",fontWeight:700}}>
@@ -1515,7 +1517,7 @@ function DashboardQuote({darkMode=false, T={card:"#fff",cardBorder:"#e2e8f0",tex
   );
 }
 
-function LandingQuote() {
+function LandingQuote({T={card:"#fff",cardBorder:"#e5e7eb",text:"#374151",text3:"#9ca3af"}}) {
   const quote = useQuote(8000);
   return (
     <div style={{background:T.card,border:`1px solid ${T.inputBorder}`,borderRadius:14,padding:"16px 18px",marginBottom:20,boxShadow:"0 1px 4px rgba(0,0,0,.06)",position:"relative"}}>
