@@ -252,7 +252,24 @@ async function getAIFeedback(bets, stats, bankroll, sport) {
 
 
 
-export default function App() {
+
+class ErrorBoundary extends React.Component {
+  constructor(props) { super(props); this.state = { error: null }; }
+  static getDerivedStateFromError(e) { return { error: e }; }
+  render() {
+    if (this.state.error) return (
+      <div style={{padding:24,fontFamily:"monospace",background:"#1a1d27",color:"#f0f2f8",minHeight:"100vh"}}>
+        <h2 style={{color:"#f87171"}}>⚠️ Runtime Error</h2>
+        <pre style={{fontSize:12,whiteSpace:"pre-wrap",color:"#fbbf24"}}>{this.state.error?.message}</pre>
+        <pre style={{fontSize:11,whiteSpace:"pre-wrap",color:"#9ca3af"}}>{this.state.error?.stack?.slice(0,600)}</pre>
+        <button onClick={()=>window.location.reload()} style={{marginTop:16,padding:"8px 16px",background:"#3b82f6",color:"#fff",border:"none",borderRadius:8,cursor:"pointer"}}>Recarregar</button>
+      </div>
+    );
+    return this.props.children;
+  }
+}
+
+function AppInner() {
   const [screen, setScreen]       = useState("loading");
   const [authMode, setAuthMode]   = useState("register");
   const [user, setUser]           = useState(null);
@@ -1475,6 +1492,8 @@ export default function App() {
     </div>
   );
 }
+
+export default function App() { return <ErrorBoundary><AppInner/></ErrorBoundary>; }
 
 function BRForm({ form, setForm, showReset, lang="PT", T={card:"#fff",cardBorder:"#e5e7eb",inputBg:"#fff",inputBorder:"#e5e7eb",text:"#111827",text2:"#6b7280",bg3:"#f9fafb"} }) {
   const SI = {...S.input, background:T.inputBg, border:`1.5px solid ${T.inputBorder}`, color:T.text};
