@@ -1,17 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from "react";
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
-// Global error catcher - remove after debugging
-if (typeof window !== "undefined") {
-  window.onerror = function(msg, src, line, col, err) {
-    document.body.innerHTML = '<div style="padding:20px;background:#1a1d27;color:#f87171;font-family:monospace;min-height:100vh"><h2>JS Error</h2><pre style="white-space:pre-wrap;color:#fbbf24">' + msg + '\n\nLine: ' + line + ':' + col + '\n\n' + (err && err.stack ? err.stack : '') + '</pre></div>';
-    return false;
-  };
-  window.addEventListener("unhandledrejection", function(e) {
-    document.body.innerHTML = '<div style="padding:20px;background:#1a1d27;color:#f87171;font-family:monospace;min-height:100vh"><h2>Promise Error</h2><pre style="white-space:pre-wrap;color:#fbbf24">' + (e.reason && e.reason.stack ? e.reason.stack : String(e.reason)) + '</pre></div>';
-  });
-}
-
 const SUPABASE_URL = "https://opeuermurrbzpglbkmrf.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9wZXVlcm11cnJienBnbGJrbXJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMjA2NTAsImV4cCI6MjA5NDU5NjY1MH0.M-VclAmrSl0gop_7IvXh7-HH7nj5DwMFLVCMIOa3Qfw";
 const STRIPE_MONTHLY = "https://buy.stripe.com/00wfZg8Z0dIb5TRbiTgQE01";
@@ -264,23 +253,7 @@ async function getAIFeedback(bets, stats, bankroll, sport) {
 
 
 
-class ErrorBoundary extends React.Component {
-  constructor(props) { super(props); this.state = { error: null }; }
-  static getDerivedStateFromError(e) { return { error: e }; }
-  render() {
-    if (this.state.error) return (
-      <div style={{padding:24,fontFamily:"monospace",background:"#1a1d27",color:"#f0f2f8",minHeight:"100vh"}}>
-        <h2 style={{color:"#f87171"}}>⚠️ Runtime Error</h2>
-        <pre style={{fontSize:12,whiteSpace:"pre-wrap",color:"#fbbf24"}}>{this.state.error?.message}</pre>
-        <pre style={{fontSize:11,whiteSpace:"pre-wrap",color:"#9ca3af"}}>{this.state.error?.stack?.slice(0,600)}</pre>
-        <button onClick={()=>window.location.reload()} style={{marginTop:16,padding:"8px 16px",background:"#3b82f6",color:"#fff",border:"none",borderRadius:8,cursor:"pointer"}}>Recarregar</button>
-      </div>
-    );
-    return this.props.children;
-  }
-}
-
-function AppInner() {
+export default function App() {
   const [screen, setScreen]       = useState("loading");
   const [authMode, setAuthMode]   = useState("register");
   const [user, setUser]           = useState(null);
@@ -291,15 +264,7 @@ function AppInner() {
   const [currency, setCurrency]   = useState("EUR");
   const [lang, setLang]           = useState("PT");
   const tx = k => (I18N[lang]||I18N.PT)[k]||k;
-  const [darkMode, setDarkMode] = useState(false);
-  useEffect(()=>{
-    try {
-      const saved = localStorage.getItem("bpDark");
-      if(saved !== null) { setDarkMode(saved === "true"); return; }
-      if(window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) setDarkMode(true);
-    } catch(e) {}
-  },[]);
-  const toggleDark = () => setDarkMode(v => { try { localStorage.setItem("bpDark", String(!v)); } catch(e){} return !v; });
+
   const [authForm, setAuthForm]   = useState({name:"",email:"",password:""});
   const [authErr, setAuthErr]     = useState("");
   const [emailSent, setEmailSent] = useState(false);
@@ -327,21 +292,6 @@ function AppInner() {
   const [showSuccess, setShowSuccess] = useState(false);
   const touchX = useRef(null);
 
-  const T = darkMode ? {
-    bg:"#0f1117", bg2:"#1a1d27", bg3:"#22263a", border:"#2a2e3d",
-    text:"#f0f2f8", text2:"#a0a8c0", text3:"#6b7280",
-    card:"#1a1d27", cardBorder:"#2a2e3d", inputBg:"#22263a",
-    inputBorder:"#3a3e52", btnGhostBorder:"#3a3e52", btnGhostColor:"#a0a8c0",
-    headerBg:"#13151f", navBg:"#13151f", drawerBg:"#1a1d27",
-    shadow:"rgba(0,0,0,.4)", spinnerBorder:"#2a2e3d", spinnerTop:"#f0f2f8",
-  } : {
-    bg:"#f7f8fa", bg2:"#fff", bg3:"#f9fafb", border:"#f3f4f6",
-    text:"#111827", text2:"#6b7280", text3:"#9ca3af",
-    card:"#fff", cardBorder:"#f3f4f6", inputBg:"#fff",
-    inputBorder:"#e5e7eb", btnGhostBorder:"#e5e7eb", btnGhostColor:"#6b7280",
-    headerBg:"#fff", navBg:"#fff", drawerBg:"#fff",
-    shadow:"rgba(0,0,0,.06)", spinnerBorder:"#e5e7eb", spinnerTop:"#111827",
-  };
 
   const br      = bankrolls.find(b=>b.id===activeBR);
   const sc      = SPORTS[br?.sport||"Ténis"];
@@ -358,8 +308,8 @@ function AppInner() {
   const formSC    = SPORTS[effectiveSport]||sc;
   const userName  = user?.user_metadata?.name||user?.email?.split("@")[0]||"";
   const emptyForm = {event:"",market:markets[0]||"Vencedor do Jogo",selection:"",odd:"",units:1,result:"WIN",notes:"",cashoutVal:""};
-  const SI = {...S.input, background:T.inputBg, border:`1.5px solid ${T.inputBorder}`, color:T.text};
-  const STA = {...SI, height:80, resize:"none", fontFamily:"inherit"};
+  const SI = {...S.input, background:"#fff", border:"1.5px solid #e5e7eb", color:"#111827"};
+  
 
   useEffect(()=>{
     const params = new URLSearchParams(window.location.search);
@@ -518,17 +468,17 @@ function AppInner() {
   function swipeEnd(e){ if(touchX.current!==null&&touchX.current-e.changedTouches[0].clientX>60) setDrawerOpen(false); touchX.current=null; }
 
   if(screen==="loading") return (
-    <div style={{display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100vh",background:T.bg3}}>
-      <div style={{...S.spinner,border:`2px solid ${T.spinnerBorder}`,borderTop:`2px solid ${T.spinnerTop}`}}/>
+    <div style={{display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100vh",background:"#f7f8fa"3}}>
+      <div style={{...S.spinner,border:"2px solid #e5e7eb",borderTop:"2px solid #111827"}}/>
     </div>
   );
 
   if(screen==="landing") return (
-    <div style={{background:T.bg3,minHeight:"100vh",fontFamily:"-apple-system,'Segoe UI',sans-serif",color:T.text}}>
-      <header style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"16px 20px",background:T.card,borderBottom:`1px solid ${T.cardBorder}`}}>
+    <div style={{background:"#f7f8fa"3,minHeight:"100vh",fontFamily:"-apple-system,'Segoe UI',sans-serif",color:"#111827"}}>
+      <header style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"16px 20px",background:"#fff",borderBottom:`1px solid ${"#fff"Border}`}}>
         <div style={{display:"flex",alignItems:"center",gap:10}}>
-          <div style={{width:32,height:32,background:T.bg3,borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center",fontSize:16}}>📊</div>
-          <span style={{fontSize:16,fontWeight:800,color:T.text}}>BankrollPro</span>
+          <div style={{width:32,height:32,background:"#f7f8fa"3,borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center",fontSize:16}}>📊</div>
+          <span style={{fontSize:16,fontWeight:800,color:"#111827"}}>BankrollPro</span>
         </div>
         <button style={S.btnOutline} onClick={()=>{setAuthMode("login");setScreen("auth");}}>Entrar</button>
       </header>
@@ -538,32 +488,32 @@ function AppInner() {
           🔥 Oferta de lançamento — {PROMO_DAYS} dias
         </div>
 
-        <h1 style={{fontSize:36,fontWeight:900,lineHeight:1.05,letterSpacing:"-2px",margin:"0 0 12px",color:T.text}}>
-          Para de perder.<br/><span style={{color:T.text}}>Começa a gerir.</span>
+        <h1 style={{fontSize:36,fontWeight:900,lineHeight:1.05,letterSpacing:"-2px",margin:"0 0 12px",color:"#111827"}}>
+          Para de perder.<br/><span style={{color:"#111827"}}>Começa a gerir.</span>
         </h1>
 
         <p style={{fontSize:14,color:"#6b7280",lineHeight:1.7,marginBottom:24}}>
           Controla bancas por desporto, acompanha ROI em tempo real e recebe análise com IA para evoluir a tua performance.
         </p>
 
-        <LandingQuote T={T}/>
+        <LandingQuote/>
 
-        <div style={{background:T.card,border:`1px solid ${T.inputBorder}`,borderRadius:14,padding:16,marginBottom:20,boxShadow:"0 2px 8px rgba(0,0,0,.06)"}}>
+        <div style={{background:"#fff",border:"1px solid #e5e7eb",borderRadius:14,padding:16,marginBottom:20,boxShadow:"0 2px 8px rgba(0,0,0,.06)"}}>
           <div style={{textAlign:"center",marginBottom:12,fontSize:12,color:"#dc2626",fontWeight:700}}>
             ⏰ Preço de lançamento — só nos primeiros {PROMO_DAYS} dias
           </div>
           <div style={{display:"flex",gap:10}}>
-            <div style={{flex:1,background:T.bg3,border:`1px solid ${T.inputBorder}`,borderRadius:12,padding:"12px 10px"}}>
+            <div style={{flex:1,background:"#f7f8fa"3,border:"1px solid #e5e7eb",borderRadius:12,padding:"12px 10px"}}>
               <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:600,marginBottom:4}}>Mensal</div>
               <div style={{fontSize:11,color:"#d1d5db",textDecoration:"line-through"}}>€{NORMAL_MONTHLY}/mês</div>
-              <div style={{fontSize:22,fontWeight:900,color:T.text}}>€{PROMO_MONTHLY}<span style={{fontSize:12,fontWeight:400,color:T.text3}}>/mês</span></div>
+              <div style={{fontSize:22,fontWeight:900,color:"#111827"}}>€{PROMO_MONTHLY}<span style={{fontSize:12,fontWeight:400,color:"#111827"3}}>/mês</span></div>
               <div style={{fontSize:11,color:"#dc2626",fontWeight:600,marginTop:4}}>Depois €{NORMAL_MONTHLY}/mês</div>
             </div>
-            <div style={{flex:1,background:T.bg3,border:"2px solid #111827",borderRadius:12,padding:"12px 10px"}}>
+            <div style={{flex:1,background:"#f7f8fa"3,border:"2px solid #111827",borderRadius:12,padding:"12px 10px"}}>
               <div style={{fontSize:9,color:"#fff",background:"#111827",borderRadius:4,padding:"2px 8px",fontWeight:800,textTransform:"uppercase",letterSpacing:1,marginBottom:6,display:"inline-block"}}>POPULAR</div>
               <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:600,marginBottom:4}}>Anual</div>
               <div style={{fontSize:11,color:"#d1d5db",textDecoration:"line-through"}}>€{NORMAL_ANNUAL}/ano</div>
-              <div style={{fontSize:22,fontWeight:900,color:T.text}}>€{PROMO_ANNUAL}<span style={{fontSize:12,fontWeight:400,color:T.text3}}>/ano</span></div>
+              <div style={{fontSize:22,fontWeight:900,color:"#111827"}}>€{PROMO_ANNUAL}<span style={{fontSize:12,fontWeight:400,color:"#111827"3}}>/ano</span></div>
               <div style={{fontSize:11,color:"#059669",fontWeight:700,marginTop:4}}>Depois €{NORMAL_ANNUAL}/ano · Poupas €{(NORMAL_MONTHLY*12-PROMO_ANNUAL).toFixed(0)}</div>
             </div>
           </div>
@@ -571,9 +521,9 @@ function AppInner() {
 
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:24}}>
           {[["📊","Múltiplas bancas","Até 3, separadas por desporto"],["🤖","Análise IA","Feedback do teu histórico real"],["📅","Diário & Relatório","Cada dia, cada mês com precisão"],["⚡","Registo rápido","Imediato ou pendente — tu decides"]].map(([ico,t,d])=>(
-            <div key={t} style={{background:T.card,border:`1px solid ${T.cardBorder}`,borderRadius:12,padding:"14px 12px",boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
+            <div key={t} style={{background:"#fff",border:`1px solid ${"#fff"Border}`,borderRadius:12,padding:"14px 12px",boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
               <span style={{fontSize:24,marginBottom:8,display:"block"}}>{ico}</span>
-              <div style={{fontSize:13,fontWeight:700,color:T.text,marginBottom:4}}>{t}</div>
+              <div style={{fontSize:13,fontWeight:700,color:"#111827",marginBottom:4}}>{t}</div>
               <div style={{fontSize:12,color:"#6b7280",lineHeight:1.4}}>{d}</div>
             </div>
           ))}
@@ -589,8 +539,8 @@ function AppInner() {
 
         <div style={{display:"flex",flexWrap:"wrap",gap:8,justifyContent:"center",marginTop:20}}>
           {SPORT_KEYS.map(s=>(
-            <div key={s} style={{display:"flex",alignItems:"center",gap:5,background:T.card,border:`1px solid ${T.inputBorder}`,borderRadius:20,padding:"4px 10px",fontSize:12}}>
-              <span>{SPORTS[s].icon}</span><span style={{color:T.text2}}>{s}</span>
+            <div key={s} style={{display:"flex",alignItems:"center",gap:5,background:"#fff",border:"1px solid #e5e7eb",borderRadius:20,padding:"4px 10px",fontSize:12}}>
+              <span>{SPORTS[s].icon}</span><span style={{color:"#111827"2}}>{s}</span>
             </div>
           ))}
         </div>
@@ -599,17 +549,17 @@ function AppInner() {
   );
 
   if(screen==="auth") return (
-    <div style={{background:T.bg3,minHeight:"100vh",fontFamily:"-apple-system,'Segoe UI',sans-serif"}}>
-      <div style={{padding:"14px 18px",background:T.card,borderBottom:`1px solid ${T.cardBorder}`}}>
+    <div style={{background:"#f7f8fa"3,minHeight:"100vh",fontFamily:"-apple-system,'Segoe UI',sans-serif"}}>
+      <div style={{padding:"14px 18px",background:"#fff",borderBottom:`1px solid ${"#fff"Border}`}}>
         <button style={{background:"transparent",border:"none",color:"#6b7280",cursor:"pointer",fontSize:13,padding:0,fontWeight:600}} onClick={()=>setScreen("landing")}>← Voltar</button>
       </div>
       <div style={{display:"flex",alignItems:"center",justifyContent:"center",minHeight:"calc(100vh - 56px)",padding:20}}>
-        <div style={{width:"100%",maxWidth:380,background:T.card,border:`1px solid ${T.inputBorder}`,borderRadius:16,padding:"28px 24px",boxShadow:`0 4px 24px ${T.shadow}`}}>
+        <div style={{width:"100%",maxWidth:380,background:"#fff",border:"1px solid #e5e7eb",borderRadius:16,padding:"28px 24px",boxShadow:"0 4px 24px rgba(0,0,0,.06)"}}>
 
           {emailSent ? (
             <div style={{textAlign:"center"}}>
               <div style={{fontSize:56,marginBottom:16}}>📩</div>
-              <h2 style={{fontSize:20,fontWeight:800,color:T.text,margin:"0 0 8px"}}>Conta criada! 🎉</h2>
+              <h2 style={{fontSize:20,fontWeight:800,color:"#111827",margin:"0 0 8px"}}>Conta criada! 🎉</h2>
               <p style={{fontSize:14,color:"#6b7280",lineHeight:1.6,marginBottom:20}}>
                 Enviámos um email de boas-vindas para <strong>{authForm.email}</strong>. Podes entrar já de seguida.
               </p>
@@ -624,23 +574,23 @@ function AppInner() {
           ) : (
             <div>
               <div style={{fontSize:32,marginBottom:10}}>📊</div>
-              <h2 style={{fontSize:20,fontWeight:800,color:T.text,margin:"0 0 4px"}}>{authMode==="login"?"Bem-vindo de volta":"Criar conta grátis"}</h2>
+              <h2 style={{fontSize:20,fontWeight:800,color:"#111827",margin:"0 0 4px"}}>{authMode==="login"?"Bem-vindo de volta":"Criar conta grátis"}</h2>
               <p style={{fontSize:13,color:"#9ca3af",marginBottom:14}}>{authMode==="login"?"Entra na tua conta.":"7 dias grátis + preço de lançamento garantido."}</p>
               {authMode==="register" && (
                 <div>
-                  <label style={{...S.label,color:T.text2}}>Nome</label>
-                  <input style={SI} placeholder="O teu nome" value={authForm.name} onChange={e=>setAuthForm(f=>({...f,name:e.target.value}))}/>
+                  <label style={{...S.label,color:"#111827"2}}>Nome</label>
+                  <input style={S.input} placeholder="O teu nome" value={authForm.name} onChange={e=>setAuthForm(f=>({...f,name:e.target.value}))}/>
                 </div>
               )}
-              <label style={{...S.label,color:T.text2}}>Email</label>
-              <input style={SI} type="email" placeholder="email@exemplo.com" value={authForm.email} onChange={e=>setAuthForm(f=>({...f,email:e.target.value}))}/>
-              <label style={{...S.label,color:T.text2}}>Password</label>
-              <input style={SI} type="password" placeholder="••••••••" value={authForm.password} onChange={e=>setAuthForm(f=>({...f,password:e.target.value}))}/>
+              <label style={{...S.label,color:"#111827"2}}>Email</label>
+              <input style={S.input} type="email" placeholder="email@exemplo.com" value={authForm.email} onChange={e=>setAuthForm(f=>({...f,email:e.target.value}))}/>
+              <label style={{...S.label,color:"#111827"2}}>Password</label>
+              <input style={S.input} type="password" placeholder="••••••••" value={authForm.password} onChange={e=>setAuthForm(f=>({...f,password:e.target.value}))}/>
               {authErr && <p style={{color:"#dc2626",fontSize:12,margin:"6px 0",background:"#fef2f2",padding:"8px 10px",borderRadius:6}}>{authErr}</p>}
               <button style={{...S.btnPrimary,marginTop:20}} onClick={handleAuth} disabled={loading}>{loading?"...":authMode==="login"?"Entrar":"Criar conta"}</button>
               <p style={{fontSize:12,color:"#9ca3af",textAlign:"center",marginTop:14}}>
                 {authMode==="login"?"Ainda não tens conta? ":"Já tens conta? "}
-                <span style={{color:T.text,cursor:"pointer",textDecoration:"underline",fontWeight:600}} onClick={()=>setAuthMode(m=>m==="login"?"register":"login")}>
+                <span style={{color:"#111827",cursor:"pointer",textDecoration:"underline",fontWeight:600}} onClick={()=>setAuthMode(m=>m==="login"?"register":"login")}>
                   {authMode==="login"?"Regista-te":"Entra aqui"}
                 </span>
               </p>
@@ -653,16 +603,16 @@ function AppInner() {
   );
 
   if(screen==="setup") return (
-    <div style={{background:T.bg3,minHeight:"100vh",fontFamily:"-apple-system,'Segoe UI',sans-serif"}}>
+    <div style={{background:"#f7f8fa"3,minHeight:"100vh",fontFamily:"-apple-system,'Segoe UI',sans-serif"}}>
       <div style={{display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100vh",padding:20}}>
-        <div style={{width:"100%",maxWidth:380,background:T.card,border:`1px solid ${T.inputBorder}`,borderRadius:16,padding:"28px 24px",boxShadow:`0 4px 24px ${T.shadow}`}}>
+        <div style={{width:"100%",maxWidth:380,background:"#fff",border:"1px solid #e5e7eb",borderRadius:16,padding:"28px 24px",boxShadow:"0 4px 24px rgba(0,0,0,.06)"}}>
           <div style={{fontSize:32,marginBottom:8}}>💼</div>
-          <h2 style={{fontSize:20,fontWeight:800,color:T.text,margin:"0 0 4px"}}>Primeira banca</h2>
+          <h2 style={{fontSize:20,fontWeight:800,color:"#111827",margin:"0 0 4px"}}>Primeira banca</h2>
           <p style={{fontSize:13,color:"#9ca3af",marginBottom:12}}>Olá, {userName}! Configura a tua banca.</p>
           <div style={{background:"#f0fdf4",border:"1px solid #bbf7d0",borderRadius:8,padding:"8px 12px",fontSize:12,color:"#15803d",marginBottom:12,fontWeight:600,textAlign:"center"}}>
             🎯 Trial de 7 dias ativado · Preço de lançamento garantido
           </div>
-          <BRForm form={brForm} setForm={setBRForm} showReset={false} lang={lang} T={T}/>
+          <BRForm form={brForm} setForm={setBRForm} showReset={false} lang={lang}/>
           <button style={{...S.btnPrimary,marginTop:20}} onClick={()=>handleCreateBR(false)}>Criar banca</button>
         </div>
       </div>
@@ -670,23 +620,23 @@ function AppInner() {
   );
 
   if(screen==="app" && !isActive && !isAdmin) return (
-    <div style={{background:T.bg3,minHeight:"100vh",fontFamily:"-apple-system,'Segoe UI',sans-serif"}}>
+    <div style={{background:"#f7f8fa"3,minHeight:"100vh",fontFamily:"-apple-system,'Segoe UI',sans-serif"}}>
       <div style={{display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100vh",padding:20}}>
-        <div style={{width:"100%",maxWidth:380,background:T.card,border:`1px solid ${T.inputBorder}`,borderRadius:16,padding:"28px 24px",boxShadow:`0 4px 24px ${T.shadow}`}}>
+        <div style={{width:"100%",maxWidth:380,background:"#fff",border:"1px solid #e5e7eb",borderRadius:16,padding:"28px 24px",boxShadow:"0 4px 24px rgba(0,0,0,.06)"}}>
           <div style={{fontSize:40,marginBottom:8,textAlign:"center"}}>⏰</div>
-          <h2 style={{fontSize:20,fontWeight:800,color:T.text,margin:"0 0 4px",textAlign:"center"}}>Trial terminado</h2>
+          <h2 style={{fontSize:20,fontWeight:800,color:"#111827",margin:"0 0 4px",textAlign:"center"}}>Trial terminado</h2>
           <p style={{fontSize:13,color:"#9ca3af",textAlign:"center",marginBottom:16}}>Escolhe um plano para continuar.</p>
 
-          <div style={{display:"flex",gap:4,background:T.bg3,padding:4,borderRadius:10,marginBottom:12}}>
+          <div style={{display:"flex",gap:4,background:"#f7f8fa"3,padding:4,borderRadius:10,marginBottom:12}}>
             <button style={{flex:1,padding:"8px 10px",borderRadius:8,border:"none",background:subView==="monthly"?"#fff":"transparent",color:subView==="monthly"?"#111827":"#9ca3af",cursor:"pointer",fontSize:13,fontWeight:700,boxShadow:subView==="monthly"?"0 1px 3px rgba(0,0,0,.1)":"none"}} onClick={()=>setSubView("monthly")}>Mensal</button>
             <button style={{flex:1,padding:"8px 10px",borderRadius:8,border:"none",background:subView==="annual"?"#fff":"transparent",color:subView==="annual"?"#111827":"#9ca3af",cursor:"pointer",fontSize:13,fontWeight:700,boxShadow:subView==="annual"?"0 1px 3px rgba(0,0,0,.1)":"none"}} onClick={()=>setSubView("annual")}>Anual ⭐</button>
           </div>
 
-          <div style={{background:T.bg3,border:subView==="annual"?"2px solid #111827":"1px solid #e5e7eb",borderRadius:12,padding:20,marginBottom:12}}>
+          <div style={{background:"#f7f8fa"3,border:subView==="annual"?"2px solid #111827":"1px solid #e5e7eb",borderRadius:12,padding:20,marginBottom:12}}>
             {subView==="annual" && <div style={{fontSize:11,color:"#059669",fontWeight:700,marginBottom:8,textAlign:"center"}}>⭐ Melhor valor · Poupas €{(NORMAL_MONTHLY*12-PROMO_ANNUAL).toFixed(0)}</div>}
             <div style={{textAlign:"center",marginBottom:16}}>
               <div style={{fontSize:11,color:"#d1d5db",textDecoration:"line-through"}}>{subView==="monthly"?`€${NORMAL_MONTHLY}/mês`:`€${NORMAL_ANNUAL}/ano`}</div>
-              <div style={{fontSize:28,fontWeight:900,color:T.text,letterSpacing:"-.5px"}}>{subView==="monthly"?`€${PROMO_MONTHLY}`:`€${PROMO_ANNUAL}`}<span style={{fontSize:13,fontWeight:400,color:T.text3}}>{subView==="monthly"?"/mês":"/ano"}</span></div>
+              <div style={{fontSize:28,fontWeight:900,color:"#111827",letterSpacing:"-.5px"}}>{subView==="monthly"?`€${PROMO_MONTHLY}`:`€${PROMO_ANNUAL}`}<span style={{fontSize:13,fontWeight:400,color:"#111827"3}}>{subView==="monthly"?"/mês":"/ano"}</span></div>
               <div style={{fontSize:11,color:"#9ca3af",marginTop:2}}>Depois {subView==="monthly"?`€${NORMAL_MONTHLY}/mês`:`€${NORMAL_ANNUAL}/ano`}</div>
             </div>
             <div style={{borderTop:"1px solid #e5e7eb",paddingTop:12,marginBottom:16}}>
@@ -698,7 +648,7 @@ function AppInner() {
                 ["✓",`Análise IA — ${subView==="annual"?AI_LIMIT_ANNUAL:AI_LIMIT_MONTHLY} análises/mês`],
                 ["✓","Sem anúncios"],
               ].map(([ico,txt])=>(
-                <div key={txt} style={{display:"flex",gap:8,marginBottom:6,fontSize:12,color:T.text}}>
+                <div key={txt} style={{display:"flex",gap:8,marginBottom:6,fontSize:12,color:"#111827"}}>
                   <span style={{color:"#059669",fontWeight:700,flexShrink:0}}>{ico}</span>
                   <span>{txt}</span>
                 </div>
@@ -719,21 +669,21 @@ function AppInner() {
   );
 
   return (
-    <div style={{background:T.bg,minHeight:"100vh",fontFamily:"-apple-system,'Segoe UI',sans-serif",color:T.text,paddingBottom:100}} onTouchStart={swipeStart} onTouchEnd={swipeEnd}>
+    <div style={{background:"#f7f8fa",minHeight:"100vh",fontFamily:"-apple-system,'Segoe UI',sans-serif",color:"#111827",paddingBottom:100}} onTouchStart={swipeStart} onTouchEnd={swipeEnd}>
 
       {showImport && (
         <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.4)",zIndex:200,display:"flex",alignItems:"flex-end",justifyContent:"center"}} onClick={()=>setShowImport(false)}>
-          <div style={{background:T.card,borderRadius:"16px 16px 0 0",padding:24,width:"100%",maxWidth:500,maxHeight:"85vh",overflowY:"auto"}} onClick={e=>e.stopPropagation()}>
+          <div style={{background:"#fff",borderRadius:"16px 16px 0 0",padding:24,width:"100%",maxWidth:500,maxHeight:"85vh",overflowY:"auto"}} onClick={e=>e.stopPropagation()}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
               <div>
-                <h3 style={{margin:0,fontSize:16,fontWeight:700,color:T.text}}>📋 Importar do Telegram</h3>
-                <p style={{margin:"4px 0 0",fontSize:12,color:T.text3}}>Cola o texto com as apostas do grupo</p>
+                <h3 style={{margin:0,fontSize:16,fontWeight:700,color:"#111827"}}>📋 Importar do Telegram</h3>
+                <p style={{margin:"4px 0 0",fontSize:12,color:"#111827"3}}>Cola o texto com as apostas do grupo</p>
               </div>
               <button style={{background:"none",border:"none",color:"#9ca3af",fontSize:22,cursor:"pointer"}} onClick={()=>setShowImport(false)}>×</button>
             </div>
 
             <textarea
-              style={{...SI,height:140,resize:"none",fontFamily:"inherit",fontSize:13}}
+              style={{...S.input,height:140,resize:"none",fontFamily:"inherit",fontSize:13}}
               placeholder={"🎾  SINNER v ALCARAZ\n🎯   SINNER VENCE\n💰  1un @1.85 (Pinnacle)"}
               value={importText}
               onChange={e=>{
@@ -748,8 +698,8 @@ function AppInner() {
                   {importBets.length} aposta{importBets.length>1?"s":""} detectada{importBets.length>1?"s":""}
                 </div>
                 {importBets.map((b,i)=>(
-                  <div key={i} style={{background:T.bg3,border:`1px solid ${T.cardBorder}`,borderRadius:10,padding:"10px 12px",marginBottom:6}}>
-                    <div style={{fontSize:13,fontWeight:600,color:T.text,marginBottom:6}}>{b.event}</div>
+                  <div key={i} style={{background:"#f7f8fa"3,border:`1px solid ${"#fff"Border}`,borderRadius:10,padding:"10px 12px",marginBottom:6}}>
+                    <div style={{fontSize:13,fontWeight:600,color:"#111827",marginBottom:6}}>{b.event}</div>
                     <div style={{fontSize:12,color:"#6b7280",marginBottom:6}}>{b.selection} · {b.units}u</div>
                     <div style={{display:"flex",alignItems:"center",gap:8}}>
                       <span style={{fontSize:11,color:"#9ca3af",fontWeight:600,whiteSpace:"nowrap"}}>Odd:</span>
@@ -761,9 +711,9 @@ function AppInner() {
                           newBets[i]={...newBets[i],odd:parseFloat(e.target.value)||b.odd};
                           setImportBets(newBets);
                         }}
-                        style={{...SI,padding:"5px 8px",fontSize:13,width:80,textAlign:"center"}}
+                        style={{...S.input,padding:"5px 8px",fontSize:13,width:80,textAlign:"center"}}
                       />
-                      <span style={{fontSize:11,color:T.text3}}>da tua casa</span>
+                      <span style={{fontSize:11,color:"#111827"3}}>da tua casa</span>
                     </div>
                   </div>
                 ))}
@@ -798,9 +748,9 @@ function AppInner() {
 
       {showSuccess && (
         <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.4)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center",padding:20}} onClick={()=>setShowSuccess(false)}>
-          <div style={{background:T.card,borderRadius:16,padding:28,maxWidth:360,width:"100%",textAlign:"center"}} onClick={e=>e.stopPropagation()}>
+          <div style={{background:"#fff",borderRadius:16,padding:28,maxWidth:360,width:"100%",textAlign:"center"}} onClick={e=>e.stopPropagation()}>
             <div style={{fontSize:56,marginBottom:12}}>🎉</div>
-            <h2 style={{fontSize:22,fontWeight:900,color:T.text,margin:"0 0 8px"}}>Bem-vindo ao BankrollPro!</h2>
+            <h2 style={{fontSize:22,fontWeight:900,color:"#111827",margin:"0 0 8px"}}>Bem-vindo ao BankrollPro!</h2>
             <p style={{fontSize:14,color:"#6b7280",lineHeight:1.6,marginBottom:20}}>A tua subscrição está ativa. Acesso completo desbloqueado.</p>
             <div style={{background:"#f0fdf4",border:"1px solid #bbf7d0",borderRadius:10,padding:"12px 16px",marginBottom:20}}>
               <div style={{fontSize:13,color:"#15803d",fontWeight:600}}>✓ Acesso ilimitado ativado</div>
@@ -814,13 +764,13 @@ function AppInner() {
 
       {drawerOpen && (
         <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.4)",zIndex:100,display:"flex"}} onClick={()=>setDrawerOpen(false)}>
-          <div style={{width:300,maxWidth:"85vw",background:T.drawerBg,height:"100%",display:"flex",flexDirection:"column",padding:20,overflowY:"auto",boxShadow:`4px 0 24px ${T.shadow}`}} onClick={e=>e.stopPropagation()}>
+          <div style={{width:300,maxWidth:"85vw",background:"#fff",height:"100%",display:"flex",flexDirection:"column",padding:20,overflowY:"auto",boxShadow:"4px 0 24px rgba(0,0,0,.06)"}} onClick={e=>e.stopPropagation()}>
 
-            <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:16,paddingBottom:16,borderBottom:`1px solid ${T.cardBorder}`}}>
-              <div style={{width:40,height:40,borderRadius:"50%",background:T.bg3,display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,fontWeight:800,color:T.text,flexShrink:0}}>{userName[0]?.toUpperCase()||"U"}</div>
+            <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:16,paddingBottom:16,borderBottom:`1px solid ${"#fff"Border}`}}>
+              <div style={{width:40,height:40,borderRadius:"50%",background:"#f7f8fa"3,display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,fontWeight:800,color:"#111827",flexShrink:0}}>{userName[0]?.toUpperCase()||"U"}</div>
               <div style={{flex:1}}>
-                <div style={{fontSize:14,fontWeight:700,color:T.text}}>{userName}</div>
-                <div style={{fontSize:11,color:T.text3}}>{user?.email}</div>
+                <div style={{fontSize:14,fontWeight:700,color:"#111827"}}>{userName}</div>
+                <div style={{fontSize:11,color:"#111827"3}}>{user?.email}</div>
               </div>
               <button style={{background:"none",border:"none",fontSize:20,color:"#9ca3af",cursor:"pointer"}} onClick={()=>setDrawerOpen(false)}>×</button>
             </div>
@@ -830,17 +780,17 @@ function AppInner() {
                 <div style={{fontWeight:700,marginBottom:2}}>⏰ Trial — {trialLeft} dias restantes</div>
                 <div style={{fontSize:11,marginBottom:10,color:"#b45309"}}>Subscreve agora e garantes o preço de lançamento</div>
                 <div style={{display:"flex",gap:8,marginBottom:8}}>
-                  <div style={{flex:1,background:T.card,border:"1px solid #fde68a",borderRadius:8,padding:"8px",textAlign:"center"}}>
+                  <div style={{flex:1,background:"#fff",border:"1px solid #fde68a",borderRadius:8,padding:"8px",textAlign:"center"}}>
                     <div style={{fontSize:9,color:"#9ca3af",textDecoration:"line-through"}}>€{NORMAL_MONTHLY}/mês</div>
                     <div style={{fontSize:14,fontWeight:900,color:"#92400e"}}>€{PROMO_MONTHLY}<span style={{fontSize:10,fontWeight:400}}>/mês</span></div>
                     <div style={{fontSize:9,color:"#dc2626",fontWeight:600}}>Depois €{NORMAL_MONTHLY}</div>
-                    <a href={STRIPE_MONTHLY} target="_blank" rel="noreferrer" style={{display:"block",background:T.card,border:"1px solid #92400e",color:"#92400e",borderRadius:6,padding:"5px 0",fontSize:10,fontWeight:700,textAlign:"center",textDecoration:"none",marginTop:6}}>Subscrever</a>
+                    <a href={STRIPE_MONTHLY} target="_blank" rel="noreferrer" style={{display:"block",background:"#fff",border:"1px solid #92400e",color:"#92400e",borderRadius:6,padding:"5px 0",fontSize:10,fontWeight:700,textAlign:"center",textDecoration:"none",marginTop:6}}>Subscrever</a>
                   </div>
                   <div style={{flex:1,background:"#111827",border:"1px solid #111827",borderRadius:8,padding:"8px",textAlign:"center"}}>
                     <div style={{fontSize:9,color:"#6b7280",textDecoration:"line-through"}}>€{NORMAL_ANNUAL}/ano</div>
-                    <div style={{fontSize:14,fontWeight:900,color:"#fff"}}>€{PROMO_ANNUAL}<span style={{fontSize:10,fontWeight:400,color:T.text3}}>/ano</span></div>
+                    <div style={{fontSize:14,fontWeight:900,color:"#fff"}}>€{PROMO_ANNUAL}<span style={{fontSize:10,fontWeight:400,color:"#111827"3}}>/ano</span></div>
                     <div style={{fontSize:9,color:"#4ade80",fontWeight:600}}>Depois €{NORMAL_ANNUAL} · Melhor valor</div>
-                    <a href={STRIPE_ANNUAL} target="_blank" rel="noreferrer" style={{display:"block",background:T.card,color:T.text,borderRadius:6,padding:"5px 0",fontSize:10,fontWeight:700,textAlign:"center",textDecoration:"none",marginTop:6}}>Subscrever</a>
+                    <a href={STRIPE_ANNUAL} target="_blank" rel="noreferrer" style={{display:"block",background:"#fff",color:"#111827",borderRadius:6,padding:"5px 0",fontSize:10,fontWeight:700,textAlign:"center",textDecoration:"none",marginTop:6}}>Subscrever</a>
                   </div>
                 </div>
               </div>
@@ -862,29 +812,29 @@ function AppInner() {
             </div>
 
 
-            <div style={{fontSize:10,color:T.text3,textTransform:"uppercase",letterSpacing:1,fontWeight:800,marginBottom:8}}>{lang==="PT"?"Aparência":"Appearance"}</div>
+            <div style={{fontSize:10,color:"#111827"3,textTransform:"uppercase",letterSpacing:1,fontWeight:800,marginBottom:8}}>{lang==="PT"?"Aparência":"Appearance"}</div>
             <div style={{display:"flex",gap:6,marginBottom:16}}>
               {[["☀️",lang==="PT"?"Claro":"Light",false],["🌙",lang==="PT"?"Escuro":"Dark",true]].map(([ico,lbl,val])=>(
-                <button key={lbl} style={{flex:1,padding:"8px 4px",border:`1px solid ${darkMode===val?sc.color:T.inputBorder}`,background:darkMode===val?sc.color:T.inputBg,color:darkMode===val?"#fff":T.text2,borderRadius:8,cursor:"pointer",fontSize:11,fontWeight:700,display:"flex",flexDirection:"column",alignItems:"center",gap:2}}
+                <button key={lbl} style={{flex:1,padding:"8px 4px",border:`1px solid ${darkMode===val?sc.color:"#e5e7eb"}`,background:darkMode===val?sc.color:"#fff",color:darkMode===val?"#fff":"#111827"2,borderRadius:8,cursor:"pointer",fontSize:11,fontWeight:700,display:"flex",flexDirection:"column",alignItems:"center",gap:2}}
                   onClick={()=>{ try{localStorage.setItem("bpDark",String(val));}catch(e){} setDarkMode(val); }}>
                   <span style={{fontSize:16}}>{ico}</span><span>{lbl}</span>
                 </button>
               ))}
-              <button style={{flex:1,padding:"8px 4px",border:`1px solid ${T.inputBorder}`,background:T.inputBg,color:T.text2,borderRadius:8,cursor:"pointer",fontSize:11,fontWeight:700,display:"flex",flexDirection:"column",alignItems:"center",gap:2}}
+              <button style={{flex:1,padding:"8px 4px",border:"1px solid #e5e7eb",background:"#fff",color:"#111827"2,borderRadius:8,cursor:"pointer",fontSize:11,fontWeight:700,display:"flex",flexDirection:"column",alignItems:"center",gap:2}}
                 onClick={()=>{ try{localStorage.removeItem("bpDark");}catch(e){} setDarkMode(window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches); }}>
                 <span style={{fontSize:16}}>⚙️</span><span>Auto</span>
               </button>
             </div>
-            <div style={{fontSize:10,color:T.text3,textTransform:"uppercase",letterSpacing:1,fontWeight:800,marginBottom:8}}>{tx("yourBankrolls")}</div>
+            <div style={{fontSize:10,color:"#111827"3,textTransform:"uppercase",letterSpacing:1,fontWeight:800,marginBottom:8}}>{tx("yourBankrolls")}</div>
             {bankrolls.map(b=>{
               const bsc=SPORTS[b.sport];
               return (
-                <div key={b.id} style={{display:"flex",alignItems:"center",gap:4,padding:"10px 8px",borderLeft:`3px solid ${b.id===activeBR?bsc?.color:"transparent"}`,background:b.id===activeBR?T.bg3:"transparent",borderRadius:"0 10px 10px 0",marginBottom:4}}>
+                <div key={b.id} style={{display:"flex",alignItems:"center",gap:4,padding:"10px 8px",borderLeft:`3px solid ${b.id===activeBR?bsc?.color:"transparent"}`,background:b.id===activeBR?"#f7f8fa"3:"transparent",borderRadius:"0 10px 10px 0",marginBottom:4}}>
                   <button style={{display:"flex",alignItems:"center",gap:10,flex:1,background:"none",border:"none",cursor:"pointer",padding:0,textAlign:"left"}} onClick={()=>switchBankroll(b.id)}>
                     <span style={{fontSize:22}}>{bsc?.icon}</span>
                     <div style={{flex:1}}>
-                      <div style={{fontSize:13,fontWeight:600,color:T.text}}>{b.name}</div>
-                      <div style={{fontSize:11,color:T.text3}}>{b.sport}</div>
+                      <div style={{fontSize:13,fontWeight:600,color:"#111827"}}>{b.name}</div>
+                      <div style={{fontSize:11,color:"#111827"3}}>{b.sport}</div>
                     </div>
                     <span style={{fontSize:13,fontWeight:700,color:bsc?.color}}>{fmt(parseFloat(b.bankroll))}</span>
                   </button>
@@ -894,7 +844,7 @@ function AppInner() {
             })}
 
             {bankrolls.length<MAX_BANKROLLS && (
-              <button style={{display:"flex",alignItems:"center",width:"100%",padding:"10px",border:"1px dashed #e5e7eb",background:"transparent",cursor:"pointer",borderRadius:10,fontSize:13,marginTop:4,color:T.text2}} onClick={()=>{setBRForm({name:"",sport:"Ténis",bankroll:"",unit_pct:"2",reset:false});setShowNewBR(true);setDrawerOpen(false);}}>
+              <button style={{display:"flex",alignItems:"center",width:"100%",padding:"10px",border:"1px dashed #e5e7eb",background:"transparent",cursor:"pointer",borderRadius:10,fontSize:13,marginTop:4,color:"#111827"2}} onClick={()=>{setBRForm({name:"",sport:"Ténis",bankroll:"",unit_pct:"2",reset:false});setShowNewBR(true);setDrawerOpen(false);}}>
                 <span style={{marginRight:8,color:"#9ca3af",fontSize:18}}>+</span>
                 {lang==="PT"?"Nova banca":"New bankroll"} ({bankrolls.length}/{MAX_BANKROLLS})
               </button>
@@ -905,19 +855,19 @@ function AppInner() {
             {br?.subscribed && (
               <div style={{background:"#f0fdf4",border:"1px solid #bbf7d0",borderRadius:8,padding:"10px 12px",marginTop:16,fontSize:12,color:"#15803d",fontWeight:600,textAlign:"center"}}>{tx("activePlan")}</div>
             )}
-            <button style={{...S.btnGhost,marginTop:10,fontSize:12,border:`1.5px solid ${T.btnGhostBorder}`,color:T.btnGhostColor,background:"transparent"}} onClick={()=>supabase.auth.signOut()}>{tx("logout")}</button>
+            <button style={{...S.btnGhost,marginTop:10,fontSize:12,border:"1.5px solid #e5e7eb",color:"#6b7280",background:"transparent"}} onClick={()=>supabase.auth.signOut()}>{tx("logout")}</button>
           </div>
         </div>
       )}
 
       {showNewBR && (
         <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.4)",zIndex:100,display:"flex",alignItems:"center",justifyContent:"center",padding:20}}>
-          <div style={{background:T.card,borderRadius:16,padding:24,width:"100%",maxWidth:400,maxHeight:"90vh",overflowY:"auto",boxShadow:`0 20px 60px ${T.shadow}`}}>
+          <div style={{background:"#fff",borderRadius:16,padding:24,width:"100%",maxWidth:400,maxHeight:"90vh",overflowY:"auto",boxShadow:"0 20px 60px rgba(0,0,0,.2)"}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
-              <h3 style={{margin:0,fontSize:16,fontWeight:700,color:T.text}}>{lang==="PT"?"Nova Banca":"New Bankroll"}</h3>
+              <h3 style={{margin:0,fontSize:16,fontWeight:700,color:"#111827"}}>{lang==="PT"?"Nova Banca":"New Bankroll"}</h3>
               <button style={{background:"none",border:"none",color:"#9ca3af",fontSize:22,cursor:"pointer"}} onClick={()=>setShowNewBR(false)}>×</button>
             </div>
-            <BRForm form={brForm} setForm={setBRForm} showReset={false} lang={lang} T={T}/>
+            <BRForm form={brForm} setForm={setBRForm} showReset={false} lang={lang}/>
             <button style={{...S.btnPrimary,marginTop:16}} onClick={()=>handleCreateBR(false)}>Criar banca</button>
           </div>
         </div>
@@ -925,12 +875,12 @@ function AppInner() {
 
       {showEditBR && (
         <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.4)",zIndex:100,display:"flex",alignItems:"center",justifyContent:"center",padding:20}}>
-          <div style={{background:T.card,borderRadius:16,padding:24,width:"100%",maxWidth:400,maxHeight:"90vh",overflowY:"auto",boxShadow:`0 20px 60px ${T.shadow}`}}>
+          <div style={{background:"#fff",borderRadius:16,padding:24,width:"100%",maxWidth:400,maxHeight:"90vh",overflowY:"auto",boxShadow:"0 20px 60px rgba(0,0,0,.2)"}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
-              <h3 style={{margin:0,fontSize:16,fontWeight:700,color:T.text}}>{lang==="PT"?"Editar Banca":"Edit Bankroll"}</h3>
+              <h3 style={{margin:0,fontSize:16,fontWeight:700,color:"#111827"}}>{lang==="PT"?"Editar Banca":"Edit Bankroll"}</h3>
               <button style={{background:"none",border:"none",color:"#9ca3af",fontSize:22,cursor:"pointer"}} onClick={()=>setShowEditBR(false)}>×</button>
             </div>
-            <BRForm form={brForm} setForm={setBRForm} showReset={true} lang={lang} T={T}/>
+            <BRForm form={brForm} setForm={setBRForm} showReset={true} lang={lang}/>
             <div style={{display:"flex",gap:8,marginTop:16}}>
               <button style={{...S.btnPrimary,flex:1}} onClick={()=>handleCreateBR(true)}>{lang==="PT"?"Guardar":"Save"}</button>
               <button style={{padding:"13px 16px",border:"1px solid #fca5a5",background:"#fef2f2",color:"#dc2626",borderRadius:8,cursor:"pointer",fontSize:13,fontWeight:700}} onClick={()=>deleteBankroll(editBRTarget?.id)}>🗑</button>
@@ -941,9 +891,9 @@ function AppInner() {
 
       {showForm && (
         <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.4)",zIndex:100,display:"flex",alignItems:"center",justifyContent:"center",padding:20}}>
-          <div style={{background:T.card,borderRadius:16,padding:24,width:"100%",maxWidth:440,maxHeight:"92vh",overflowY:"auto",boxShadow:`0 20px 60px ${T.shadow}`}}>
+          <div style={{background:"#fff",borderRadius:16,padding:24,width:"100%",maxWidth:440,maxHeight:"92vh",overflowY:"auto",boxShadow:"0 20px 60px rgba(0,0,0,.2)"}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
-              <h3 style={{margin:0,fontSize:16,fontWeight:700,color:T.text}}>{editBet?tx("editRecord"):`${sc.icon} ${tx("newRecord")}`}</h3>
+              <h3 style={{margin:0,fontSize:16,fontWeight:700,color:"#111827"}}>{editBet?tx("editRecord"):`${sc.icon} ${tx("newRecord")}`}</h3>
               <button style={{background:"none",border:"none",color:"#9ca3af",fontSize:22,cursor:"pointer"}} onClick={()=>{setShowForm(false);setEditBet(null);setForm(emptyForm);}}>×</button>
             </div>
 
@@ -962,7 +912,7 @@ function AppInner() {
 
             {br?.sport==="Geral" && (
               <div>
-                <label style={{...S.label,color:T.text2}}>{lang==="PT"?"Desporto":"Sport"}</label>
+                <label style={{...S.label,color:"#111827"2}}>{lang==="PT"?"Desporto":"Sport"}</label>
                 <div style={{display:"flex",flexWrap:"wrap",gap:6,marginTop:4,marginBottom:4}}>
                   {Object.keys(SPORTS).filter(s=>s!=="Geral").map(s=>(
                     <button key={s} style={{display:"flex",alignItems:"center",gap:4,padding:"6px 10px",border:`1px solid ${betSport===s?SPORTS[s].color:"#e5e7eb"}`,borderRadius:8,background:betSport===s?SPORTS[s].color+"15":"#f9fafb",color:betSport===s?SPORTS[s].color:"#9ca3af",cursor:"pointer",fontSize:11,fontWeight:700}} onClick={()=>{setBetSport(s);setForm(f=>({...f,market:SPORTS[s].markets[0]}));}}>
@@ -972,22 +922,22 @@ function AppInner() {
                 </div>
               </div>
             )}
-            <label style={{...S.label,color:T.text2}}>{betType==="multiple"?"Nome da múltipla":tx("event")}</label>
-            <input style={SI} placeholder={betType==="multiple"?lang==="PT"?"ex: Múltipla Ténis 3 jogos":"e.g. Tennis Multi 3 games":lang==="PT"?"ex: Sinner vs Alcaraz":"e.g. Sinner vs Alcaraz"} value={form.event} onChange={e=>setForm(f=>({...f,event:e.target.value}))}/>
+            <label style={{...S.label,color:"#111827"2}}>{betType==="multiple"?"Nome da múltipla":tx("event")}</label>
+            <input style={S.input} placeholder={betType==="multiple"?lang==="PT"?"ex: Múltipla Ténis 3 jogos":"e.g. Tennis Multi 3 games":lang==="PT"?"ex: Sinner vs Alcaraz":"e.g. Sinner vs Alcaraz"} value={form.event} onChange={e=>setForm(f=>({...f,event:e.target.value}))}/>
             {betType==="multiple" && (
               <div>
-                <label style={{...S.label,color:T.text2}}>{lang==="PT"?"Seleções (uma por linha)":"Selections (one per line)"}</label>
-                <textarea style={{...SI,height:80,resize:"none",fontFamily:"inherit"}} placeholder={lang==="PT"?"ex: Sinner a ganhar":"e.g. Sinner to win"} value={form.selections||""} onChange={e=>{const v=e.target.value;setForm(f=>({...f,selections:v,selection:v.split(/\r?\n/).filter(Boolean).join(" + ")}));}}/>
+                <label style={{...S.label,color:"#111827"2}}>{lang==="PT"?"Seleções (uma por linha)":"Selections (one per line)"}</label>
+                <textarea style={{...S.input,height:80,resize:"none",fontFamily:"inherit"}} placeholder={lang==="PT"?"ex: Sinner a ganhar":"e.g. Sinner to win"} value={form.selections||""} onChange={e=>{const v=e.target.value;setForm(f=>({...f,selections:v,selection:v.split(/\r?\n/).filter(Boolean).join(" + ")}));}}/>
               </div>
             )}
 
             <div style={{display:"flex",gap:10}}>
               <div style={{flex:1}}>
-                <label style={{...S.label,color:T.text2}}>{tx("odd")}</label>
-                <input style={SI} type="number" step="0.01" min="1.01" placeholder="1.85" value={form.odd} onChange={e=>setForm(f=>({...f,odd:e.target.value}))}/>
+                <label style={{...S.label,color:"#111827"2}}>{tx("odd")}</label>
+                <input style={S.input} type="number" step="0.01" min="1.01" placeholder="1.85" value={form.odd} onChange={e=>setForm(f=>({...f,odd:e.target.value}))}/>
               </div>
               <div style={{flex:1}}>
-                <label style={{...S.label,color:T.text2}}>{tx("units")}</label>
+                <label style={{...S.label,color:"#111827"2}}>{tx("units")}</label>
                 <div style={{display:"flex",flexWrap:"wrap",gap:4,marginTop:4}}>
                   {[0.25,0.5,0.75,1,1.25,1.5,1.75,2,2.5,3].map(u=>(
                     <button key={u} style={{padding:"8px 6px",border:`1px solid ${Number(form.units)===u?sc.color:"#e5e7eb"}`,borderRadius:8,background:Number(form.units)===u?sc.color:"#f9fafb",color:Number(form.units)===u?"#fff":"#9ca3af",cursor:"pointer",fontSize:12,fontWeight:700,minWidth:"18%"}} onClick={()=>setForm(f=>({...f,units:u}))}>{u}</button>
@@ -1005,18 +955,18 @@ function AppInner() {
 
             {betType==="single" && (
               <div>
-                <label style={{...S.label,color:T.text2}}>{tx("market")}</label>
-                <select style={{...SI,colorScheme:darkMode?"dark":"light"}} value={form.market} onChange={e=>setForm(f=>({...f,market:e.target.value}))}>
+                <label style={{...S.label,color:"#111827"2}}>{tx("market")}</label>
+                <select style={S.input} value={form.market} onChange={e=>setForm(f=>({...f,market:e.target.value}))}>
                   {markets.map(m=><option key={m}>{m}</option>)}
                 </select>
-                <label style={{...S.label,color:T.text2}}>{tx("selection")}</label>
-                <input style={SI} placeholder="ex: Sinner / Over 22.5 Games" value={form.selection} onChange={e=>setForm(f=>({...f,selection:e.target.value}))}/>
+                <label style={{...S.label,color:"#111827"2}}>{tx("selection")}</label>
+                <input style={S.input} placeholder="ex: Sinner / Over 22.5 Games" value={form.selection} onChange={e=>setForm(f=>({...f,selection:e.target.value}))}/>
               </div>
             )}
 
             {(formMode==="immediate"||editBet) && (
               <div>
-                <label style={{...S.label,color:T.text2}}>{tx("result")}</label>
+                <label style={{...S.label,color:"#111827"2}}>{tx("result")}</label>
                 <div style={{display:"flex",gap:6,marginTop:4,flexWrap:"wrap"}}>
                   {[["WIN","✓ Green","#059669","#f0fdf4","#bbf7d0"],["LOSS","✗ Red","#dc2626","#fef2f2","#fca5a5"],["PENDING",tx("pending"),"#7c3aed","#faf5ff","#c4b5fd"],["CASHOUT","💰 Cash","#2563eb","#eff6ff","#93c5fd"],["VOID","Void","#92400e","#fefce8","#fde68a"]].map(([r,l,c,bg,border])=>(
                     <button key={r} style={{flex:1,minWidth:"30%",padding:"8px 4px",borderRadius:8,border:`1px solid ${form.result===r?c:border}`,background:form.result===r?bg:"#fff",color:form.result===r?c:"#9ca3af",cursor:"pointer",fontSize:11,fontWeight:700}} onClick={()=>setForm(f=>({...f,result:r}))}>{l}</button>
@@ -1024,21 +974,21 @@ function AppInner() {
                 </div>
                 {form.result==="CASHOUT" && (
                   <div>
-                    <label style={{...S.label,color:T.text2}}>{lang==="PT"?"Valor cashout":"Cashout value"}</label>
-                    <input style={SI} type="number" placeholder="ex: 12.50" value={form.cashoutVal} onChange={e=>setForm(f=>({...f,cashoutVal:e.target.value}))}/>
+                    <label style={{...S.label,color:"#111827"2}}>{lang==="PT"?"Valor cashout":"Cashout value"}</label>
+                    <input style={S.input} type="number" placeholder="ex: 12.50" value={form.cashoutVal} onChange={e=>setForm(f=>({...f,cashoutVal:e.target.value}))}/>
                   </div>
                 )}
               </div>
             )}
 
-            <label style={{...S.label,color:T.text2}}>{tx("notes")}</label>
-            <input style={SI} placeholder={lang==="PT"?"Raciocínio, contexto...":"Reasoning, context..."} value={form.notes} onChange={e=>setForm(f=>({...f,notes:e.target.value}))}/>
+            <label style={{...S.label,color:"#111827"2}}>{tx("notes")}</label>
+            <input style={S.input} placeholder={lang==="PT"?"Raciocínio, contexto...":"Reasoning, context..."} value={form.notes} onChange={e=>setForm(f=>({...f,notes:e.target.value}))}/>
             <button style={{...S.btnPrimary,marginTop:18,background:sc.color,border:"none"}} onClick={handleSaveBet}>{editBet?tx("saveChanges"):tx("saveRecord")}</button>
           </div>
         </div>
       )}
 
-      <header style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"12px 16px",background:T.headerBg,borderBottom:`1px solid ${T.border}`,position:"sticky",top:0,zIndex:10,boxShadow:`0 1px 0 ${T.border}`}}>
+      <header style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"12px 16px",background:"#fff",borderBottom:"1px solid #f3f4f6",position:"sticky",top:0,zIndex:10,boxShadow:"0 1px 0 #f0f0f0"}}>
         <button style={{display:"flex",flexDirection:"column",gap:4,background:"none",border:"none",cursor:"pointer",padding:"6px",borderRadius:8}} onClick={()=>setDrawerOpen(true)}>
           <div style={{width:20,height:2,background:"#9ca3af",borderRadius:2}}/>
           <div style={{width:20,height:2,background:"#9ca3af",borderRadius:2}}/>
@@ -1046,7 +996,7 @@ function AppInner() {
         </button>
         <div style={{display:"flex",alignItems:"center",gap:6}}>
           <span style={{fontSize:18}}>{sc.icon}</span>
-          <span style={{fontSize:14,fontWeight:700,color:T.text}}>{br?.name||"BankrollPro"}</span>
+          <span style={{fontSize:14,fontWeight:700,color:"#111827"}}>{br?.name||"BankrollPro"}</span>
         </div>
         <div style={{display:"flex",alignItems:"center",gap:6}}>
           {isInTrial && !isAdmin && <span style={{borderRadius:6,padding:"3px 10px",fontSize:12,fontWeight:600,color:"#92400e",background:"#f8f9fa",border:"1px solid #e9ecef",cursor:"pointer"}} onClick={()=>setDrawerOpen(true)}>{trialLeft}d ⏰</span>}
@@ -1057,11 +1007,11 @@ function AppInner() {
       {isInTrial && trialLeft<=3 && !isAdmin && (
         <div style={{background:"#111827",padding:"8px 14px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
           <span style={{fontSize:12,color:"#e5e7eb",fontWeight:600}}>⏰ Trial termina em {trialLeft} {trialLeft===1?"dia":"dias"}</span>
-          <a href={STRIPE_ANNUAL} target="_blank" rel="noreferrer" style={{fontSize:11,fontWeight:800,textDecoration:"none",background:T.card,color:T.text,padding:"4px 10px",borderRadius:6}}>€{PROMO_ANNUAL}/ano →</a>
+          <a href={STRIPE_ANNUAL} target="_blank" rel="noreferrer" style={{fontSize:11,fontWeight:800,textDecoration:"none",background:"#fff",color:"#111827",padding:"4px 10px",borderRadius:6}}>€{PROMO_ANNUAL}/ano →</a>
         </div>
       )}
 
-      <nav style={{display:"flex",background:T.navBg,borderBottom:`1px solid ${T.border}`,overflowX:"auto",scrollbarWidth:"none"}}>
+      <nav style={{display:"flex",background:"#fff",borderBottom:"1px solid #f3f4f6",overflowX:"auto",scrollbarWidth:"none"}}>
         {[["dashboard",(I18N[lang]||I18N.PT).tabs[0]],["diary",(I18N[lang]||I18N.PT).tabs[1]],["report",(I18N[lang]||I18N.PT).tabs[2]],["chart",(I18N[lang]||I18N.PT).tabs[3]],["ai",(I18N[lang]||I18N.PT).tabs[4]],["sobre",(I18N[lang]||I18N.PT).tabs[5]]].concat(isAdmin?[["admin","Admin"]]:[]).map(([v,l])=>(
           <button key={v} style={{flex:1,padding:"11px 4px",border:"none",borderBottom:`2px solid ${tab===v?sc.color:"transparent"}`,background:"transparent",color:tab===v?sc.color:"#9ca3af",cursor:"pointer",fontSize:11,fontWeight:700,whiteSpace:"nowrap"}} onClick={()=>setTab(v)}>{l}</button>
         ))}
@@ -1071,11 +1021,11 @@ function AppInner() {
 
         {tab==="dashboard" && (
           <div>
-            <div style={{background:T.card,border:`1px solid ${T.cardBorder}`,borderRadius:14,padding:20,marginBottom:10,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
+            <div style={{background:"#fff",border:`1px solid ${"#fff"Border}`,borderRadius:14,padding:20,marginBottom:10,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:16}}>
                 <div>
                   <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,marginBottom:4}}>{tx("bankroll")}</div>
-                  <div style={{fontSize:34,fontWeight:900,color:T.text,letterSpacing:"-1.5px",lineHeight:1}}>{fmt(currentBR)}</div>
+                  <div style={{fontSize:34,fontWeight:900,color:"#111827",letterSpacing:"-1.5px",lineHeight:1}}>{fmt(currentBR)}</div>
                   <div style={{fontSize:13,marginTop:6,color:currentBR>=(br?.bankroll||0)?"#059669":"#dc2626",fontWeight:600}}>{fmtPct(((currentBR-(br?.bankroll||0))/(br?.bankroll||1))*100)} {lang==="PT"?"desde o início":"since start"}</div>
                 </div>
                 <div style={{textAlign:"right"}}>
@@ -1084,11 +1034,11 @@ function AppInner() {
                   <div style={{fontSize:12,color:stats.roi>=0?"#059669":"#dc2626",fontWeight:600,marginTop:4}}>ROI {fmtPct(stats.roi)}</div>
                 </div>
               </div>
-              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:0,borderTop:`1px solid ${T.cardBorder}`,paddingTop:14}}>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:0,borderTop:`1px solid ${"#fff"Border}`,paddingTop:14}}>
                 {[[tx("strike"),stats.strikeRate.toFixed(1)+"%"],[tx("avgOdd"),stats.avgOdd.toFixed(2)],[tx("unit"),fmt(unitVal)],[tx("pending"),stats.pending]].map(([l,v])=>(
                   <div key={l} style={{textAlign:"center"}}>
                     <div style={{fontSize:9,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,marginBottom:3}}>{l}</div>
-                    <div style={{fontSize:15,fontWeight:800,color:T.text}}>{v}</div>
+                    <div style={{fontSize:15,fontWeight:800,color:"#111827"}}>{v}</div>
                   </div>
                 ))}
               </div>
@@ -1103,22 +1053,22 @@ function AppInner() {
               ))}
             </div>
 
-            <DashboardQuote darkMode={darkMode} T={T}/>
+            <DashboardQuote/>
 
             {stats.pending>0 && (
-              <div style={{background:T.card,border:`1px solid ${T.cardBorder}`,borderRadius:14,padding:16,marginBottom:10,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
+              <div style={{background:"#fff",border:`1px solid ${"#fff"Border}`,borderRadius:14,padding:16,marginBottom:10,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
                 <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,marginBottom:14,fontWeight:800}}>{tx("pending").toUpperCase()} · {stats.pending}</div>
                 {bets.filter(b=>b.result==="PENDING").map(b=>(
-                  <div key={b.id} style={{display:"flex",alignItems:"center",padding:"10px 0",borderBottom:`1px solid ${T.border}`,gap:10}}>
+                  <div key={b.id} style={{display:"flex",alignItems:"center",padding:"10px 0",borderBottom:"1px solid #f3f4f6",gap:10}}>
                     <div style={{flex:1,minWidth:0}}>
-                      <div style={{fontSize:13,fontWeight:600,color:T.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{b.event||b.selection}</div>
+                      <div style={{fontSize:13,fontWeight:600,color:"#111827",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{b.event||b.selection}</div>
                       {b.event && b.selection && <div style={{fontSize:11,color:"#9ca3af",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{b.selection}</div>}
-                      <div style={{fontSize:11,color:T.text3}}>@{b.odd.toFixed(2)} · {fmt(b.stake)}</div>
+                      <div style={{fontSize:11,color:"#111827"3}}>@{b.odd.toFixed(2)} · {fmt(b.stake)}</div>
                     </div>
                     <div style={{display:"flex",gap:6}}>
                       <button style={S.bWin} onClick={()=>settleBet(b.id,"WIN")}>✓</button>
                       <button style={S.bLoss} onClick={()=>settleBet(b.id,"LOSS")}>✗</button>
-                      <button style={{padding:"5px 8px",borderRadius:8,border:`1px solid ${T.cardBorder}`,background:"transparent",color:"#d1d5db",cursor:"pointer",fontSize:13}} onClick={()=>openEditBet(b)}>✏️</button>
+                      <button style={{padding:"5px 8px",borderRadius:8,border:`1px solid ${"#fff"Border}`,background:"transparent",color:"#d1d5db",cursor:"pointer",fontSize:13}} onClick={()=>openEditBet(b)}>✏️</button>
                     </div>
                   </div>
                 ))}
@@ -1129,13 +1079,13 @@ function AppInner() {
 
         {tab==="diary" && (
           <div>
-            <div style={{display:"flex",alignItems:"center",background:T.card,border:`1px solid ${T.cardBorder}`,borderRadius:12,padding:"10px 14px",marginBottom:10,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
-              <button style={{background:"none",border:`1px solid ${T.inputBorder}`,borderRadius:8,width:32,height:32,cursor:"pointer",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center",color:T.text,flexShrink:0}} onClick={()=>{ const dt=new Date(diaryDate+"T00:00:00"); dt.setDate(dt.getDate()-1); setDiaryDate(padDate(dt)); }}>‹</button>
-              <div style={{flex:1,textAlign:"center",fontSize:13,fontWeight:700,color:T.text}}>{fmtDate(diaryDate)}</div>
-              <button style={{background:"none",border:`1px solid ${T.inputBorder}`,borderRadius:8,width:32,height:32,cursor:"pointer",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center",color:T.text,flexShrink:0}} onClick={()=>{ const dt=new Date(diaryDate+"T00:00:00"); dt.setDate(dt.getDate()+1); setDiaryDate(padDate(dt)); }}>›</button>
+            <div style={{display:"flex",alignItems:"center",background:"#fff",border:`1px solid ${"#fff"Border}`,borderRadius:12,padding:"10px 14px",marginBottom:10,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
+              <button style={{background:"none",border:"1px solid #e5e7eb",borderRadius:8,width:32,height:32,cursor:"pointer",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center",color:"#111827",flexShrink:0}} onClick={()=>{ const dt=new Date(diaryDate+"T00:00:00"); dt.setDate(dt.getDate()-1); setDiaryDate(padDate(dt)); }}>‹</button>
+              <div style={{flex:1,textAlign:"center",fontSize:13,fontWeight:700,color:"#111827"}}>{fmtDate(diaryDate)}</div>
+              <button style={{background:"none",border:"1px solid #e5e7eb",borderRadius:8,width:32,height:32,cursor:"pointer",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center",color:"#111827",flexShrink:0}} onClick={()=>{ const dt=new Date(diaryDate+"T00:00:00"); dt.setDate(dt.getDate()+1); setDiaryDate(padDate(dt)); }}>›</button>
             </div>
 
-            <div style={{background:T.card,border:`1px solid ${T.cardBorder}`,borderRadius:14,padding:16,marginBottom:10,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
+            <div style={{background:"#fff",border:`1px solid ${"#fff"Border}`,borderRadius:14,padding:16,marginBottom:10,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                 <div>
                   <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,marginBottom:4}}>{tx("dayProfit")}</div>
@@ -1143,7 +1093,7 @@ function AppInner() {
                 </div>
                 <div style={{textAlign:"right"}}>
                   <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,marginBottom:4}}>{tx("records")}</div>
-                  <div style={{fontSize:26,fontWeight:900,color:T.text}}>{diaryBets.length}</div>
+                  <div style={{fontSize:26,fontWeight:900,color:"#111827"}}>{diaryBets.length}</div>
                 </div>
               </div>
             </div>
@@ -1151,7 +1101,7 @@ function AppInner() {
             {diaryBets.length===0 && (
               <div style={{textAlign:"center",padding:"32px 0"}}>
                 <div style={{fontSize:36,marginBottom:8}}>{sc.icon}</div>
-                <div style={{fontSize:14,color:T.text3}}>{tx("noRecords")}</div>
+                <div style={{fontSize:14,color:"#111827"3}}>{tx("noRecords")}</div>
                 <div style={{fontSize:12,color:"#d1d5db",marginTop:4}}>{tx("addHint")}</div>
               </div>
             )}
@@ -1160,11 +1110,11 @@ function AppInner() {
               const isWin=b.result==="WIN",isLoss=b.result==="LOSS",isPending=b.result==="PENDING";
               const borderColor=isWin?"#059669":isLoss?"#dc2626":isPending?"#7c3aed":"#d1d5db";
               return (
-                <div key={b.id} style={{background:T.card,border:`1px solid ${T.cardBorder}`,borderRadius:14,padding:14,marginBottom:8,boxShadow:"0 1px 2px rgba(0,0,0,.04)",borderLeft:`3px solid ${borderColor}`}}>
+                <div key={b.id} style={{background:"#fff",border:`1px solid ${"#fff"Border}`,borderRadius:14,padding:14,marginBottom:8,boxShadow:"0 1px 2px rgba(0,0,0,.04)",borderLeft:`3px solid ${borderColor}`}}>
                   <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
                     <div style={{flex:1,minWidth:0}}>
-                      <div style={{fontSize:13,fontWeight:700,color:T.text}}>{b.event||b.selection}</div>
-                      {b.event && <div style={{fontSize:12,color:"#6b7280",marginTop:1}}>{b.market} · <strong style={{color:T.text}}>{b.selection}</strong></div>}
+                      <div style={{fontSize:13,fontWeight:700,color:"#111827"}}>{b.event||b.selection}</div>
+                      {b.event && <div style={{fontSize:12,color:"#6b7280",marginTop:1}}>{b.market} · <strong style={{color:"#111827"}}>{b.selection}</strong></div>}
                       {!b.event && b.market && <div style={{fontSize:12,color:"#6b7280",marginTop:1}}>{b.market}</div>}
                       <div style={{fontSize:12,color:"#9ca3af",marginTop:2}}>ODD {b.odd.toFixed(2)} · Stake {fmt(b.stake)}</div>
                       {b.notes && <div style={{fontSize:11,color:"#9ca3af",fontStyle:"italic",marginTop:2}}>"{b.notes}"</div>}
@@ -1173,10 +1123,10 @@ function AppInner() {
                       <div style={{fontSize:13,fontWeight:800,color:isWin?"#059669":isLoss?"#dc2626":isPending?"#7c3aed":b.result==="CASHOUT"?"#2563eb":"#9ca3af"}}>
                         {isWin?fmtP(b.stake*(b.odd-1)):isLoss?fmtP(-b.stake):isPending?tx("pending"):b.result==="CASHOUT"?fmtP((b.cashout_val||0)-b.stake):"—"}
                       </div>
-                      {isWin && <div style={{fontSize:11,color:T.text3}}>Retorno {fmt(b.stake*b.odd)}</div>}
+                      {isWin && <div style={{fontSize:11,color:"#111827"3}}>Retorno {fmt(b.stake*b.odd)}</div>}
                     </div>
                   </div>
-                  <div style={{display:"flex",gap:6,marginTop:10,paddingTop:10,borderTop:`1px solid ${T.cardBorder}`}}>
+                  <div style={{display:"flex",gap:6,marginTop:10,paddingTop:10,borderTop:`1px solid ${"#fff"Border}`}}>
                     {isPending && (
                       <div style={{display:"flex",gap:6,flex:1,flexWrap:"wrap"}}>
                         <button style={S.bWin} onClick={()=>settleBet(b.id,"WIN")}>{tx("settleWin")}</button>
@@ -1185,8 +1135,8 @@ function AppInner() {
                         <button style={S.bVoid} onClick={()=>settleBet(b.id,"VOID")}>{lang==="PT"?"Void":"Void"}</button>
                       </div>
                     )}
-                    <button style={{padding:"5px 8px",borderRadius:8,border:`1px solid ${T.cardBorder}`,background:"transparent",color:"#d1d5db",cursor:"pointer",fontSize:13,marginLeft:"auto"}} onClick={()=>openEditBet(b)}>✏️</button>
-                    <button style={{padding:"5px 8px",borderRadius:8,border:`1px solid ${T.cardBorder}`,background:"transparent",color:"#d1d5db",cursor:"pointer",fontSize:13}} onClick={()=>deleteBet(b.id)}>🗑</button>
+                    <button style={{padding:"5px 8px",borderRadius:8,border:`1px solid ${"#fff"Border}`,background:"transparent",color:"#d1d5db",cursor:"pointer",fontSize:13,marginLeft:"auto"}} onClick={()=>openEditBet(b)}>✏️</button>
+                    <button style={{padding:"5px 8px",borderRadius:8,border:`1px solid ${"#fff"Border}`,background:"transparent",color:"#d1d5db",cursor:"pointer",fontSize:13}} onClick={()=>deleteBet(b.id)}>🗑</button>
                   </div>
                 </div>
               );
@@ -1196,24 +1146,24 @@ function AppInner() {
 
         {tab==="report" && (
           <div>
-            <div style={{display:"flex",alignItems:"center",background:T.card,border:`1px solid ${T.cardBorder}`,borderRadius:12,padding:"10px 14px",marginBottom:10,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
-              <button style={{background:"none",border:`1px solid ${T.inputBorder}`,borderRadius:8,width:32,height:32,cursor:"pointer",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center",color:T.text,flexShrink:0}} onClick={()=>{ const d=new Date(reportMonth+"-01"); d.setMonth(d.getMonth()-1); setReportMonth(d.toISOString().slice(0,7)); }}>‹</button>
-              <div style={{flex:1,textAlign:"center",fontSize:14,fontWeight:700,color:T.text}}>{monthLabel(reportMonth+"-01")}</div>
-              <button style={{background:"none",border:`1px solid ${T.inputBorder}`,borderRadius:8,width:32,height:32,cursor:"pointer",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center",color:T.text,flexShrink:0}} onClick={()=>{ const d=new Date(reportMonth+"-01"); d.setMonth(d.getMonth()+1); setReportMonth(d.toISOString().slice(0,7)); }}>›</button>
+            <div style={{display:"flex",alignItems:"center",background:"#fff",border:`1px solid ${"#fff"Border}`,borderRadius:12,padding:"10px 14px",marginBottom:10,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
+              <button style={{background:"none",border:"1px solid #e5e7eb",borderRadius:8,width:32,height:32,cursor:"pointer",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center",color:"#111827",flexShrink:0}} onClick={()=>{ const d=new Date(reportMonth+"-01"); d.setMonth(d.getMonth()-1); setReportMonth(d.toISOString().slice(0,7)); }}>‹</button>
+              <div style={{flex:1,textAlign:"center",fontSize:14,fontWeight:700,color:"#111827"}}>{monthLabel(reportMonth+"-01")}</div>
+              <button style={{background:"none",border:"1px solid #e5e7eb",borderRadius:8,width:32,height:32,cursor:"pointer",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center",color:"#111827",flexShrink:0}} onClick={()=>{ const d=new Date(reportMonth+"-01"); d.setMonth(d.getMonth()+1); setReportMonth(d.toISOString().slice(0,7)); }}>›</button>
             </div>
 
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:10}}>
               {[[tx("initialBR"),fmt(parseFloat(br?.bankroll||0))],[tx("finalBR"),fmt(currentBR)],[tx("entries"),reportBets.length]].map(([l,v])=>(
-                <div key={l} style={{background:T.card,border:`1px solid ${T.cardBorder}`,borderRadius:14,padding:12,textAlign:"center",boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
+                <div key={l} style={{background:"#fff",border:`1px solid ${"#fff"Border}`,borderRadius:14,padding:12,textAlign:"center",boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
                   <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,marginBottom:5}}>{l}</div>
-                  <div style={{fontSize:14,fontWeight:800,color:T.text}}>{v}</div>
+                  <div style={{fontSize:14,fontWeight:800,color:"#111827"}}>{v}</div>
                 </div>
               ))}
             </div>
 
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:10}}>
               {[[tx("wins"),reportWins,"#059669"],[tx("losses"),reportLoss,"#dc2626"],[(lang==="PT"?lang==="PT"?"% Acertos":"% Wins":"% Wins"),reportWins+reportLoss>0?((reportWins/(reportWins+reportLoss))*100).toFixed(1)+"%":"—","#374151"]].map(([l,v,c])=>(
-                <div key={l} style={{background:T.card,border:`1px solid ${T.cardBorder}`,borderRadius:14,padding:12,textAlign:"center",boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
+                <div key={l} style={{background:"#fff",border:`1px solid ${"#fff"Border}`,borderRadius:14,padding:12,textAlign:"center",boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
                   <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,marginBottom:5}}>{l}</div>
                   <div style={{fontSize:18,fontWeight:800,color:c}}>{v}</div>
                 </div>
@@ -1225,7 +1175,7 @@ function AppInner() {
                 <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,marginBottom:5}}>{tx("monthProfit")}</div>
                 <div style={{fontSize:22,fontWeight:900,color:reportPnl>=0?"#059669":"#dc2626"}}>{fmtP(reportPnl)}</div>
               </div>
-              <div style={{background:T.card,border:`1px solid ${T.cardBorder}`,borderRadius:14,padding:16,textAlign:"center",boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
+              <div style={{background:"#fff",border:`1px solid ${"#fff"Border}`,borderRadius:14,padding:16,textAlign:"center",boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
                 <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,marginBottom:5}}>{tx("monthROI")}</div>
                 <div style={{fontSize:22,fontWeight:900,color:reportROI>=0?"#059669":"#dc2626"}}>{fmtPct(reportROI)}</div>
               </div>
@@ -1242,14 +1192,14 @@ function AppInner() {
                 else if(b.result==="CASHOUT"){byDay[d].returned+=(b.cashout_val||0);byDay[d].pnl+=(b.cashout_val||0)-b.stake;}
               });
               return (
-                <div style={{background:T.card,border:`1px solid ${T.cardBorder}`,borderRadius:14,padding:16,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
+                <div style={{background:"#fff",border:`1px solid ${"#fff"Border}`,borderRadius:14,padding:16,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
                   <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,marginBottom:14,fontWeight:800}}>{tx("perDay")}</div>
-                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:0,borderBottom:`1px solid ${T.cardBorder}`,paddingBottom:6,marginBottom:6}}>
+                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:0,borderBottom:`1px solid ${"#fff"Border}`,paddingBottom:6,marginBottom:6}}>
                     {[tx("day"),tx("invested"),tx("returned"),tx("profit")].map(h=><div key={h} style={{fontSize:9,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,textAlign:"center"}}>{h}</div>)}
                   </div>
                   {Object.entries(byDay).sort(([a],[b])=>a>b?1:-1).map(([d,v])=>(
-                    <div key={d} style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:0,padding:"6px 0",borderBottom:`1px solid ${T.border}`}}>
-                      <div style={{fontSize:12,fontWeight:600,color:T.text,textAlign:"center"}}>{new Date(d+"T00:00:00").getDate()}</div>
+                    <div key={d} style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:0,padding:"6px 0",borderBottom:"1px solid #f3f4f6"}}>
+                      <div style={{fontSize:12,fontWeight:600,color:"#111827",textAlign:"center"}}>{new Date(d+"T00:00:00").getDate()}</div>
                       <div style={{fontSize:12,color:"#6b7280",textAlign:"center"}}>{fmt(v.staked)}</div>
                       <div style={{fontSize:12,color:"#6b7280",textAlign:"center"}}>{fmt(v.returned)}</div>
                       <div style={{fontSize:12,fontWeight:700,color:v.pnl>=0?"#059669":"#dc2626",textAlign:"center"}}>{fmtP(v.pnl)}</div>
@@ -1263,7 +1213,7 @@ function AppInner() {
 
         {tab==="chart" && (
           <div>
-            <div style={{background:T.card,border:`1px solid ${T.cardBorder}`,borderRadius:14,padding:20,marginBottom:10,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
+            <div style={{background:"#fff",border:`1px solid ${"#fff"Border}`,borderRadius:14,padding:20,marginBottom:10,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
               <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,marginBottom:14,fontWeight:800}}>{tx("evolution")}</div>
               {pts.length>1 ? (
                 <svg viewBox={`0 0 ${svgW} ${svgH}`} style={{width:"100%",height:160,display:"block"}}>
@@ -1283,13 +1233,13 @@ function AppInner() {
               ) : (
                 <div style={{textAlign:"center",padding:"32px 0",color:"#d1d5db"}}>
                   <div style={{fontSize:36,marginBottom:8}}>{sc.icon}</div>
-                  <div style={{fontSize:13,color:T.text3}}>Adiciona registos para ver a evolução.</div>
+                  <div style={{fontSize:13,color:"#111827"3}}>Adiciona registos para ver a evolução.</div>
                 </div>
               )}
               <div style={{display:"flex",justifyContent:"space-between",marginTop:12}}>
                 <div style={{textAlign:"center"}}>
                   <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,marginBottom:4}}>{tx("start")}</div>
-                  <div style={{fontSize:14,fontWeight:700,color:T.text}}>{fmt(parseFloat(br?.bankroll||0))}</div>
+                  <div style={{fontSize:14,fontWeight:700,color:"#111827"}}>{fmt(parseFloat(br?.bankroll||0))}</div>
                 </div>
                 <div style={{textAlign:"center"}}>
                   <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,marginBottom:4}}>{tx("current")}</div>
@@ -1315,15 +1265,15 @@ function AppInner() {
               if(!entries.length) return null;
               const maxAbs=Math.max(...entries.map(([,v])=>Math.abs(v)),1);
               return (
-                <div style={{background:T.card,border:`1px solid ${T.cardBorder}`,borderRadius:14,padding:16,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
+                <div style={{background:"#fff",border:`1px solid ${"#fff"Border}`,borderRadius:14,padding:16,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
                   <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,marginBottom:14,fontWeight:800}}>{tx("perMonth")}</div>
                   {entries.map(([m,v])=>(
                     <div key={m} style={{marginBottom:10}}>
                       <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
-                        <span style={{fontSize:12,color:T.text2}}>{monthLabel(m+"-01")}</span>
+                        <span style={{fontSize:12,color:"#111827"2}}>{monthLabel(m+"-01")}</span>
                         <span style={{fontSize:13,fontWeight:700,color:v>=0?"#059669":"#dc2626"}}>{fmtP(v)}</span>
                       </div>
-                      <div style={{height:8,background:T.bg3,borderRadius:4,overflow:"hidden"}}>
+                      <div style={{height:8,background:"#f7f8fa"3,borderRadius:4,overflow:"hidden"}}>
                         <div style={{height:"100%",width:`${(Math.abs(v)/maxAbs)*100}%`,background:v>=0?sc.color:"#dc2626",borderRadius:4}}/>
                       </div>
                     </div>
@@ -1336,16 +1286,16 @@ function AppInner() {
 
         {tab==="ai" && (
           <div>
-            <div style={{background:T.card,border:`1px solid ${T.cardBorder}`,borderRadius:14,padding:20,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
+            <div style={{background:"#fff",border:`1px solid ${"#fff"Border}`,borderRadius:14,padding:20,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
               <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:16}}>
                 <span style={{fontSize:28}}>🤖</span>
                 <div style={{flex:1}}>
-                  <div style={{fontSize:16,fontWeight:800,color:T.text}}>{tx("aiTitle")} · {br?.sport}</div>
+                  <div style={{fontSize:16,fontWeight:800,color:"#111827"}}>{tx("aiTitle")} · {br?.sport}</div>
                 </div>
                 <div style={{textAlign:"right",flexShrink:0}}>
                   <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700}}>Análises</div>
                   <div style={{fontSize:16,fontWeight:900,color:sc.color}}>{isAdmin?"∞":aiUsage+"/"+(br?.plan==="annual"?AI_LIMIT_ANNUAL:AI_LIMIT_MONTHLY)}</div>
-                  <div style={{fontSize:10,color:T.text3}}>{lang==="PT"?"este mês":"this month"}</div>
+                  <div style={{fontSize:10,color:"#111827"3}}>{lang==="PT"?"este mês":"this month"}</div>
                 </div>
               </div>
               <p style={{color:"#6b7280",fontSize:13,lineHeight:1.6,marginBottom:12}}>
@@ -1354,8 +1304,8 @@ function AppInner() {
               <div style={{background:"#f8f9fa",border:"1px solid #e9ecef",borderRadius:10,padding:"10px 14px",marginBottom:16,display:"flex",gap:10,alignItems:"flex-start"}}>
                 <span style={{fontSize:16,flexShrink:0}}>💡</span>
                 <div>
-                  <div style={{fontSize:12,fontWeight:700,color:T.text,marginBottom:3}}>{lang==="PT"?"Análise mais precisa":"More precise analysis"}</div>
-                  <div style={{fontSize:12,color:T.text2,lineHeight:1.5}}>{lang==="PT"?"Preenche o campo":"Fill in the"} <strong>{tx("notes").replace(" (opcional)","").replace(" (optional)","")}</strong> {lang==="PT"?"nas apostas com contexto extra":"field in bets with extra context"} — ex: <em>{lang==="PT"?'"Alcaraz @1.23, terra"':' "Alcaraz @1.23, clay"'}</em> {lang==="PT"?"ou":"or"} <em>'indoor, top 10'</em>. {lang==="PT"?"A IA usa esse contexto para identificar padrões cruzados.":"The AI uses this context to identify cross-patterns."}</div>
+                  <div style={{fontSize:12,fontWeight:700,color:"#111827",marginBottom:3}}>{lang==="PT"?"Análise mais precisa":"More precise analysis"}</div>
+                  <div style={{fontSize:12,color:"#111827"2,lineHeight:1.5}}>{lang==="PT"?"Preenche o campo":"Fill in the"} <strong>{tx("notes").replace(" (opcional)","").replace(" (optional)","")}</strong> {lang==="PT"?"nas apostas com contexto extra":"field in bets with extra context"} — ex: <em>{lang==="PT"?'"Alcaraz @1.23, terra"':' "Alcaraz @1.23, clay"'}</em> {lang==="PT"?"ou":"or"} <em>'indoor, top 10'</em>. {lang==="PT"?"A IA usa esse contexto para identificar padrões cruzados.":"The AI uses this context to identify cross-patterns."}</div>
                 </div>
               </div>
 
@@ -1363,17 +1313,17 @@ function AppInner() {
                 <div style={{background:"#f0fdf4",border:"1px solid #bbf7d0",borderRadius:10,padding:"14px 16px",marginBottom:16}}>
                   <div style={{fontSize:13,fontWeight:700,color:"#15803d",marginBottom:10}}>🔒 Funcionalidade exclusiva para subscritores</div>
                   <div style={{display:"flex",flexDirection:"column",gap:8}}>
-                    <a href={STRIPE_MONTHLY} target="_blank" rel="noreferrer" style={{display:"flex",justifyContent:"space-between",alignItems:"center",background:T.card,border:"1px solid #bbf7d0",borderRadius:8,padding:"10px 12px",textDecoration:"none"}}>
+                    <a href={STRIPE_MONTHLY} target="_blank" rel="noreferrer" style={{display:"flex",justifyContent:"space-between",alignItems:"center",background:"#fff",border:"1px solid #bbf7d0",borderRadius:8,padding:"10px 12px",textDecoration:"none"}}>
                       <div>
-                        <div style={{fontSize:12,fontWeight:700,color:T.text}}>Plano Mensal</div>
-                        <div style={{fontSize:11,color:T.text2}}>{AI_LIMIT_MONTHLY} análises por mês · €{PROMO_MONTHLY}/mês</div>
+                        <div style={{fontSize:12,fontWeight:700,color:"#111827"}}>Plano Mensal</div>
+                        <div style={{fontSize:11,color:"#111827"2}}>{AI_LIMIT_MONTHLY} análises por mês · €{PROMO_MONTHLY}/mês</div>
                       </div>
                       <div style={{fontSize:12,fontWeight:700,color:"#15803d",flexShrink:0}}>Subscrever →</div>
                     </a>
                     <a href={STRIPE_ANNUAL} target="_blank" rel="noreferrer" style={{display:"flex",justifyContent:"space-between",alignItems:"center",background:"#111827",borderRadius:8,padding:"10px 12px",textDecoration:"none"}}>
                       <div>
                         <div style={{fontSize:12,fontWeight:700,color:"#fff"}}>Plano Anual ⭐</div>
-                        <div style={{fontSize:11,color:T.text3}}>{AI_LIMIT_ANNUAL} análises por mês · €{PROMO_ANNUAL}/ano</div>
+                        <div style={{fontSize:11,color:"#111827"3}}>{AI_LIMIT_ANNUAL} análises por mês · €{PROMO_ANNUAL}/ano</div>
                       </div>
                       <div style={{fontSize:12,fontWeight:700,color:"#4ade80",flexShrink:0}}>Subscrever →</div>
                     </a>
@@ -1407,8 +1357,8 @@ function AppInner() {
             </div>
 
             {loadingFB && (
-              <div style={{background:T.card,border:`1px solid ${T.cardBorder}`,borderRadius:14,padding:40,textAlign:"center",boxShadow:"0 1px 2px rgba(0,0,0,.04)",marginTop:10}}>
-                <div style={{...S.spinner,border:`2px solid ${T.spinnerBorder}`,borderTop:`2px solid ${T.spinnerTop}`}}/>
+              <div style={{background:"#fff",border:`1px solid ${"#fff"Border}`,borderRadius:14,padding:40,textAlign:"center",boxShadow:"0 1px 2px rgba(0,0,0,.04)",marginTop:10}}>
+                <div style={{...S.spinner,border:"2px solid #e5e7eb",borderTop:"2px solid #111827"}}/>
                 <div style={{fontSize:13,color:"#9ca3af",marginTop:16}}>{lang==="PT"?lang==="PT"?"A analisar o teu histórico...":"Analysing your history...":"Analysing your history..."}</div>
               </div>
             )}
@@ -1422,9 +1372,9 @@ function AppInner() {
             {!feedback && !loadingFB && (
               <div style={{marginTop:10,display:"flex",flexDirection:"column",gap:8}}>
                 {lang==="PT"?["Score de saúde da banca","Identificação dos melhores mercados","Alertas de risco personalizados","Recomendações baseadas no histórico"]:["Bankroll health score","Best markets identification","Personalised risk alerts","Recommendations based on history"].map(f=>(
-                  <div key={f} style={{display:"flex",alignItems:"center",gap:10,background:T.card,border:`1px solid ${T.cardBorder}`,borderRadius:10,padding:"10px 14px",boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
+                  <div key={f} style={{display:"flex",alignItems:"center",gap:10,background:"#fff",border:`1px solid ${"#fff"Border}`,borderRadius:10,padding:"10px 14px",boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
                     <span style={{color:sc.color,fontWeight:700}}>→</span>
-                    <span style={{fontSize:13,color:T.text}}>{f}</span>
+                    <span style={{fontSize:13,color:"#111827"}}>{f}</span>
                   </div>
                 ))}
               </div>
@@ -1432,12 +1382,12 @@ function AppInner() {
 
             {feedback && !feedback.error && !loadingFB && (
               <div>
-                <div style={{background:T.card,border:`1px solid ${T.cardBorder}`,borderRadius:14,padding:20,textAlign:"center",boxShadow:"0 1px 2px rgba(0,0,0,.04)",marginTop:10}}>
-                  <div style={{width:90,height:90,borderRadius:"50%",border:`3px solid ${sc.color}44`,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",margin:"0 auto",background:T.bg3}}>
+                <div style={{background:"#fff",border:`1px solid ${"#fff"Border}`,borderRadius:14,padding:20,textAlign:"center",boxShadow:"0 1px 2px rgba(0,0,0,.04)",marginTop:10}}>
+                  <div style={{width:90,height:90,borderRadius:"50%",border:`3px solid ${sc.color}44`,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",margin:"0 auto",background:"#f7f8fa"3}}>
                     <div style={{fontSize:32,fontWeight:900,color:(feedback.score||0)>=7?"#059669":(feedback.score||0)>=4?"#d97706":"#dc2626"}}>{feedback.score||"—"}</div>
-                    <div style={{fontSize:10,color:T.text3}}>/10</div>
+                    <div style={{fontSize:10,color:"#111827"3}}>/10</div>
                   </div>
-                  <div style={{fontSize:15,fontWeight:700,color:T.text,marginTop:12}}>{feedback.headline||""}</div>
+                  <div style={{fontSize:15,fontWeight:700,color:"#111827",marginTop:12}}>{feedback.headline||""}</div>
                 </div>
                 {feedback.warnings?.length>0 && (
                   <div style={{background:"#fffbeb",border:"1px solid #fde68a",borderRadius:14,padding:16,marginTop:10}}>
@@ -1445,21 +1395,21 @@ function AppInner() {
                     {feedback.warnings.map((w,i)=><p key={i} style={{color:"#78350f",fontSize:13,margin:"6px 0",lineHeight:1.5}}>{w}</p>)}
                   </div>
                 )}
-                <div style={{background:T.card,border:`1px solid ${T.cardBorder}`,borderRadius:14,padding:16,marginTop:10,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
+                <div style={{background:"#fff",border:`1px solid ${"#fff"Border}`,borderRadius:14,padding:16,marginTop:10,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
                   <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,marginBottom:14,fontWeight:800}}>{tx("insights")}</div>
                   {(feedback.insights||[]).map((ins,i)=>(
-                    <div key={i} style={{display:"flex",padding:"8px 0",borderBottom:`1px solid ${T.cardBorder}`}}>
+                    <div key={i} style={{display:"flex",padding:"8px 0",borderBottom:`1px solid ${"#fff"Border}`}}>
                       <span style={{color:sc.color,marginRight:10,flexShrink:0,fontWeight:700}}>→</span>
-                      <span style={{color:T.text,fontSize:13,lineHeight:1.5}}>{ins}</span>
+                      <span style={{color:"#111827",fontSize:13,lineHeight:1.5}}>{ins}</span>
                     </div>
                   ))}
                 </div>
-                <div style={{background:T.card,border:`1px solid ${T.cardBorder}`,borderRadius:14,padding:16,marginTop:10,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
+                <div style={{background:"#fff",border:`1px solid ${"#fff"Border}`,borderRadius:14,padding:16,marginTop:10,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
                   <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,marginBottom:14,fontWeight:800}}>{tx("recommendations")}</div>
                   {(feedback.tips||[]).map((t,i)=>(
-                    <div key={i} style={{display:"flex",padding:"8px 0",borderBottom:`1px solid ${T.cardBorder}`}}>
+                    <div key={i} style={{display:"flex",padding:"8px 0",borderBottom:`1px solid ${"#fff"Border}`}}>
                       <span style={{color:"#059669",marginRight:10,flexShrink:0,fontWeight:700}}>✓</span>
-                      <span style={{color:T.text,fontSize:13,lineHeight:1.5}}>{t}</span>
+                      <span style={{color:"#111827",fontSize:13,lineHeight:1.5}}>{t}</span>
                     </div>
                   ))}
                 </div>
@@ -1470,16 +1420,16 @@ function AppInner() {
 
         {tab==="sobre" && (
           <div>
-            <div style={{background:T.card,border:`1px solid ${T.cardBorder}`,borderRadius:14,padding:24,textAlign:"center",boxShadow:"0 1px 2px rgba(0,0,0,.04)",marginBottom:10}}>
+            <div style={{background:"#fff",border:`1px solid ${"#fff"Border}`,borderRadius:14,padding:24,textAlign:"center",boxShadow:"0 1px 2px rgba(0,0,0,.04)",marginBottom:10}}>
               <div style={{fontSize:48,marginBottom:12}}>📊</div>
-              <div style={{fontSize:20,fontWeight:900,color:T.text,marginBottom:4}}>BankrollPro</div>
+              <div style={{fontSize:20,fontWeight:900,color:"#111827",marginBottom:4}}>BankrollPro</div>
               <div style={{fontSize:13,color:"#9ca3af",marginBottom:16}}>Gestão profissional de banca desportiva</div>
-              <div style={{background:T.bg3,border:`1px solid ${T.cardBorder}`,borderRadius:10,padding:"12px 16px",marginBottom:16,textAlign:"left"}}>
+              <div style={{background:"#f7f8fa"3,border:`1px solid ${"#fff"Border}`,borderRadius:10,padding:"12px 16px",marginBottom:16,textAlign:"left"}}>
                 <div style={{fontSize:11,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,marginBottom:8}}>Desenvolvido por</div>
-                <div style={{fontSize:14,fontWeight:700,color:T.text}}>BankrollPro Team</div>
+                <div style={{fontSize:14,fontWeight:700,color:"#111827"}}>BankrollPro Team</div>
                 <div style={{fontSize:12,color:"#6b7280",marginTop:2}}>Todos os direitos reservados</div>
               </div>
-              <div style={{background:T.bg3,border:`1px solid ${T.cardBorder}`,borderRadius:10,padding:"12px 16px",marginBottom:20,textAlign:"left"}}>
+              <div style={{background:"#f7f8fa"3,border:`1px solid ${"#fff"Border}`,borderRadius:10,padding:"12px 16px",marginBottom:20,textAlign:"left"}}>
                 <div style={{fontSize:11,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,marginBottom:8}}>Plano atual</div>
                 <div style={{fontSize:14,fontWeight:700,color:br?.subscribed?"#059669":"#d97706"}}>{br?.subscribed?lang==="PT"?`Plano ${br?.plan==="annual"?"Anual":"Mensal"} · Ativo`:`${br?.plan==="annual"?"Annual":"Monthly"} Plan · Active`:lang==="PT"?`Trial · ${trialLeft} dias restantes`:`Trial · ${trialLeft} days remaining`}</div>
                 {br?.subscribed&&<div style={{fontSize:12,color:"#6b7280",marginTop:2}}>Análises IA: {br?.plan==="annual"?AI_LIMIT_ANNUAL:AI_LIMIT_MONTHLY}/mês</div>}
@@ -1490,14 +1440,14 @@ function AppInner() {
               </a>
             </div>
 
-            <div style={{background:T.card,border:`1px solid ${T.cardBorder}`,borderRadius:14,padding:16,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
+            <div style={{background:"#fff",border:`1px solid ${"#fff"Border}`,borderRadius:14,padding:16,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
               <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,fontWeight:800,marginBottom:14}}>{lang==="PT"?"O que está incluído":"What's included"}</div>
               {[lang==="PT"?[["📊","Múltiplas bancas","Até 3 bancas separadas por desporto"],["📅","Diário de apostas","Registo completo com resultado imediato ou pendente"],["📈","Relatório mensal","Métricas detalhadas por mês e por dia"],["📉","Gráfico de evolução","Acompanha a evolução da tua banca visualmente"],["🤖","Análise IA","Feedback personalizado baseado no teu histórico real"],["💱","Múltiplas moedas","€, R\$ e \$"]]:[["📊","Multiple bankrolls","Up to 3, separated by sport"],["📅","Betting diary","Full log with immediate or pending results"],["📈","Monthly report","Detailed metrics per month and day"],["📉","Evolution chart","Track your bankroll visually"],["🤖","AI Analysis","Personalised feedback based on your real history"],["💱","Multiple currencies","€, R\$ and \$"]]].map(([ico,t,d])=>(
-                <div key={t} style={{display:"flex",gap:12,padding:"10px 0",borderBottom:`1px solid ${T.border}`}}>
+                <div key={t} style={{display:"flex",gap:12,padding:"10px 0",borderBottom:"1px solid #f3f4f6"}}>
                   <span style={{fontSize:20,flexShrink:0}}>{ico}</span>
                   <div>
-                    <div style={{fontSize:13,fontWeight:600,color:T.text}}>{t}</div>
-                    <div style={{fontSize:12,color:T.text3}}>{d}</div>
+                    <div style={{fontSize:13,fontWeight:600,color:"#111827"}}>{t}</div>
+                    <div style={{fontSize:12,color:"#111827"3}}>{d}</div>
                   </div>
                 </div>
               ))}
@@ -1506,7 +1456,7 @@ function AppInner() {
         )}
 
         {tab==="admin" && isAdmin && (
-          <AdminPanel supabase={supabase} fmt={fmt} daysLeft={daysLeft} T={T}/>
+          <AdminPanel supabase={supabase} fmt={fmt} daysLeft={daysLeft}/>
         )}
 
       </main>
@@ -1519,27 +1469,25 @@ function AppInner() {
   );
 }
 
-export default function App() { return <ErrorBoundary><AppInner/></ErrorBoundary>; }
-
 function BRForm({ form, setForm, showReset, lang="PT", T={card:"#fff",cardBorder:"#e5e7eb",inputBg:"#fff",inputBorder:"#e5e7eb",text:"#111827",text2:"#6b7280",bg3:"#f9fafb"} }) {
-  const SI = {...S.input, background:T.inputBg, border:`1.5px solid ${T.inputBorder}`, color:T.text};
+  const SI = {...S.input, background:"#fff", border:"1.5px solid #e5e7eb", color:"#111827"};
   return (
     <div>
-      <label style={{...S.label,color:T.text2}}>{lang==="PT"?"Nome da banca":"Bankroll name"}</label>
-      <input style={SI} placeholder="ex: Ténis Principal" value={form.name} onChange={e=>setForm(f=>({...f,name:e.target.value}))}/>
-      <label style={{...S.label,color:T.text2}}>{lang==="PT"?"Desporto":"Sport"}</label>
+      <label style={{...S.label,color:"#111827"2}}>{lang==="PT"?"Nome da banca":"Bankroll name"}</label>
+      <input style={S.input} placeholder="ex: Ténis Principal" value={form.name} onChange={e=>setForm(f=>({...f,name:e.target.value}))}/>
+      <label style={{...S.label,color:"#111827"2}}>{lang==="PT"?"Desporto":"Sport"}</label>
       <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:6,marginTop:4}}>
         {Object.keys(SPORTS).map(s=>(
-          <button key={s} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:3,padding:"8px 4px",border:`1px solid ${form.sport===s?SPORTS[s].color:"#e5e7eb"}`,borderRadius:10,background:T.bg3,cursor:"pointer",color:form.sport===s?SPORTS[s].color:"#9ca3af",fontSize:10,fontWeight:600}} onClick={()=>setForm(f=>({...f,sport:s}))}>
+          <button key={s} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:3,padding:"8px 4px",border:`1px solid ${form.sport===s?SPORTS[s].color:"#e5e7eb"}`,borderRadius:10,background:"#f7f8fa"3,cursor:"pointer",color:form.sport===s?SPORTS[s].color:"#9ca3af",fontSize:10,fontWeight:600}} onClick={()=>setForm(f=>({...f,sport:s}))}>
             <span style={{fontSize:20}}>{SPORTS[s].icon}</span>
             <span>{s}</span>
           </button>
         ))}
       </div>
-      <label style={{...S.label,color:T.text2}}>{lang==="PT"?`Bankroll ${showReset?"(novo valor se repuser)":""} (€)`:`Bankroll ${showReset?"(reset value)":""} (€)`}</label>
-      <input style={SI} type="number" placeholder="ex: 500" value={form.bankroll} onChange={e=>setForm(f=>({...f,bankroll:e.target.value}))}/>
-      <label style={{...S.label,color:T.text2}}>{lang==="PT"?"Unidade (% do bankroll)":"Unit (% of bankroll)"}</label>
-      <input style={SI} type="number" step="0.5" min="0.5" max="10" value={form.unit_pct} onChange={e=>setForm(f=>({...f,unit_pct:e.target.value}))}/>
+      <label style={{...S.label,color:"#111827"2}}>{lang==="PT"?`Bankroll ${showReset?"(novo valor se repuser)":""} (€)`:`Bankroll ${showReset?"(reset value)":""} (€)`}</label>
+      <input style={S.input} type="number" placeholder="ex: 500" value={form.bankroll} onChange={e=>setForm(f=>({...f,bankroll:e.target.value}))}/>
+      <label style={{...S.label,color:"#111827"2}}>{lang==="PT"?"Unidade (% do bankroll)":"Unit (% of bankroll)"}</label>
+      <input style={S.input} type="number" step="0.5" min="0.5" max="10" value={form.unit_pct} onChange={e=>setForm(f=>({...f,unit_pct:e.target.value}))}/>
       {form.bankroll && <p style={{fontSize:12,color:"#9ca3af",margin:"6px 0 0"}}>{lang==="PT"?"1 unidade":"1 unit"} = <strong>€{((parseFloat(form.bankroll)||0)*(parseFloat(form.unit_pct)||2)/100).toFixed(2)}</strong> · {lang==="PT"?"Recomendamos 1–2%":"We recommend 1–2%"}</p>}
       {showReset && (
         <label style={{display:"flex",alignItems:"center",gap:8,marginTop:14,cursor:"pointer",fontSize:12,color:"#dc2626",fontWeight:600}}>
@@ -1551,29 +1499,29 @@ function BRForm({ form, setForm, showReset, lang="PT", T={card:"#fff",cardBorder
   );
 }
 
-function DashboardQuote({darkMode=false, T={card:"#fff",cardBorder:"#e2e8f0",text:"#374151",text3:"#6b7280"}}) {
+function DashboardQuote() {
   const quote = useQuote(8000);
   return (
-    <div style={{background:darkMode?"linear-gradient(135deg,#1a1d27,#22263a)":"linear-gradient(135deg,#f8fafc,#f1f5f9)",border:`1px solid ${T.cardBorder}`,borderRadius:14,padding:"16px 18px",marginBottom:10,position:"relative",overflow:"hidden"}}>
+    <div style={{background:darkMode?"linear-gradient(135deg,#1a1d27,#22263a)":"linear-gradient(135deg,#f8fafc,#f1f5f9)",border:`1px solid ${"#fff"Border}`,borderRadius:14,padding:"16px 18px",marginBottom:10,position:"relative",overflow:"hidden"}}>
       <div style={{position:"absolute",top:10,left:14,fontSize:32,color:"#e2e8f0",fontFamily:"Georgia,serif",lineHeight:1}}>"</div>
-      <p style={{fontSize:13,color:T.text,lineHeight:1.6,fontStyle:"italic",margin:"0 0 10px",paddingLeft:16}}>{quote.text}</p>
-      <div style={{fontSize:11,fontWeight:700,color:T.text2}}>— {quote.author}</div>
+      <p style={{fontSize:13,color:"#111827",lineHeight:1.6,fontStyle:"italic",margin:"0 0 10px",paddingLeft:16}}>{quote.text}</p>
+      <div style={{fontSize:11,fontWeight:700,color:"#111827"2}}>— {quote.author}</div>
     </div>
   );
 }
 
-function LandingQuote({T={card:"#fff",cardBorder:"#e5e7eb",text:"#374151",text3:"#9ca3af"}}) {
+function LandingQuote() {
   const quote = useQuote(8000);
   return (
-    <div style={{background:T.card,border:`1px solid ${T.inputBorder}`,borderRadius:14,padding:"16px 18px",marginBottom:20,boxShadow:"0 1px 4px rgba(0,0,0,.06)",position:"relative"}}>
+    <div style={{background:"#fff",border:"1px solid #e5e7eb",borderRadius:14,padding:"16px 18px",marginBottom:20,boxShadow:"0 1px 4px rgba(0,0,0,.06)",position:"relative"}}>
       <div style={{position:"absolute",top:8,left:14,fontSize:36,color:"#f3f4f6",fontFamily:"Georgia,serif",lineHeight:1}}>"</div>
-      <p style={{fontSize:13,color:T.text,lineHeight:1.6,fontStyle:"italic",margin:"0 0 10px",paddingLeft:18}}>{quote.text}</p>
-      <div style={{fontSize:11,fontWeight:700,color:T.text3}}>— {quote.author}</div>
+      <p style={{fontSize:13,color:"#111827",lineHeight:1.6,fontStyle:"italic",margin:"0 0 10px",paddingLeft:18}}>{quote.text}</p>
+      <div style={{fontSize:11,fontWeight:700,color:"#111827"3}}>— {quote.author}</div>
     </div>
   );
 }
 
-function AdminPanel({ supabase, fmt, daysLeft, T={card:"#fff",cardBorder:"#f3f4f6",text:"#111827",text2:"#6b7280",text3:"#9ca3af",spinnerBorder:"#e5e7eb",spinnerTop:"#111827"} }) {
+function AdminPanel({ supabase, fmt, daysLeft }) {
   const [data, setData]     = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -1592,32 +1540,32 @@ function AdminPanel({ supabase, fmt, daysLeft, T={card:"#fff",cardBorder:"#f3f4f
     load();
   },[]);
 
-  if(loading) return <div style={{textAlign:"center",padding:40}}><div style={{...S.spinner,border:`2px solid ${T.spinnerBorder}`,borderTop:`2px solid ${T.spinnerTop}`}}/></div>;
+  if(loading) return <div style={{textAlign:"center",padding:40}}><div style={{...S.spinner,border:"2px solid #e5e7eb",borderTop:"2px solid #111827"}}/></div>;
 
   return (
     <div>
       <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,fontWeight:800,marginBottom:14}}>Painel de Administração</div>
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:12}}>
         {[["Total Utilizadores",data?.total,"#111827"],["Subscritores Pagos",data?.paid,"#059669"],["Em Trial",data?.trial,"#d97706"],["Trial Expirado",data?.expired,"#dc2626"]].map(([l,v,c])=>(
-          <div key={l} style={{background:T.card,border:`1px solid ${T.cardBorder}`,borderRadius:14,padding:"14px 16px",boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
+          <div key={l} style={{background:"#fff",border:`1px solid ${"#fff"Border}`,borderRadius:14,padding:"14px 16px",boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
             <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,marginBottom:5}}>{l}</div>
             <div style={{fontSize:28,fontWeight:900,color:c}}>{v||0}</div>
           </div>
         ))}
       </div>
-      <div style={{background:T.card,border:`1px solid ${T.cardBorder}`,borderRadius:14,padding:16,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
+      <div style={{background:"#fff",border:`1px solid ${"#fff"Border}`,borderRadius:14,padding:16,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
         <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,fontWeight:800,marginBottom:14}}>Utilizadores</div>
         {data?.users.map(u=>{
           const tl=daysLeft(u.user_trial_start||u.trial_start);
           const status=u.subscribed?"Pago":tl>0?`Trial (${tl}d)`:"Expirado";
           const sc=u.subscribed?"#059669":tl>0?"#d97706":"#dc2626";
           return (
-            <div key={u.user_id} style={{padding:"12px 0",borderBottom:`1px solid ${T.border}`}}>
+            <div key={u.user_id} style={{padding:"12px 0",borderBottom:"1px solid #f3f4f6"}}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8}}>
                 <div style={{flex:1,minWidth:0}}>
-                  <div style={{fontSize:13,fontWeight:600,color:T.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{u.user_name||u.email||u.user_id.slice(0,8)+"..."}</div>
-                  <div style={{fontSize:11,color:T.text3}}>{u.email&&u.user_name?u.email:""}</div>
-                  <div style={{fontSize:11,color:T.text3}}>{u.bancas} banca{u.bancas>1?"s":""} · {new Date(u.created_at).toLocaleDateString("pt-PT")}</div>
+                  <div style={{fontSize:13,fontWeight:600,color:"#111827",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{u.user_name||u.email||u.user_id.slice(0,8)+"..."}</div>
+                  <div style={{fontSize:11,color:"#111827"3}}>{u.email&&u.user_name?u.email:""}</div>
+                  <div style={{fontSize:11,color:"#111827"3}}>{u.bancas} banca{u.bancas>1?"s":""} · {new Date(u.created_at).toLocaleDateString("pt-PT")}</div>
                 </div>
                 <div style={{textAlign:"right",flexShrink:0,marginLeft:10}}>
                   <div style={{fontSize:12,fontWeight:700,color:sc}}>{status}</div>
@@ -1635,14 +1583,14 @@ function AdminPanel({ supabase, fmt, daysLeft, T={card:"#fff",cardBorder:"#f3f4f
 const S = {
   spinner: { width:26,height:26,border:"2px solid #e5e7eb",borderTop:"2px solid #111827",borderRadius:"50%",animation:"spin 1s linear infinite",margin:"0 auto" },
   btnPrimary: { width:"100%",background:"#111827",color:"#fff",border:"none",borderRadius:10,padding:"14px",fontSize:14,fontWeight:700,cursor:"pointer",letterSpacing:.3 },
-  btnGhost:   { width:"100%",background:"transparent",border:`1.5px solid ${T.inputBorder}`,color:"#6b7280",borderRadius:10,padding:"12px",fontSize:13,cursor:"pointer",marginTop:4 },
-  btnOutline: { background:T.card,border:`1.5px solid ${T.inputBorder}`,color:T.text,borderRadius:8,padding:"8px 18px",fontSize:13,cursor:"pointer",fontWeight:600 },
+  btnGhost:   { width:"100%",background:"transparent",border:"1.5px solid #e5e7eb",color:"#6b7280",borderRadius:10,padding:"12px",fontSize:13,cursor:"pointer",marginTop:4 },
+  btnOutline: { background:"#fff",border:"1.5px solid #e5e7eb",color:"#111827",borderRadius:8,padding:"8px 18px",fontSize:13,cursor:"pointer",fontWeight:600 },
   label: { fontSize:11,color:"#6b7280",marginBottom:5,marginTop:14,display:"block",fontWeight:700,textTransform:"uppercase",letterSpacing:.8 },
-  input: { width:"100%",background:T.card,border:`1.5px solid ${T.inputBorder}`,borderRadius:10,color:T.text,padding:"12px 14px",fontSize:14,boxSizing:"border-box",outline:"none",transition:"border-color .15s" },
+  input: { width:"100%",background:"#fff",border:"1.5px solid #e5e7eb",borderRadius:10,color:"#111827",padding:"12px 14px",fontSize:14,boxSizing:"border-box",outline:"none",transition:"border-color .15s" },
   bWin:  { padding:"7px 14px",borderRadius:8,border:"1.5px solid #d1fae5",background:"#ecfdf5",color:"#065f46",cursor:"pointer",fontSize:12,fontWeight:700 },
   bLoss: { padding:"7px 14px",borderRadius:8,border:"1.5px solid #fecaca",background:"#fff1f2",color:"#991b1b",cursor:"pointer",fontSize:12,fontWeight:700 },
   bCash: { padding:"7px 12px",borderRadius:8,border:"1.5px solid #bfdbfe",background:"#eff6ff",color:"#1e40af",cursor:"pointer",fontSize:12,fontWeight:700 },
-  bVoid: { padding:"7px 12px",borderRadius:8,border:`1.5px solid ${T.inputBorder}`,background:T.bg3,color:"#6b7280",cursor:"pointer",fontSize:12,fontWeight:700 },
+  bVoid: { padding:"7px 12px",borderRadius:8,border:"1.5px solid #e5e7eb",background:"#f7f8fa"3,color:"#6b7280",cursor:"pointer",fontSize:12,fontWeight:700 },
 };
 
 if(typeof document!=="undefined"){
