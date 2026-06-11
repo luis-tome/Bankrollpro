@@ -24,7 +24,7 @@ const I18N = {
   PT:{
     tabs:["Banca","Diário","Relatório","Gráfico","IA","Info"],
     logout:"Terminar sessão",currency:"Moeda",language:"Idioma",
-    bankroll:tx("bankroll"),pnl:tx("pnl"),roi:"ROI",
+    bankroll:"Banca Atual",pnl:"P&L Total",roi:"ROI",
     wins:"Acertos",losses:"Erros",total:"Total",pending:"Pendente",
     strike:"Taxa de Acerto",avgOdd:"Odd Média",unit:"Unidade",
     dayProfit:"Lucro do dia",records:"Registos",
@@ -38,8 +38,8 @@ const I18N = {
     insights:"Insights",recommendations:"Recomendações",alerts:"⚠️ Alertas",
     newRecord:"Novo Registo",editRecord:"Editar Registo",
     immediate:"Resultado imediato",leavePending:"Deixar pendente",
-    single:"Simples",multiple:tx("multiple"),
-    event:tx("event"),odd:"Odd",units:"Unidades",market:"Mercado",selection:"Seleção",
+    single:"Simples",multiple:"Múltipla",
+    event:"Evento",odd:"Odd",units:"Unidades",market:"Mercado",selection:"Seleção",
     result:"Resultado",notes:"Notas (opcional)",saveRecord:"Guardar registo",saveChanges:"Guardar alterações",
     stake:"Stake",potReturn:"Retorno pot.",
     yourBankrolls:"As tuas bancas",newBankroll:"Nova banca",
@@ -166,7 +166,7 @@ function parseTelegramTips(text) {
         if (om) {
           const odd = parseFloat(om[1].replace(",","."));
           const units = um ? parseFloat(um[1].replace(",",".")) : 1;
-          if (odd > 1) bets.push({ event:"BINGO", selection:bingoSelections.join(" + "), units, odd, market:tx("multiple"), result:"PENDING", notes:"" });
+          if (odd > 1) bets.push({ event:"BINGO", selection:bingoSelections.join(" + "), units, odd, market:"Múltipla", result:"PENDING", notes:"" });
         }
         bingoMode = false; bingoSelections = [];
       }
