@@ -1375,7 +1375,7 @@ export default function App() {
 
             {!feedback && !loadingFB && (
               <div style={{marginTop:10,display:"flex",flexDirection:"column",gap:8}}>
-                {lang==="PT"?["Score de saúde da banca","Identificação dos melhores mercados","Alertas de risco personalizados","Recomendações baseadas no histórico"]:["Bankroll health score","Best markets identification","Personalised risk alerts","Recommendations based on history"].map(f=>(
+                {(lang==="PT"?["Score de saúde da banca","Identificação dos melhores mercados","Alertas de risco personalizados","Recomendações baseadas no histórico"]:["Bankroll health score","Best markets identification","Personalised risk alerts","Recommendations based on history"]).map(f=>(
                   <div key={f} style={{display:"flex",alignItems:"center",gap:10,background:"#fff",border:"1px solid #fff",borderRadius:10,padding:"10px 14px",boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
                     <span style={{color:sc.color,fontWeight:700}}>→</span>
                     <span style={{fontSize:13,color:"#111827"}}>{f}</span>
