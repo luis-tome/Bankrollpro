@@ -14,74 +14,68 @@ module.exports = async function handler(req, res) {
   let payload;
   try {
     const b = rawBody ? JSON.parse(rawBody) : req.body;
-    // support both old (summary) and new (payload) format
     payload = b?.payload || b?.summary;
   } catch(e) {
     return res.status(200).json({ error: "Parse body: " + e.message });
   }
   if (!payload) return res.status(200).json({ error: "Sem dados" });
 
-  // Build a readable breakdown for the prompt
   const overview = payload.overview || payload;
   const byMarket = payload.byMarket || [];
   const byOddRange = payload.byOddRange || [];
-  const byUnits = payload.byUnits || [];
+  const individualBets = payload.individualBets || [];
 
+  // Build market breakdown
   const marketLines = byMarket.length
-    ? byMarket.map(m => `  - ${m.market}: ${m.count} apostas, ${m.wins}W/${m.losses}L, P&L ${m.pnl > 0 ? "+" : ""}${m.pnl}, SR ${m.sr}%`).join("\n")
+    ? byMarket.map(m =>
+        `  ${m.market}: ${m.count} apostas | ${m.wins}W/${m.losses}L | SR ${m.sr}% | Odd média ${m.avgOdd} | P&L ${m.pnl > 0 ? "+" : ""}${m.pnl}`
+      ).join("\n")
     : "  (sem dados por mercado)";
 
+  // Build odd range breakdown
   const oddLines = byOddRange.length
-    ? byOddRange.map(o => `  - Odds ${o.range}: ${o.count} apostas, ${o.wins} acertos, P&L ${o.pnl > 0 ? "+" : ""}${o.pnl}`).join("\n")
+    ? byOddRange.map(o =>
+        `  Odds ${o.range}: ${o.count} apostas | ${o.wins}W/${o.losses}L | SR ${o.sr}% | P&L ${o.pnl > 0 ? "+" : ""}${o.pnl}`
+      ).join("\n")
     : "  (sem dados por range de odds)";
 
-  const unitLines = byUnits.length
-    ? byUnits.map(u => `  - ${u.units}: ${u.count} apostas, ${u.wins}W/${u.losses}L, P&L ${u.pnl > 0 ? "+" : ""}${u.pnl}`).join("\n")
-    : "  (sem dados por unidades)";
+  // Build individual bets list
+  const betLines = individualBets.length
+    ? individualBets.map((b, i) =>
+        `  ${i+1}. [${b.result}] ${b.selection || b.market} | @${b.odd} | ${b.units}u | P&L ${b.pnl > 0 ? "+" : ""}${b.pnl}${b.notes ? ` | nota: "${b.notes}"` : ""}`
+      ).join("\n")
+    : "  (sem apostas individuais)";
 
-  const contextBets = payload.betsWithContext || [];
-  const contextLines = contextBets.length
-    ? contextBets.map(b => `  - ${b.market} @${b.odd} → ${b.result} (P&L ${b.pnl > 0 ? "+" : ""}${b.pnl}) | contexto: "${b.notes}"`).join("\n")
-    : null;
+  const hasIndividual = individualBets.length > 0;
 
-  const hasContext = contextBets.length > 0;
+  const prompt = `És um analista de apostas desportivas sénior. Tens acesso ao histórico REAL deste apostador — apostas individuais, mercados, odds e resultados. A tua análise tem de ser baseada nos dados concretos, não em conselhos genéricos.
 
-  const prompt = `És um analista de apostas desportivas experiente. Analisa os dados reais deste apostador e dá feedback direto, específico e accionável. Sem frases genéricas. Foca em padrões concretos que explicam onde está a ganhar e a perder dinheiro.
+DESPORTO: ${payload.sport || "Geral"}
 
-DADOS DO APOSTADOR (${payload.sport || "Desporto geral"}):
+VISÃO GERAL:
+  Total apostas: ${overview.totalBets} | Acertos: ${overview.wins} | Erros: ${overview.losses}
+  Strike Rate: ${overview.strikeRate}% | Odd média: ${overview.avgOdd}
+  ROI: ${overview.roi}% | P&L total: ${overview.pnl > 0 ? "+" : ""}${overview.pnl} | Banca: ${overview.bankroll}
 
-Visão geral:
-  - Total apostas liquidadas: ${overview.totalBets}
-  - Acertos/Erros: ${overview.wins}W / ${overview.losses}L
-  - Strike Rate: ${overview.strikeRate}%
-  - Odd média: ${overview.avgOdd}
-  - ROI: ${overview.roi}%
-  - P&L total: ${overview.pnl > 0 ? "+" : ""}${overview.pnl}
-  - Banca atual: ${overview.bankroll}
-
-Resultados por mercado (ordenado do pior para o melhor):
+RESULTADOS POR MERCADO (pior para melhor):
 ${marketLines}
 
-Resultados por range de odds:
+RESULTADOS POR RANGE DE ODDS:
 ${oddLines}
 
-Resultados por tamanho de aposta:
-${unitLines}
-${hasContext ? `
-Apostas com contexto adicional (${contextBets.length} de ${overview.totalBets} têm notas preenchidas):
-${contextLines}
+${hasIndividual ? `APOSTAS INDIVIDUAIS (últimas ${individualBets.length}):
+${betLines}` : ""}
 
-IMPORTANTE: Usa o campo "contexto" para identificar padrões cruzados. Ex: se várias apostas com "favorito @1.x" têm resultados negativos, menciona isso especificamente.` : `
-NOTA: O apostador não tem notas preenchidas nas apostas. A análise fica limitada aos totais por mercado e odds. Menciona nos tips que preencher o campo "Notas" com contexto (ex: "Alcaraz @1.23, terra, indoor") permite análises muito mais precisas.`}
+INSTRUÇÕES OBRIGATÓRIAS:
+1. score (1-10): baseado no edge real demonstrado — não no ROI isolado. Um SR de 55% com odds médias de 2.0 é um score alto mesmo com ROI baixo.
+2. headline: 1 frase directa que resume o padrão mais importante que vês nos dados.
+3. insights: 3-4 observações FACTUAIS dos dados. Menciona mercados específicos pelo nome, seleções específicas se relevante, ranges de odds com números reais. Exemplo: "Em 'Vencedor do Jogo' tens 8W/14L (SR 36%) com P&L -€28 — é o teu maior buraco."
+4. warnings: 1-2 alertas sobre os padrões mais destrutivos. Sê directo: "As tuas apostas acima de odd 3.0 têm SR de 20% — estás a perder sistematicamente nesse range."
+5. tips: 3-4 acções CONCRETAS e específicas baseadas nos dados. NÃO dizes "aposta menos" — dizes "Corta apostas em [mercado específico] onde o teu SR é X% e perdeste €Y. Concentra em [mercado específico] onde tens SR de Z%."
 
-INSTRUÇÕES:
-- score: 1-10 baseado na saúde real da banca e edge demonstrado
-- headline: 1 frase direta que resume o estado atual (máx 10 palavras)
-- insights: 3-4 observações factuais baseadas nos dados acima. Menciona mercados específicos, ranges de odds específicos. Ex: "Perdes €X em apostas acima de odd 3.0 com SR de Y%" — usa os números reais
-- warnings: 1-2 alertas sobre os padrões mais destrutivos identificados nos dados
-- tips: 3-4 acções concretas e específicas. Ex: "Corta apostas no mercado X onde tens SR de Y% e P&L de -Z" ou "Concentra volume no range de odds A-B onde o teu SR é C% e P&L é positivo". Nunca dizer "aposta menos" sem especificar onde e porquê.
+Se vires padrões nas apostas individuais (ex: perdes sempre quando a seleção inclui "Over", ou quando a odd está entre 2.5-3.0), menciona-os explicitamente.
 
-Responde APENAS com JSON válido sem markdown nem texto extra:
+Responde APENAS com JSON válido sem markdown:
 {"score":7,"headline":"texto","insights":["a","b","c"],"warnings":["w"],"tips":["t1","t2","t3"]}`;
 
   try {
@@ -94,7 +88,7 @@ Responde APENAS com JSON válido sem markdown nem texto extra:
       },
       body: JSON.stringify({
         model: "claude-haiku-4-5-20251001",
-        max_tokens: 1000,
+        max_tokens: 1200,
         messages: [{ role: "user", content: prompt }]
       })
     });
