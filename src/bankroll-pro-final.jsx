@@ -223,11 +223,13 @@ async function getAIFeedback(bets, stats, bankroll, sport) {
 
   // Individual bets (last 50 max to stay within token limits)
   const individualBets = settled.slice(0,50).map(b=>({
+    event: b.event||"",
     selection: b.selection||"",
     market: b.market||"Outros",
     odd: b.odd,
     units: b.units||1,
     result: b.result,
+    date: b.created_at||"",
     pnl: Number((b.result==="WIN"?b.stake*(b.odd-1):b.result==="LOSS"?-b.stake:(b.cashout_val||0)-b.stake).toFixed(2)),
     notes: b.notes||""
   }));
