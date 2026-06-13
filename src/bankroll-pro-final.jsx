@@ -187,58 +187,57 @@ async function getAIFeedback(bets, stats, bankroll, sport) {
   if(settled.length<3) return {error:"Poucos registos"};
   const effectiveSport = (!sport||sport==="Geral") ? "Desporto geral" : sport;
 
+  // Aggregate by market
   const byMarket = {};
-  const byOddRange = {"1.01-1.50":[],"1.51-2.00":[],"2.01-3.00":[],"3.01+":[]};
-  const byUnits = {};
-
   settled.forEach(b => {
     const mkt = b.market || "Outros";
-    if(!byMarket[mkt]) byMarket[mkt] = {wins:0,losses:0,cashouts:0,pnl:0,count:0};
+    if(!byMarket[mkt]) byMarket[mkt] = {wins:0,losses:0,pnl:0,count:0,totalOdd:0};
     byMarket[mkt].count++;
+    byMarket[mkt].totalOdd += b.odd;
     if(b.result==="WIN"){ byMarket[mkt].wins++; byMarket[mkt].pnl+=b.stake*(b.odd-1); }
     else if(b.result==="LOSS"){ byMarket[mkt].losses++; byMarket[mkt].pnl-=b.stake; }
-    else if(b.result==="CASHOUT"){ byMarket[mkt].cashouts++; byMarket[mkt].pnl+=(b.cashout_val||0)-b.stake; }
-
-    const o = b.odd;
-    const range = o<=1.50?"1.01-1.50":o<=2.00?"1.51-2.00":o<=3.00?"2.01-3.00":"3.01+";
-    byOddRange[range].push({result:b.result, pnl:b.result==="WIN"?b.stake*(b.odd-1):b.result==="LOSS"?-b.stake:(b.cashout_val||0)-b.stake});
-
-    const u = b.units<=0.5?"0.5u":b.units<=1?"1u":b.units<=2?"1.5-2u":">2u";
-    if(!byUnits[u]) byUnits[u]={wins:0,losses:0,pnl:0,count:0};
-    byUnits[u].count++;
-    if(b.result==="WIN"){byUnits[u].wins++;byUnits[u].pnl+=b.stake*(b.odd-1);}
-    else if(b.result==="LOSS"){byUnits[u].losses++;byUnits[u].pnl-=b.stake;}
+    else if(b.result==="CASHOUT"){ byMarket[mkt].pnl+=(b.cashout_val||0)-b.stake; }
   });
-
-  const oddRangeSummary = Object.entries(byOddRange).map(([range,arr])=>({
-    range, count:arr.length,
-    wins:arr.filter(x=>x.pnl>0).length,
-    pnl:Number(arr.reduce((s,x)=>s+x.pnl,0).toFixed(2))
-  })).filter(x=>x.count>0);
-
   const marketSummary = Object.entries(byMarket)
-    .map(([market,v])=>({market,...v,pnl:Number(v.pnl.toFixed(2)),sr:v.wins+v.losses>0?Number((v.wins/(v.wins+v.losses)*100).toFixed(0)):0}))
+    .map(([market,v])=>({
+      market, count:v.count,
+      wins:v.wins, losses:v.losses,
+      pnl:Number(v.pnl.toFixed(2)),
+      sr:v.wins+v.losses>0?Number((v.wins/(v.wins+v.losses)*100).toFixed(0)):0,
+      avgOdd:Number((v.totalOdd/v.count).toFixed(2))
+    }))
     .sort((a,b)=>a.pnl-b.pnl);
 
-  // Apostas com notas para análise contextual
-  const betsWithContext = settled
-    .filter(b => b.notes && b.notes.trim().length > 0)
-    .map(b => ({
-      market: b.market || "Outros",
-      selection: b.selection || "",
-      odd: b.odd,
-      result: b.result,
-      pnl: b.result==="WIN" ? Number((b.stake*(b.odd-1)).toFixed(2)) : b.result==="LOSS" ? Number((-b.stake).toFixed(2)) : Number(((b.cashout_val||0)-b.stake).toFixed(2)),
-      notes: b.notes.trim()
-    }));
+  // Aggregate by odd range
+  const byOddRange = {"1.01-1.50":{wins:0,losses:0,pnl:0,count:0},"1.51-2.00":{wins:0,losses:0,pnl:0,count:0},"2.01-3.00":{wins:0,losses:0,pnl:0,count:0},"3.01+":{wins:0,losses:0,pnl:0,count:0}};
+  settled.forEach(b => {
+    const range = b.odd<=1.50?"1.01-1.50":b.odd<=2.00?"1.51-2.00":b.odd<=3.00?"2.01-3.00":"3.01+";
+    const pnl = b.result==="WIN"?b.stake*(b.odd-1):b.result==="LOSS"?-b.stake:(b.cashout_val||0)-b.stake;
+    byOddRange[range].count++;
+    byOddRange[range].pnl+=pnl;
+    if(pnl>0) byOddRange[range].wins++; else byOddRange[range].losses++;
+  });
+  const oddRangeSummary = Object.entries(byOddRange)
+    .filter(([,v])=>v.count>0)
+    .map(([range,v])=>({range,count:v.count,wins:v.wins,losses:v.losses,pnl:Number(v.pnl.toFixed(2)),sr:v.count>0?Number((v.wins/v.count*100).toFixed(0)):0}));
+
+  // Individual bets (last 50 max to stay within token limits)
+  const individualBets = settled.slice(0,50).map(b=>({
+    selection: b.selection||"",
+    market: b.market||"Outros",
+    odd: b.odd,
+    units: b.units||1,
+    result: b.result,
+    pnl: Number((b.result==="WIN"?b.stake*(b.odd-1):b.result==="LOSS"?-b.stake:(b.cashout_val||0)-b.stake).toFixed(2)),
+    notes: b.notes||""
+  }));
 
   const payload = {
     sport: effectiveSport,
     overview: { totalBets:settled.length, wins:stats.wins, losses:stats.losses, roi:Number(stats.roi.toFixed(1)), strikeRate:Number(stats.strikeRate.toFixed(1)), avgOdd:Number(stats.avgOdd.toFixed(2)), pnl:Number(stats.pnl.toFixed(2)), bankroll:Number(bankroll.toFixed(2)) },
     byMarket: marketSummary,
     byOddRange: oddRangeSummary,
-    byUnits: Object.entries(byUnits).map(([u,v])=>({units:u,...v,pnl:Number(v.pnl.toFixed(2))})),
-    betsWithContext: betsWithContext.length > 0 ? betsWithContext : null
+    individualBets
   };
 
   try {
