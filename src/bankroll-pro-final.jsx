@@ -283,8 +283,9 @@ export default function App() {
   const [showImport, setShowImport] = useState(false);
   const [importText, setImportText] = useState("");
   const [importBets, setImportBets] = useState([]);
+  const [importDate, setImportDate] = useState(today());
   const [betSport, setBetSport]     = useState("");
-  const [form, setForm]           = useState({event:"",market:"Vencedor do Jogo",selection:"",odd:"",units:1,result:"WIN",notes:"",cashoutVal:""});
+  const [form, setForm]           = useState({event:"",market:"Vencedor do Jogo",selection:"",odd:"",units:1,result:"WIN",notes:"",cashoutVal:"",betDate:today()});
   const [subView, setSubView]     = useState("annual");
   const [feedback, setFeedback]   = useState(null);
   const [loadingFB, setLoadingFB] = useState(false);
@@ -309,7 +310,7 @@ export default function App() {
   const markets   = SPORTS[effectiveSport]?.markets||["Outros"];
   const formSC    = SPORTS[effectiveSport]||sc;
   const userName  = user?.user_metadata?.name||user?.email?.split("@")[0]||"";
-  const emptyForm = {event:"",market:markets[0]||"Vencedor do Jogo",selection:"",odd:"",units:1,result:"WIN",notes:"",cashoutVal:""};
+  const emptyForm = {event:"",market:markets[0]||"Vencedor do Jogo",selection:"",odd:"",units:1,result:"WIN",notes:"",cashoutVal:"",betDate:today()};
   
 
   useEffect(()=>{
@@ -384,13 +385,17 @@ export default function App() {
     if(odd<=1) return;
     const stake=unitVal*(parseFloat(form.units)||1);
     const result=formMode==="immediate"?form.result:"PENDING";
-    const payload={sport:br?.sport==="Geral"?(betSport||"Outros"):br.sport,event:form.event,market:form.market,selection:form.selection,odd,stake,units:parseFloat(form.units),result,notes:form.notes,cashout_val:form.result==="CASHOUT"?parseFloat(form.cashoutVal)||null:null};
+    // Preserve time-of-day from "now", but use the selected date
+    const now = new Date();
+    const [by,bm,bd] = (form.betDate||today()).split("-").map(Number);
+    const betTimestamp = new Date(by, bm-1, bd, now.getHours(), now.getMinutes(), now.getSeconds()).toISOString();
+    const payload={sport:br?.sport==="Geral"?(betSport||"Outros"):br.sport,event:form.event,market:form.market,selection:form.selection,odd,stake,units:parseFloat(form.units),result,notes:form.notes,cashout_val:form.result==="CASHOUT"?parseFloat(form.cashoutVal)||null:null,created_at:betTimestamp};
     if(editBet){
       const{data}=await supabase.from("bets").update(payload).eq("id",editBet.id).select().single();
-      if(data) setBets(prev=>prev.map(b=>b.id===data.id?{...data,odd:parseFloat(data.odd),stake:parseFloat(data.stake)}:b));
+      if(data) setBets(prev=>prev.map(b=>b.id===data.id?{...data,odd:parseFloat(data.odd),stake:parseFloat(data.stake)}:b).sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)));
     } else {
-      const{data}=await supabase.from("bets").insert({...payload,user_id:user.id,bankroll_id:activeBR,created_at:new Date().toISOString()}).select().single();
-      if(data) setBets(prev=>[{...data,odd:parseFloat(data.odd),stake:parseFloat(data.stake)},...prev]);
+      const{data}=await supabase.from("bets").insert({...payload,user_id:user.id,bankroll_id:activeBR}).select().single();
+      if(data) setBets(prev=>[{...data,odd:parseFloat(data.odd),stake:parseFloat(data.stake)},...prev].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)));
     }
     setForm(emptyForm);setShowForm(false);setEditBet(null);setTab("diary");
   }
@@ -408,7 +413,7 @@ export default function App() {
 
   function openEditBet(b){
     setEditBet(b);
-    setForm({event:b.event||"",market:b.market||markets[0],selection:b.selection||"",odd:b.odd||"",units:b.units||1,result:b.result||"WIN",notes:b.notes||"",cashoutVal:b.cashout_val||""});
+    setForm({event:b.event||"",market:b.market||markets[0],selection:b.selection||"",odd:b.odd||"",units:b.units||1,result:b.result||"WIN",notes:b.notes||"",cashoutVal:b.cashout_val||"",betDate:b.created_at?b.created_at.slice(0,10):today()});
     setFormMode(b.result==="PENDING"?"pending":"immediate");
     setShowForm(true);
   }
@@ -700,6 +705,10 @@ export default function App() {
               <button style={{background:"none",border:"none",color:"#9ca3af",fontSize:22,cursor:"pointer"}} onClick={()=>setShowImport(false)}>×</button>
             </div>
 
+            <label style={S.label}>{lang==="PT"?"Data das apostas":"Bets date"}</label>
+            <input type="date" style={S.input} max={today()} value={importDate} onChange={e=>setImportDate(e.target.value)}/>
+
+            <label style={{...S.label,marginTop:14}}>{lang==="PT"?"Texto das apostas":"Bets text"}</label>
             <textarea
               style={{...S.input,height:140,resize:"none",fontFamily:"inherit",fontSize:13}}
               placeholder={"🎾  SINNER v ALCARAZ\n🎯   SINNER VENCE\n💰  1un @1.85 (Pinnacle)"}
@@ -737,13 +746,16 @@ export default function App() {
                 ))}
                 <button style={{...S.btnPrimary,marginTop:12,background:sc.color,border:"none"}}
                   onClick={async()=>{
+                    const now = new Date();
+                    const [iy,im,id] = (importDate||today()).split("-").map(Number);
+                    const importTimestamp = new Date(iy, im-1, id, now.getHours(), now.getMinutes(), now.getSeconds()).toISOString();
                     for(const b of importBets){
                       const stake=unitVal*b.units;
                       await supabase.from("bets").insert({
                         user_id:user.id,bankroll_id:activeBR,sport:br.sport,
                         event:b.event,market:b.market,selection:b.selection,
                         odd:b.odd,stake,units:b.units,result:"PENDING",
-                        notes:b.notes,created_at:new Date().toISOString()
+                        notes:b.notes,created_at:importTimestamp
                       });
                     }
                     await loadBets(activeBR);
@@ -914,6 +926,9 @@ export default function App() {
                 </div>
               </div>
             )}
+
+            <label style={S.label}>{lang==="PT"?"Data da aposta":"Bet date"}</label>
+            <input type="date" style={S.input} max={today()} value={form.betDate||today()} onChange={e=>setForm(f=>({...f,betDate:e.target.value}))}/>
 
             {br?.sport==="Geral" && (
               <div>
@@ -1477,7 +1492,7 @@ export default function App() {
 
       </main>
 
-      <button style={{position:"fixed",bottom:90,right:18,width:44,height:44,borderRadius:"50%",border:"none",color:"#fff",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 16px rgba(0,0,0,.15)",zIndex:20,fontSize:18,background:"#374151"}} onClick={()=>{setShowImport(true);setImportText("");setImportBets([]);}}>📋</button>
+      <button style={{position:"fixed",bottom:90,right:18,width:44,height:44,borderRadius:"50%",border:"none",color:"#fff",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 16px rgba(0,0,0,.15)",zIndex:20,fontSize:18,background:"#374151"}} onClick={()=>{setShowImport(true);setImportText("");setImportBets([]);setImportDate(today());}}>📋</button>
 
       <button style={{position:"fixed",bottom:24,right:18,width:56,height:56,borderRadius:"50%",border:"none",color:"#fff",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 16px rgba(0,0,0,.2)",zIndex:20,fontSize:28,lineHeight:1,background:sc.color}} onClick={()=>{setForm(emptyForm);setEditBet(null);setBetSport("");setShowForm(true);}}>+</button>
 
