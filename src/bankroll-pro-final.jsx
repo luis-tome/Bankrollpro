@@ -96,6 +96,7 @@ const QUOTES = [
   { text: "Apostadores que quebram não perdem porque escolhem mal. Perdem porque apostam demasiado.", author: "Kelly Criterion" },
   { text: "Trata cada aposta como um investimento, não como entretenimento.", author: "Pinnacle Sports" },
   { text: "A paciência é a arma mais poderosa de qualquer apostador profissional.", author: "Zeljko Ranogajec" },
+  { text: "Na subida do Monte Evereste está cheio de corpos de gente super motivada.", author: "Theo Borges" },
 ];
 
 function useQuote(interval = 8000) {
