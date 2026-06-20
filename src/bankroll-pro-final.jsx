@@ -294,6 +294,7 @@ export default function App() {
   const [diaryDate, setDiaryDate] = useState(today());
   const [reportMonth, setReportMonth] = useState(today().slice(0,7));
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showStakeReview, setShowStakeReview] = useState(false);
   const touchX = useRef(null);
 
 
@@ -354,7 +355,7 @@ export default function App() {
     if(!brv||brv<=0||!brForm.name) return;
     if(isEdit&&editBRTarget){
       const updates={name:brForm.name,sport:brForm.sport,unit_pct:parseFloat(brForm.unit_pct)};
-      if(brForm.reset) updates.bankroll=brv;
+      if(brForm.reset){ updates.bankroll=brv; updates.last_stake_review=new Date().toISOString(); }
       const{data}=await supabase.from("profiles").update(updates).eq("id",editBRTarget.id).select().single();
       if(data){setBankrolls(prev=>prev.map(b=>b.id===data.id?data:b));setShowEditBR(false);}
     } else {
@@ -364,7 +365,7 @@ export default function App() {
       const earliestTrial=existing?.[0]?.user_trial_start||existing?.[0]?.trial_start||new Date().toISOString();
       const userEmail=session?.user?.email||user?.email||"";
       const userDisplayName=session?.user?.user_metadata?.name||user?.user_metadata?.name||"";
-      const{data}=await supabase.from("profiles").insert({user_id:uid,name:brForm.name,sport:brForm.sport,bankroll:brv,unit_pct:parseFloat(brForm.unit_pct),trial_start:new Date().toISOString(),user_trial_start:earliestTrial,subscribed:false,email:userEmail,user_name:userDisplayName}).select().single();
+      const{data}=await supabase.from("profiles").insert({user_id:uid,name:brForm.name,sport:brForm.sport,bankroll:brv,unit_pct:parseFloat(brForm.unit_pct),trial_start:new Date().toISOString(),user_trial_start:earliestTrial,subscribed:false,email:userEmail,user_name:userDisplayName,last_stake_review:new Date().toISOString()}).select().single();
       if(data){setBankrolls(prev=>[...prev,data]);setActiveBR(data.id);setBets([]);setShowNewBR(false);setShowEditBR(false);setDrawerOpen(false);setBRForm({name:"",sport:"Ténis",bankroll:"",unit_pct:"2",reset:false});setScreen("app");}
     }
   }
@@ -447,6 +448,38 @@ export default function App() {
 
   const currentBR = brHistory[brHistory.length-1]?.v||parseFloat(br?.bankroll||0);
   const unitVal   = br ? currentBR*br.unit_pct/100 : 0;
+
+  // Revisão de stake a cada 30 dias
+  const lastReviewDate = br?.last_stake_review || br?.created_at;
+  const daysSinceReview = lastReviewDate ? Math.floor((Date.now()-new Date(lastReviewDate).getTime())/86400000) : 0;
+  const stakeReviewDue = br && daysSinceReview >= 30;
+  const reviewPnlPct = br ? ((currentBR-parseFloat(br.bankroll||0))/(parseFloat(br.bankroll||0)||1))*100 : 0;
+  const suggestedBankroll = currentBR;
+
+  useEffect(()=>{
+    if(stakeReviewDue && screen==="app" && isActive){
+      const dismissedKey = `stakeReviewDismissed_${br?.id}`;
+      const dismissedUntil = typeof localStorage!=="undefined" ? localStorage.getItem(dismissedKey) : null;
+      if(!dismissedUntil || new Date(dismissedUntil) < new Date()){
+        setShowStakeReview(true);
+      }
+    }
+  },[stakeReviewDue, br?.id, screen]);
+
+  async function acceptStakeReview(){
+    if(!br) return;
+    const{data}=await supabase.from("profiles").update({bankroll:suggestedBankroll, last_stake_review:new Date().toISOString()}).eq("id",br.id).select().single();
+    if(data) setBankrolls(prev=>prev.map(b=>b.id===data.id?data:b));
+    setShowStakeReview(false);
+  }
+
+  function dismissStakeReview(){
+    if(br?.id && typeof localStorage!=="undefined"){
+      const snooze = new Date(); snooze.setDate(snooze.getDate()+30);
+      localStorage.setItem(`stakeReviewDismissed_${br.id}`, snooze.toISOString());
+    }
+    setShowStakeReview(false);
+  }
 
   const diaryBets = bets.filter(b=>b.created_at?.slice(0,10)===diaryDate);
   const diaryPnl  = diaryBets.filter(b=>b.result!=="PENDING"&&b.result!=="VOID").reduce((s,b)=>{
@@ -789,6 +822,44 @@ export default function App() {
               <div style={{fontSize:13,color:"#15803d",fontWeight:600,marginTop:4}}>✓ Análise IA disponível</div>
             </div>
             <button style={{...S.btnPrimary,background:sc.color,border:"none"}} onClick={()=>setShowSuccess(false)}>Começar agora →</button>
+          </div>
+        </div>
+      )}
+
+      {showStakeReview && br && (
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.5)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center",padding:20}}>
+          <div style={{background:"#fff",borderRadius:16,padding:28,maxWidth:380,width:"100%"}} onClick={e=>e.stopPropagation()}>
+            <div style={{fontSize:40,marginBottom:10,textAlign:"center"}}>📊</div>
+            <h2 style={{fontSize:19,fontWeight:900,color:"#111827",margin:"0 0 6px",textAlign:"center"}}>{lang==="PT"?"Hora de rever a tua banca":"Time to review your bankroll"}</h2>
+            <p style={{fontSize:13,color:"#6b7280",lineHeight:1.5,marginBottom:18,textAlign:"center"}}>
+              {lang==="PT"?`Já passaram 30 dias desde a última revisão de "${br.name}".`:`30 days have passed since the last review of "${br.name}".`}
+            </p>
+
+            <div style={{background:"#f9fafb",border:"1px solid #f3f4f6",borderRadius:12,padding:16,marginBottom:16}}>
+              <div style={{display:"flex",justifyContent:"space-between",marginBottom:10}}>
+                <span style={{fontSize:12,color:"#9ca3af"}}>{lang==="PT"?"Banca declarada":"Declared bankroll"}</span>
+                <strong style={{fontSize:13,color:"#374151"}}>{fmt(parseFloat(br.bankroll||0))}</strong>
+              </div>
+              <div style={{display:"flex",justifyContent:"space-between",marginBottom:10}}>
+                <span style={{fontSize:12,color:"#9ca3af"}}>{lang==="PT"?"Banca atual (real)":"Current bankroll (actual)"}</span>
+                <strong style={{fontSize:14,color:reviewPnlPct>=0?"#059669":"#dc2626"}}>{fmt(currentBR)} ({fmtPct(reviewPnlPct)})</strong>
+              </div>
+              <div style={{borderTop:"1px solid #e5e7eb",paddingTop:10,display:"flex",justifyContent:"space-between"}}>
+                <span style={{fontSize:12,color:"#9ca3af"}}>{lang==="PT"?"Nova unidade sugerida":"Suggested new unit"}</span>
+                <strong style={{fontSize:14,color:sc.color}}>{fmt(suggestedBankroll*br.unit_pct/100)} <span style={{fontSize:11,fontWeight:400,color:"#9ca3af"}}>({br.unit_pct}%)</span></strong>
+              </div>
+            </div>
+
+            <p style={{fontSize:12,color:"#9ca3af",lineHeight:1.5,marginBottom:18,textAlign:"center"}}>
+              {lang==="PT"?"Queres atualizar a banca declarada para o valor atual? Isto recalcula automaticamente o valor da tua unidade.":"Do you want to update your declared bankroll to the current value? This recalculates your unit automatically."}
+            </p>
+
+            <button style={{...S.btnPrimary,background:sc.color,border:"none",marginBottom:8}} onClick={acceptStakeReview}>
+              {lang==="PT"?"✓ Atualizar banca":"✓ Update bankroll"}
+            </button>
+            <button style={S.btnGhost} onClick={dismissStakeReview}>
+              {lang==="PT"?"Manter como está · lembrar em 30 dias":"Keep as is · remind in 30 days"}
+            </button>
           </div>
         </div>
       )}
