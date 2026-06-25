@@ -109,15 +109,15 @@ function useQuote(interval = 8000) {
 }
 
 const SPORTS = {
-  "Geral":       { icon:"🎯", color:"#6b7280", markets:["Outros"] },
-  "Ténis":       { icon:"🎾", color:"#0ea5e9", markets:["Vencedor do Jogo","Handicap Games","Total Games O/U","Set Winner","Total Sets O/U","Resultado Correto Sets","1º Set Vencedor","Total Games 1º Set","Handicap Sets","Dupla Hipótese","Tie-Break no Jogo","1º Break de Serviço","Jogo em Deuce","Total Aces O/U","Total Double Faults O/U","Outros"] },
-  "Futebol":     { icon:"⚽", color:"#10b981", markets:["1X2","Dupla Hipótese","Over/Under Golos","BTTS","Handicap Asiático","Handicap Europeu","Marcador Correto","1º Marcador","Total Cantos","Total Cartões","Over/Under 1ª Parte","Resultado ao Intervalo","Outros"] },
-  "Basquetebol": { icon:"🏀", color:"#f97316", markets:["1X2","Handicap","Over/Under","1º Quarto","Moneyline","Outros"] },
-  "Hóquei":      { icon:"🏒", color:"#8b5cf6", markets:["1X2","Handicap","Over/Under","Resultado Final","Outros"] },
-  "Baseball":    { icon:"⚾", color:"#ef4444", markets:["Moneyline","Run Line","Over/Under","1ª Entrada","Outros"] },
-  "Rugby":       { icon:"🏉", color:"#eab308", markets:["1X2","Handicap","Over/Under","Primeira Tentativa","Outros"] },
-  "MMA/UFC":     { icon:"🥊", color:"#ec4899", markets:["Vencedor","Método de Vitória","Round","Over/Under Rounds","Vai a Decisão","Outros"] },
-  "Outros":      { icon:"🎯", color:"#6b7280", markets:["1X2","Handicap","Over/Under","Outros"] },
+  "Geral":       { icon:"🎯", color:"#6b7280", markets:["Outros"], strategies:["Liga Principal","Torneio Secundário"] },
+  "Ténis":       { icon:"🎾", color:"#0ea5e9", markets:["Vencedor do Jogo","Handicap Games","Total Games O/U","Set Winner","Total Sets O/U","Resultado Correto Sets","1º Set Vencedor","Total Games 1º Set","Handicap Sets","Dupla Hipótese","Tie-Break no Jogo","1º Break de Serviço","Jogo em Deuce","Total Aces O/U","Total Double Faults O/U","Outros"], strategies:["ATP","WTA","Challenger","ITF"] },
+  "Futebol":     { icon:"⚽", color:"#10b981", markets:["1X2","Dupla Hipótese","Over/Under Golos","BTTS","Handicap Asiático","Handicap Europeu","Marcador Correto","1º Marcador","Total Cantos","Total Cartões","Over/Under 1ª Parte","Resultado ao Intervalo","Outros"], strategies:["Liga Principal","Copa Nacional","Liga Europeia","Amigável"] },
+  "Basquetebol": { icon:"🏀", color:"#f97316", markets:["1X2","Handicap","Over/Under","1º Quarto","Moneyline","Outros"], strategies:["NBA","EuroLiga","Liga Nacional"] },
+  "Hóquei":      { icon:"🏒", color:"#8b5cf6", markets:["1X2","Handicap","Over/Under","Resultado Final","Outros"], strategies:["NHL","Liga Europeia","Liga Nacional"] },
+  "Baseball":    { icon:"⚾", color:"#ef4444", markets:["Moneyline","Run Line","Over/Under","1ª Entrada","Outros"], strategies:["MLB","Liga Nacional"] },
+  "Rugby":       { icon:"🏉", color:"#eab308", markets:["1X2","Handicap","Over/Under","Primeira Tentativa","Outros"], strategies:["Six Nations","Liga Principal","Torneio Internacional"] },
+  "MMA/UFC":     { icon:"🥊", color:"#ec4899", markets:["Vencedor","Método de Vitória","Round","Over/Under Rounds","Vai a Decisão","Outros"], strategies:["UFC","Bellator","Outro Evento"] },
+  "Outros":      { icon:"🎯", color:"#6b7280", markets:["1X2","Handicap","Over/Under","Outros"], strategies:["Liga Principal","Torneio Secundário"] },
 };
 const SPORT_KEYS = Object.keys(SPORTS);
 
@@ -276,7 +276,7 @@ export default function App() {
   const [showNewBR, setShowNewBR] = useState(false);
   const [showEditBR, setShowEditBR] = useState(false);
   const [editBRTarget, setEditBRTarget] = useState(null);
-  const [brForm, setBRForm]       = useState({name:"",sport:"Ténis",bankroll:"",unit_pct:"2",reset:false});
+  const [brForm, setBRForm]       = useState({name:"",sport:"Ténis",bankroll:"",unit_pct:"2",reset:false,stake_mode:"variable"});
   const [showForm, setShowForm]   = useState(false);
   const [editBet, setEditBet]     = useState(null);
   const [formMode, setFormMode]   = useState("immediate");
@@ -286,12 +286,14 @@ export default function App() {
   const [importBets, setImportBets] = useState([]);
   const [importDate, setImportDate] = useState(today());
   const [betSport, setBetSport]     = useState("");
-  const [form, setForm]           = useState({event:"",market:"Vencedor do Jogo",selection:"",odd:"",units:1,result:"WIN",notes:"",cashoutVal:"",betDate:today()});
+  const [form, setForm]           = useState({event:"",market:"Vencedor do Jogo",selection:"",odd:"",units:1,result:"WIN",notes:"",cashoutVal:"",betDate:today(),strategy:""});
   const [subView, setSubView]     = useState("annual");
   const [feedback, setFeedback]   = useState(null);
   const [loadingFB, setLoadingFB] = useState(false);
   const [aiUsage, setAiUsage]       = useState(0);
   const [diaryDate, setDiaryDate] = useState(today());
+  const [diaryStrategyFilter, setDiaryStrategyFilter] = useState("all");
+  const [reportStrategyFilter, setReportStrategyFilter] = useState("all");
   const [reportMonth, setReportMonth] = useState(today().slice(0,7));
   const [showSuccess, setShowSuccess] = useState(false);
   const [showStakeReview, setShowStakeReview] = useState(false);
@@ -312,7 +314,7 @@ export default function App() {
   const markets   = SPORTS[effectiveSport]?.markets||["Outros"];
   const formSC    = SPORTS[effectiveSport]||sc;
   const userName  = user?.user_metadata?.name||user?.email?.split("@")[0]||"";
-  const emptyForm = {event:"",market:markets[0]||"Vencedor do Jogo",selection:"",odd:"",units:1,result:"WIN",notes:"",cashoutVal:"",betDate:today()};
+  const emptyForm = {event:"",market:markets[0]||"Vencedor do Jogo",selection:"",odd:"",units:1,result:"WIN",notes:"",cashoutVal:"",betDate:today(),strategy:""};
   
 
   useEffect(()=>{
@@ -354,7 +356,7 @@ export default function App() {
     const brv=parseFloat(brForm.bankroll);
     if(!brv||brv<=0||!brForm.name) return;
     if(isEdit&&editBRTarget){
-      const updates={name:brForm.name,sport:brForm.sport,unit_pct:parseFloat(brForm.unit_pct)};
+      const updates={name:brForm.name,sport:brForm.sport,unit_pct:parseFloat(brForm.unit_pct),stake_mode:brForm.stake_mode||"variable"};
       if(brForm.reset){ updates.bankroll=brv; updates.last_stake_review=new Date().toISOString(); }
       const{data}=await supabase.from("profiles").update(updates).eq("id",editBRTarget.id).select().single();
       if(data){setBankrolls(prev=>prev.map(b=>b.id===data.id?data:b));setShowEditBR(false);}
@@ -365,8 +367,8 @@ export default function App() {
       const earliestTrial=existing?.[0]?.user_trial_start||existing?.[0]?.trial_start||new Date().toISOString();
       const userEmail=session?.user?.email||user?.email||"";
       const userDisplayName=session?.user?.user_metadata?.name||user?.user_metadata?.name||"";
-      const{data}=await supabase.from("profiles").insert({user_id:uid,name:brForm.name,sport:brForm.sport,bankroll:brv,unit_pct:parseFloat(brForm.unit_pct),trial_start:new Date().toISOString(),user_trial_start:earliestTrial,subscribed:false,email:userEmail,user_name:userDisplayName,last_stake_review:new Date().toISOString()}).select().single();
-      if(data){setBankrolls(prev=>[...prev,data]);setActiveBR(data.id);setBets([]);setShowNewBR(false);setShowEditBR(false);setDrawerOpen(false);setBRForm({name:"",sport:"Ténis",bankroll:"",unit_pct:"2",reset:false});setScreen("app");}
+      const{data}=await supabase.from("profiles").insert({user_id:uid,name:brForm.name,sport:brForm.sport,bankroll:brv,unit_pct:parseFloat(brForm.unit_pct),trial_start:new Date().toISOString(),user_trial_start:earliestTrial,subscribed:false,email:userEmail,user_name:userDisplayName,last_stake_review:new Date().toISOString(),stake_mode:brForm.stake_mode||"variable"}).select().single();
+      if(data){setBankrolls(prev=>[...prev,data]);setActiveBR(data.id);setBets([]);setShowNewBR(false);setShowEditBR(false);setDrawerOpen(false);setBRForm({name:"",sport:"Ténis",bankroll:"",unit_pct:"2",reset:false,stake_mode:"variable"});setScreen("app");}
     }
   }
 
@@ -391,7 +393,7 @@ export default function App() {
     const now = new Date();
     const [by,bm,bd] = (form.betDate||today()).split("-").map(Number);
     const betTimestamp = new Date(by, bm-1, bd, now.getHours(), now.getMinutes(), now.getSeconds()).toISOString();
-    const payload={sport:br?.sport==="Geral"?(betSport||"Outros"):br.sport,event:form.event,market:form.market,selection:form.selection,odd,stake,units:parseFloat(form.units),result,notes:form.notes,cashout_val:form.result==="CASHOUT"?parseFloat(form.cashoutVal)||null:null,created_at:betTimestamp};
+    const payload={sport:br?.sport==="Geral"?(betSport||"Outros"):br.sport,event:form.event,market:form.market,selection:form.selection,odd,stake,units:parseFloat(form.units),result,notes:form.notes,cashout_val:form.result==="CASHOUT"?parseFloat(form.cashoutVal)||null:null,created_at:betTimestamp,strategy:form.strategy||null};
     if(editBet){
       const{data}=await supabase.from("bets").update(payload).eq("id",editBet.id).select().single();
       if(data) setBets(prev=>prev.map(b=>b.id===data.id?{...data,odd:parseFloat(data.odd),stake:parseFloat(data.stake)}:b).sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)));
@@ -415,7 +417,7 @@ export default function App() {
 
   function openEditBet(b){
     setEditBet(b);
-    setForm({event:b.event||"",market:b.market||markets[0],selection:b.selection||"",odd:b.odd||"",units:b.units||1,result:b.result||"WIN",notes:b.notes||"",cashoutVal:b.cashout_val||"",betDate:b.created_at?b.created_at.slice(0,10):today()});
+    setForm({event:b.event||"",market:b.market||markets[0],selection:b.selection||"",odd:b.odd||"",units:b.units||1,result:b.result||"WIN",notes:b.notes||"",cashoutVal:b.cashout_val||"",betDate:b.created_at?b.created_at.slice(0,10):today(),strategy:b.strategy||""});
     setFormMode(b.result==="PENDING"?"pending":"immediate");
     setShowForm(true);
   }
@@ -447,7 +449,7 @@ export default function App() {
   },[bets,br]);
 
   const currentBR = brHistory[brHistory.length-1]?.v||parseFloat(br?.bankroll||0);
-  const unitVal   = br ? currentBR*br.unit_pct/100 : 0;
+  const unitVal   = br ? (br.stake_mode==="fixed" ? parseFloat(br.bankroll||0)*br.unit_pct/100 : currentBR*br.unit_pct/100) : 0;
 
   // Revisão de stake a cada 30 dias
   const lastReviewDate = br?.last_stake_review || br?.created_at;
@@ -481,7 +483,12 @@ export default function App() {
     setShowStakeReview(false);
   }
 
-  const diaryBets = bets.filter(b=>b.created_at?.slice(0,10)===diaryDate);
+  const availableStrategies = useMemo(()=>{
+    const set = new Set(bets.map(b=>b.strategy).filter(Boolean));
+    return Array.from(set).sort();
+  },[bets]);
+
+  const diaryBets = bets.filter(b=>b.created_at?.slice(0,10)===diaryDate && (diaryStrategyFilter==="all" || b.strategy===diaryStrategyFilter));
   const diaryPnl  = diaryBets.filter(b=>b.result!=="PENDING"&&b.result!=="VOID").reduce((s,b)=>{
     if(b.result==="WIN") return s+b.stake*(b.odd-1);
     if(b.result==="LOSS") return s-b.stake;
@@ -489,7 +496,7 @@ export default function App() {
     return s;
   },0);
 
-  const reportBets   = bets.filter(b=>b.created_at?.slice(0,7)===reportMonth&&b.result!=="PENDING"&&b.result!=="VOID");
+  const reportBets   = bets.filter(b=>b.created_at?.slice(0,7)===reportMonth&&b.result!=="PENDING"&&b.result!=="VOID"&&(reportStrategyFilter==="all"||b.strategy===reportStrategyFilter));
   const reportWins   = reportBets.filter(b=>b.result==="WIN").length;
   const reportLoss   = reportBets.filter(b=>b.result==="LOSS").length;
   const reportPnl    = reportBets.reduce((s,b)=>{ if(b.result==="WIN")return s+b.stake*(b.odd-1); if(b.result==="LOSS")return s-b.stake; if(b.result==="CASHOUT")return s+(b.cashout_val||0)-b.stake; return s; },0);
@@ -837,6 +844,10 @@ export default function App() {
 
             <div style={{background:"#f9fafb",border:"1px solid #f3f4f6",borderRadius:12,padding:16,marginBottom:16}}>
               <div style={{display:"flex",justifyContent:"space-between",marginBottom:10}}>
+                <span style={{fontSize:12,color:"#9ca3af"}}>{lang==="PT"?"Modo de stake":"Stake mode"}</span>
+                <strong style={{fontSize:13,color:"#374151"}}>{br.stake_mode==="fixed"?(lang==="PT"?"Fixa 🔒":"Fixed 🔒"):(lang==="PT"?"Variável 📈":"Variable 📈")}</strong>
+              </div>
+              <div style={{display:"flex",justifyContent:"space-between",marginBottom:10}}>
                 <span style={{fontSize:12,color:"#9ca3af"}}>{lang==="PT"?"Banca declarada":"Declared bankroll"}</span>
                 <strong style={{fontSize:13,color:"#374151"}}>{fmt(parseFloat(br.bankroll||0))}</strong>
               </div>
@@ -851,7 +862,10 @@ export default function App() {
             </div>
 
             <p style={{fontSize:12,color:"#9ca3af",lineHeight:1.5,marginBottom:18,textAlign:"center"}}>
-              {lang==="PT"?"Queres atualizar a banca declarada para o valor atual? Isto recalcula automaticamente o valor da tua unidade.":"Do you want to update your declared bankroll to the current value? This recalculates your unit automatically."}
+              {br.stake_mode==="fixed"
+                ? (lang==="PT"?"A tua stake fixa está calculada sobre €"+parseFloat(br.bankroll||0).toFixed(2)+". Queres atualizá-la para a banca atual?":"Your fixed stake is calculated on €"+parseFloat(br.bankroll||0).toFixed(2)+". Update it to the current bankroll?")
+                : (lang==="PT"?"A tua stake variável usa "+br.unit_pct+"% da banca atual. Queres manter a percentagem ou ajustá-la?":"Your variable stake uses "+br.unit_pct+"% of current bankroll. Keep the percentage or adjust it?")
+              }
             </p>
 
             <button style={{...S.btnPrimary,background:sc.color,border:"none",marginBottom:8}} onClick={acceptStakeReview}>
@@ -927,13 +941,13 @@ export default function App() {
                     </div>
                     <span style={{fontSize:13,fontWeight:700,color:bsc?.color}}>{fmt(parseFloat(b.bankroll))}</span>
                   </button>
-                  <button style={{background:"none",border:"none",color:"#d1d5db",cursor:"pointer",padding:"0 4px",fontSize:14}} onClick={()=>{setEditBRTarget(b);setBRForm({name:b.name,sport:b.sport,bankroll:b.bankroll,unit_pct:b.unit_pct,reset:false});setShowEditBR(true);setDrawerOpen(false);}}>✏️</button>
+                  <button style={{background:"none",border:"none",color:"#d1d5db",cursor:"pointer",padding:"0 4px",fontSize:14}} onClick={()=>{setEditBRTarget(b);setBRForm({name:b.name,sport:b.sport,bankroll:b.bankroll,unit_pct:b.unit_pct,reset:false,stake_mode:b.stake_mode||"variable"});setShowEditBR(true);setDrawerOpen(false);}}>✏️</button>
                 </div>
               );
             })}
 
             {bankrolls.length<MAX_BANKROLLS && (
-              <button style={{display:"flex",alignItems:"center",width:"100%",padding:"10px",border:"1px dashed #e5e7eb",background:"transparent",cursor:"pointer",borderRadius:10,fontSize:13,marginTop:4,color:"#111827"}} onClick={()=>{setBRForm({name:"",sport:"Ténis",bankroll:"",unit_pct:"2",reset:false});setShowNewBR(true);setDrawerOpen(false);}}>
+              <button style={{display:"flex",alignItems:"center",width:"100%",padding:"10px",border:"1px dashed #e5e7eb",background:"transparent",cursor:"pointer",borderRadius:10,fontSize:13,marginTop:4,color:"#111827"}} onClick={()=>{setBRForm({name:"",sport:"Ténis",bankroll:"",unit_pct:"2",reset:false,stake_mode:"variable"});setShowNewBR(true);setDrawerOpen(false);}}>
                 <span style={{marginRight:8,color:"#9ca3af",fontSize:18}}>+</span>
                 {lang==="PT"?"Nova banca":"New bankroll"} ({bankrolls.length}/{MAX_BANKROLLS})
               </button>
@@ -1001,6 +1015,12 @@ export default function App() {
 
             <label style={S.label}>{lang==="PT"?"Data da aposta":"Bet date"}</label>
             <input type="date" style={S.input} max={today()} value={form.betDate||today()} onChange={e=>setForm(f=>({...f,betDate:e.target.value}))}/>
+
+            <label style={S.label}>{lang==="PT"?"Estratégia (opcional)":"Strategy (optional)"}</label>
+            <input style={S.input} list="strategy-suggestions" placeholder={lang==="PT"?"ex: ATP, Liga Principal...":"e.g. ATP, Main League..."} value={form.strategy} onChange={e=>setForm(f=>({...f,strategy:e.target.value}))}/>
+            <datalist id="strategy-suggestions">
+              {(SPORTS[br?.sport==="Geral"?(betSport||"Outros"):(br?.sport||"Ténis")]?.strategies||[]).map(s=><option key={s} value={s}/>)}
+            </datalist>
 
             {br?.sport==="Geral" && (
               <div>
@@ -1092,6 +1112,7 @@ export default function App() {
         </div>
         <div style={{display:"flex",alignItems:"center",gap:6}}>
           {isInTrial && !isAdmin && <span style={{borderRadius:6,padding:"3px 10px",fontSize:12,fontWeight:600,color:"#92400e",background:"#f8f9fa",border:"1px solid #e9ecef",cursor:"pointer"}} onClick={()=>setDrawerOpen(true)}>{trialLeft}d ⏰</span>}
+          <span style={{borderRadius:6,padding:"3px 8px",fontSize:10,fontWeight:700,color:"#6b7280",background:"#f3f4f6",border:"1px solid #e5e7eb"}}>{br?.stake_mode==="fixed"?"🔒 Fixa":"📈 Var"}</span>
           <span style={{borderRadius:6,padding:"3px 10px",fontSize:13,fontWeight:800,color:sc.color,background:sc.color+"15",border:`1px solid ${sc.color}33`}}>{fmt(currentBR)}</span>
         </div>
       </header>
@@ -1177,6 +1198,15 @@ export default function App() {
               <button style={{background:"none",border:"1px solid #e5e7eb",borderRadius:8,width:32,height:32,cursor:"pointer",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center",color:"#111827",flexShrink:0}} onClick={()=>{ const dt=new Date(diaryDate+"T00:00:00"); dt.setDate(dt.getDate()+1); setDiaryDate(padDate(dt)); }}>›</button>
             </div>
 
+            {availableStrategies.length>0 && (
+              <div style={{display:"flex",gap:6,overflowX:"auto",marginBottom:10,paddingBottom:2}}>
+                <button style={{flexShrink:0,padding:"6px 12px",borderRadius:20,border:`1px solid ${diaryStrategyFilter==="all"?sc.color:"#e5e7eb"}`,background:diaryStrategyFilter==="all"?sc.color:"#fff",color:diaryStrategyFilter==="all"?"#fff":"#6b7280",cursor:"pointer",fontSize:12,fontWeight:700}} onClick={()=>setDiaryStrategyFilter("all")}>{lang==="PT"?"Todas":"All"}</button>
+                {availableStrategies.map(s=>(
+                  <button key={s} style={{flexShrink:0,padding:"6px 12px",borderRadius:20,border:`1px solid ${diaryStrategyFilter===s?sc.color:"#e5e7eb"}`,background:diaryStrategyFilter===s?sc.color:"#fff",color:diaryStrategyFilter===s?"#fff":"#6b7280",cursor:"pointer",fontSize:12,fontWeight:700}} onClick={()=>setDiaryStrategyFilter(s)}>{s}</button>
+                ))}
+              </div>
+            )}
+
             <div style={{background:"#fff",border:"1px solid #fff",borderRadius:14,padding:16,marginBottom:10,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                 <div>
@@ -1205,7 +1235,10 @@ export default function App() {
                 <div key={b.id} style={{background:"#fff",border:"1px solid #fff",borderRadius:14,padding:14,marginBottom:8,boxShadow:"0 1px 2px rgba(0,0,0,.04)",borderLeft:`3px solid ${borderColor}`}}>
                   <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
                     <div style={{flex:1,minWidth:0}}>
-                      <div style={{fontSize:13,fontWeight:700,color:"#111827"}}>{b.event||b.selection}</div>
+                      <div style={{display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}>
+                        <div style={{fontSize:13,fontWeight:700,color:"#111827"}}>{b.event||b.selection}</div>
+                        {b.strategy && <span style={{fontSize:10,fontWeight:700,color:sc.color,background:sc.color+"15",border:`1px solid ${sc.color}33`,borderRadius:10,padding:"1px 8px"}}>{b.strategy}</span>}
+                      </div>
                       {b.event && <div style={{fontSize:12,color:"#6b7280",marginTop:1}}>{b.market} · <strong style={{color:"#111827"}}>{b.selection}</strong></div>}
                       {!b.event && b.market && <div style={{fontSize:12,color:"#6b7280",marginTop:1}}>{b.market}</div>}
                       <div style={{fontSize:12,color:"#9ca3af",marginTop:2}}>ODD {b.odd.toFixed(2)} · Stake {fmt(b.stake)}</div>
@@ -1243,6 +1276,15 @@ export default function App() {
               <div style={{flex:1,textAlign:"center",fontSize:14,fontWeight:700,color:"#111827"}}>{monthLabel(reportMonth+"-01")}</div>
               <button style={{background:"none",border:"1px solid #e5e7eb",borderRadius:8,width:32,height:32,cursor:"pointer",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center",color:"#111827",flexShrink:0}} onClick={()=>{ const d=new Date(reportMonth+"-01"); d.setMonth(d.getMonth()+1); setReportMonth(d.toISOString().slice(0,7)); }}>›</button>
             </div>
+
+            {availableStrategies.length>0 && (
+              <div style={{display:"flex",gap:6,overflowX:"auto",marginBottom:10,paddingBottom:2}}>
+                <button style={{flexShrink:0,padding:"6px 12px",borderRadius:20,border:`1px solid ${reportStrategyFilter==="all"?sc.color:"#e5e7eb"}`,background:reportStrategyFilter==="all"?sc.color:"#fff",color:reportStrategyFilter==="all"?"#fff":"#6b7280",cursor:"pointer",fontSize:12,fontWeight:700}} onClick={()=>setReportStrategyFilter("all")}>{lang==="PT"?"Todas":"All"}</button>
+                {availableStrategies.map(s=>(
+                  <button key={s} style={{flexShrink:0,padding:"6px 12px",borderRadius:20,border:`1px solid ${reportStrategyFilter===s?sc.color:"#e5e7eb"}`,background:reportStrategyFilter===s?sc.color:"#fff",color:reportStrategyFilter===s?"#fff":"#6b7280",cursor:"pointer",fontSize:12,fontWeight:700}} onClick={()=>setReportStrategyFilter(s)}>{s}</button>
+                ))}
+              </div>
+            )}
 
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:10}}>
               {[[tx("initialBR"),fmt(parseFloat(br?.bankroll||0))],[tx("finalBR"),fmt(currentBR)],[tx("entries"),reportBets.length]].map(([l,v])=>(
@@ -1588,6 +1630,28 @@ function BRForm({ form, setForm, showReset, lang="PT", T={card:"#fff",cardBorder
       </div>
       <label style={{...S.label,color:"#111827"}}>{lang==="PT"?`Bankroll ${showReset?"(novo valor se repuser)":""} (€)`:`Bankroll ${showReset?"(reset value)":""} (€)`}</label>
       <input style={S.input} type="number" placeholder="ex: 500" value={form.bankroll} onChange={e=>setForm(f=>({...f,bankroll:e.target.value}))}/>
+
+      <label style={{...S.label,color:"#111827"}}>{lang==="PT"?"Tipo de stake":"Stake type"}</label>
+      <div style={{display:"flex",gap:8,marginTop:4,marginBottom:4}}>
+        <button style={{flex:1,padding:"10px 8px",border:`1px solid ${(form.stake_mode||"variable")==="variable"?"#111827":"#e5e7eb"}`,borderRadius:10,background:(form.stake_mode||"variable")==="variable"?"#111827":"#f9fafb",color:(form.stake_mode||"variable")==="variable"?"#fff":"#6b7280",cursor:"pointer",fontSize:12,fontWeight:700,textAlign:"center"}}
+          onClick={()=>setForm(f=>({...f,stake_mode:"variable"}))}>
+          <div style={{fontSize:16,marginBottom:4}}>📈</div>
+          <div>{lang==="PT"?"Variável":"Variable"}</div>
+          <div style={{fontSize:10,fontWeight:400,marginTop:2,opacity:.8}}>{lang==="PT"?"% da banca atual":"% of current bankroll"}</div>
+        </button>
+        <button style={{flex:1,padding:"10px 8px",border:`1px solid ${(form.stake_mode||"variable")==="fixed"?"#111827":"#e5e7eb"}`,borderRadius:10,background:(form.stake_mode||"variable")==="fixed"?"#111827":"#f9fafb",color:(form.stake_mode||"variable")==="fixed"?"#fff":"#6b7280",cursor:"pointer",fontSize:12,fontWeight:700,textAlign:"center"}}
+          onClick={()=>setForm(f=>({...f,stake_mode:"fixed"}))}>
+          <div style={{fontSize:16,marginBottom:4}}>🔒</div>
+          <div>{lang==="PT"?"Fixa":"Fixed"}</div>
+          <div style={{fontSize:10,fontWeight:400,marginTop:2,opacity:.8}}>{lang==="PT"?"% da banca inicial":"% of initial bankroll"}</div>
+        </button>
+      </div>
+      {(form.stake_mode||"variable")==="fixed" && (
+        <div style={{background:"#f0fdf4",border:"1px solid #bbf7d0",borderRadius:8,padding:"8px 12px",fontSize:12,color:"#15803d",marginBottom:4}}>
+          {lang==="PT"?"A unidade mantém-se sempre baseada na banca inicial. Usa a revisão de 30 dias para a atualizar manualmente.":"The unit always stays based on the initial bankroll. Use the 30-day review to update it manually."}
+        </div>
+      )}
+
       <label style={{...S.label,color:"#111827"}}>{lang==="PT"?"Unidade (% do bankroll)":"Unit (% of bankroll)"}</label>
       <input style={S.input} type="number" step="0.5" min="0.5" max="10" value={form.unit_pct} onChange={e=>setForm(f=>({...f,unit_pct:e.target.value}))}/>
       {form.bankroll && <p style={{fontSize:12,color:"#9ca3af",margin:"6px 0 0"}}>{lang==="PT"?"1 unidade":"1 unit"} = <strong>€{((parseFloat(form.bankroll)||0)*(parseFloat(form.unit_pct)||2)/100).toFixed(2)}</strong> · {lang==="PT"?"Recomendamos 1–2%":"We recommend 1–2%"}</p>}
