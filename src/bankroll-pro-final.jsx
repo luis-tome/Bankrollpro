@@ -164,18 +164,23 @@ function parseTelegramTips(text) {
       continue;
     }
 
+    // Event line (has sport emoji, no 🎯 or 💰)
     if (hasSport(line) && !line.includes("🎯") && !line.includes("💰")) {
       currentEvent = cleanSport(line);
       currentSelection = null;
+    // Selection/market line
     } else if (line.includes("🎯")) {
       currentSelection = line.replace(/🎯/g,"").trim();
-    } else if (line.includes("💰") && line.includes("@") && currentEvent && currentSelection) {
+    // Stake/odd line — format: 💰 Xun @ODD (original) OR 💰 Xun @ODD (Master Tipster extracted)
+    } else if (line.includes("💰") && line.includes("@") && currentEvent) {
       const um = line.match(/([\d.,]+)\s*un/i);
       const om = line.match(/@\s*([\d.,]+)/);
       if (om) {
         const odd = parseFloat(om[1].replace(",","."));
         const units = um ? parseFloat(um[1].replace(",",".")) : 1;
-        if (odd > 1) bets.push({ event:currentEvent, selection:currentSelection, units, odd, market:"Outros", result:"PENDING", notes:"" });
+        const selection = currentSelection || currentEvent;
+        const market = currentSelection ? "Outros" : "Vencedor";
+        if (odd > 1) bets.push({ event:currentEvent, selection, units, odd, market, result:"PENDING", notes:"" });
       }
       currentSelection = null;
     }
@@ -283,6 +288,8 @@ export default function App() {
   const [betType, setBetType]       = useState("single");
   const [showImport, setShowImport] = useState(false);
   const [importText, setImportText] = useState("");
+  const [importImage, setImportImage] = useState(null);
+  const [importImageLoading, setImportImageLoading] = useState(false);
   const [importBets, setImportBets] = useState([]);
   const [importDate, setImportDate] = useState(today());
   const [betSport, setBetSport]     = useState("");
@@ -748,6 +755,75 @@ export default function App() {
 
             <label style={S.label}>{lang==="PT"?"Data das apostas":"Bets date"}</label>
             <input type="date" style={S.input} max={today()} value={importDate} onChange={e=>setImportDate(e.target.value)}/>
+
+            {isAdmin && (
+              <div style={{marginTop:14,marginBottom:14}}>
+                <label style={S.label}>📸 Importar via imagem <span style={{background:"#7c3aed",color:"#fff",fontSize:9,fontWeight:800,padding:"2px 6px",borderRadius:4,marginLeft:4}}>BETA</span></label>
+                <div style={{border:"2px dashed #e5e7eb",borderRadius:10,padding:"14px",textAlign:"center",background:"#f9fafb",position:"relative"}}>
+                  {importImageLoading ? (
+                    <div>
+                      <div style={S.spinner}/>
+                      <div style={{fontSize:12,color:"#9ca3af",marginTop:10}}>A ler a imagem com IA...</div>
+                    </div>
+                  ) : importImage ? (
+                    <div>
+                      <div style={{fontSize:12,color:"#059669",fontWeight:700,marginBottom:6}}>✓ Imagem carregada — texto extraído abaixo</div>
+                      <button style={{fontSize:11,color:"#9ca3af",background:"none",border:"1px solid #e5e7eb",borderRadius:6,padding:"4px 10px",cursor:"pointer"}} onClick={()=>setImportImage(null)}>Remover</button>
+                    </div>
+                  ) : (
+                    <div>
+                      <div style={{fontSize:24,marginBottom:6}}>📱</div>
+                      <div style={{fontSize:12,color:"#6b7280",marginBottom:8}}>Faz upload do print do Telegram</div>
+                      <input type="file" accept="image/*" style={{display:"none"}} id="telegram-img-upload"
+                        onChange={async e=>{
+                          const file = e.target.files[0];
+                          if(!file) return;
+                          setImportImageLoading(true);
+                          setImportImage(file.name);
+                          try {
+                            const base64 = await new Promise((res,rej)=>{
+                              const reader = new FileReader();
+                              reader.onload = ()=>res(reader.result.split(",")[1]);
+                              reader.onerror = rej;
+                              reader.readAsDataURL(file);
+                            });
+                            const mediaType = file.type || "image/jpeg";
+                            const response = await fetch("https://api.anthropic.com/v1/messages", {
+                              method:"POST",
+                              headers:{"Content-Type":"application/json"},
+                              body: JSON.stringify({
+                                model:"claude-sonnet-4-6",
+                                max_tokens:1000,
+                                messages:[{
+                                  role:"user",
+                                  content:[
+                                    {type:"image",source:{type:"base64",media_type:mediaType,data:base64}},
+                                    {type:"text",text:`Analisa esta imagem de um grupo de Telegram de apostas. Extrai TODAS as apostas visíveis e devolve APENAS o texto no seguinte formato, uma aposta por bloco:\n\n⚽ EQUIPA_A vs EQUIPA_B\n🎯 MERCADO/SELEÇÃO\n💰 STAKEun @ODD\n\nRegras:\n- EQUIPA_A vs EQUIPA_B: o evento do card branco (ex: "Panamá vs Inglaterra")\n- MERCADO/SELEÇÃO: o tipo de aposta (ex: "Hipótese dupla. 2X", "Total. Acima de (3.5)", "1X2. V1")\n- STAKE: o número após "STAKE" (ex: se diz "STAKE 1.5" escreve "1.5un")\n- ODD: o número da odd no card (ex: "1.971")\n- Usa ⚽ para futebol, 🎾 para ténis, 🏀 para basquetebol\n- Ignora códigos de casas de apostas (22BET, etc)\n- Se não conseguires ler uma aposta claramente, salta-a\n- Não adiciones mais nada, só os blocos de apostas`}
+                                  ]
+                                }]
+                              })
+                            });
+                            const data = await response.json();
+                            const text = (data.content||[]).map(c=>c.text||"").join("").trim();
+                            setImportText(text);
+                            setImportBets(parseTelegramTips(text));
+                          } catch(err) {
+                            alert("Erro ao ler imagem: " + err.message);
+                            setImportImage(null);
+                          } finally {
+                            setImportImageLoading(false);
+                            e.target.value = "";
+                          }
+                        }}
+                      />
+                      <label htmlFor="telegram-img-upload" style={{display:"inline-block",background:"#111827",color:"#fff",padding:"8px 16px",borderRadius:8,fontSize:12,fontWeight:700,cursor:"pointer"}}>
+                        Escolher imagem
+                      </label>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
 
             <label style={{...S.label,marginTop:14}}>{lang==="PT"?"Texto das apostas":"Bets text"}</label>
             <textarea
@@ -1606,7 +1682,7 @@ export default function App() {
 
       </main>
 
-      <button style={{position:"fixed",bottom:90,right:18,width:44,height:44,borderRadius:"50%",border:"none",color:"#fff",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 16px rgba(0,0,0,.15)",zIndex:20,fontSize:18,background:"#374151"}} onClick={()=>{setShowImport(true);setImportText("");setImportBets([]);setImportDate(today());}}>📋</button>
+      <button style={{position:"fixed",bottom:90,right:18,width:44,height:44,borderRadius:"50%",border:"none",color:"#fff",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 16px rgba(0,0,0,.15)",zIndex:20,fontSize:18,background:"#374151"}} onClick={()=>{setShowImport(true);setImportText("");setImportBets([]);setImportDate(today());setImportImage(null);}}>📋</button>
 
       <button style={{position:"fixed",bottom:24,right:18,width:56,height:56,borderRadius:"50%",border:"none",color:"#fff",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 16px rgba(0,0,0,.2)",zIndex:20,fontSize:28,lineHeight:1,background:sc.color}} onClick={()=>{setForm(emptyForm);setEditBet(null);setBetSport("");setShowForm(true);}}>+</button>
 
