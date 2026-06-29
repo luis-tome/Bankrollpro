@@ -280,6 +280,8 @@ export default function App() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [showNewBR, setShowNewBR] = useState(false);
   const [showEditBR, setShowEditBR] = useState(false);
+  const [showDeposit, setShowDeposit] = useState(false);
+  const [depositVal, setDepositVal] = useState("");
   const [editBRTarget, setEditBRTarget] = useState(null);
   const [brForm, setBRForm]       = useState({name:"",sport:"Ténis",bankroll:"",unit_pct:"2",reset:false,stake_mode:"variable"});
   const [showForm, setShowForm]   = useState(false);
@@ -376,6 +378,18 @@ export default function App() {
       const userDisplayName=session?.user?.user_metadata?.name||user?.user_metadata?.name||"";
       const{data}=await supabase.from("profiles").insert({user_id:uid,name:brForm.name,sport:brForm.sport,bankroll:brv,unit_pct:parseFloat(brForm.unit_pct),trial_start:new Date().toISOString(),user_trial_start:earliestTrial,subscribed:false,email:userEmail,user_name:userDisplayName,last_stake_review:new Date().toISOString(),stake_mode:brForm.stake_mode||"variable"}).select().single();
       if(data){setBankrolls(prev=>[...prev,data]);setActiveBR(data.id);setBets([]);setShowNewBR(false);setShowEditBR(false);setDrawerOpen(false);setBRForm({name:"",sport:"Ténis",bankroll:"",unit_pct:"2",reset:false,stake_mode:"variable"});setScreen("app");}
+    }
+  }
+
+  async function handleDeposit(){
+    const val = parseFloat(depositVal);
+    if(!val || val <= 0 || !br) return;
+    const newBankroll = parseFloat(br.bankroll||0) + val;
+    const{data} = await supabase.from("profiles").update({bankroll: newBankroll, last_stake_review: new Date().toISOString()}).eq("id", br.id).select().single();
+    if(data){
+      setBankrolls(prev=>prev.map(b=>b.id===data.id?data:b));
+      setShowDeposit(false);
+      setDepositVal("");
     }
   }
 
@@ -788,23 +802,14 @@ export default function App() {
                               reader.readAsDataURL(file);
                             });
                             const mediaType = file.type || "image/jpeg";
-                            const response = await fetch("https://api.anthropic.com/v1/messages", {
+                            const response = await fetch("/api/read-image", {
                               method:"POST",
                               headers:{"Content-Type":"application/json"},
-                              body: JSON.stringify({
-                                model:"claude-sonnet-4-6",
-                                max_tokens:1000,
-                                messages:[{
-                                  role:"user",
-                                  content:[
-                                    {type:"image",source:{type:"base64",media_type:mediaType,data:base64}},
-                                    {type:"text",text:`Analisa esta imagem de um grupo de Telegram de apostas. Extrai TODAS as apostas visíveis e devolve APENAS o texto no seguinte formato, uma aposta por bloco:\n\n⚽ EQUIPA_A vs EQUIPA_B\n🎯 MERCADO/SELEÇÃO\n💰 STAKEun @ODD\n\nRegras:\n- EQUIPA_A vs EQUIPA_B: o evento do card branco (ex: "Panamá vs Inglaterra")\n- MERCADO/SELEÇÃO: o tipo de aposta (ex: "Hipótese dupla. 2X", "Total. Acima de (3.5)", "1X2. V1")\n- STAKE: o número após "STAKE" (ex: se diz "STAKE 1.5" escreve "1.5un")\n- ODD: o número da odd no card (ex: "1.971")\n- Usa ⚽ para futebol, 🎾 para ténis, 🏀 para basquetebol\n- Ignora códigos de casas de apostas (22BET, etc)\n- Se não conseguires ler uma aposta claramente, salta-a\n- Não adiciones mais nada, só os blocos de apostas`}
-                                  ]
-                                }]
-                              })
+                              body: JSON.stringify({ imageData: base64, mediaType })
                             });
                             const data = await response.json();
-                            const text = (data.content||[]).map(c=>c.text||"").join("").trim();
+                            if(data.error) throw new Error(data.error);
+                            const text = data.text || "";
                             setImportText(text);
                             setImportBets(parseTelegramTips(text));
                           } catch(err) {
@@ -1064,6 +1069,53 @@ export default function App() {
               <button style={{...S.btnPrimary,flex:1}} onClick={()=>handleCreateBR(true)}>{lang==="PT"?"Guardar":"Save"}</button>
               <button style={{padding:"13px 16px",border:"1px solid #fca5a5",background:"#fef2f2",color:"#dc2626",borderRadius:8,cursor:"pointer",fontSize:13,fontWeight:700}} onClick={()=>deleteBankroll(editBRTarget?.id)}>🗑</button>
             </div>
+            <button style={{...S.btnGhost,marginTop:8,color:"#059669",border:"1px solid #bbf7d0",background:"#f0fdf4",fontWeight:700}} onClick={()=>{setShowEditBR(false);setShowDeposit(true);}}>
+              💰 {lang==="PT"?"Fazer aporte":"Add funds"}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {showDeposit && br && (
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.4)",zIndex:100,display:"flex",alignItems:"center",justifyContent:"center",padding:20}}>
+          <div style={{background:"#fff",borderRadius:16,padding:24,width:"100%",maxWidth:380,boxShadow:"0 20px 60px rgba(0,0,0,.2)"}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+              <h3 style={{margin:0,fontSize:16,fontWeight:700,color:"#111827"}}>💰 {lang==="PT"?"Fazer aporte":"Add funds"}</h3>
+              <button style={{background:"none",border:"none",color:"#9ca3af",fontSize:22,cursor:"pointer"}} onClick={()=>{setShowDeposit(false);setDepositVal("");}}>×</button>
+            </div>
+
+            <div style={{background:"#f9fafb",border:"1px solid #f3f4f6",borderRadius:10,padding:"12px 16px",marginBottom:16}}>
+              <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}>
+                <span style={{fontSize:12,color:"#9ca3af"}}>{lang==="PT"?"Banca atual":"Current bankroll"}</span>
+                <strong style={{fontSize:13,color:"#374151"}}>{fmt(parseFloat(br.bankroll||0))}</strong>
+              </div>
+              {depositVal && parseFloat(depositVal)>0 && (
+                <>
+                  <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}>
+                    <span style={{fontSize:12,color:"#9ca3af"}}>{lang==="PT"?"Aporte":"Deposit"}</span>
+                    <strong style={{fontSize:13,color:"#059669"}}>+{fmt(parseFloat(depositVal))}</strong>
+                  </div>
+                  <div style={{display:"flex",justifyContent:"space-between",borderTop:"1px solid #e5e7eb",paddingTop:8}}>
+                    <span style={{fontSize:12,color:"#9ca3af"}}>{lang==="PT"?"Nova banca":"New bankroll"}</span>
+                    <strong style={{fontSize:14,color:sc.color}}>{fmt(parseFloat(br.bankroll||0)+parseFloat(depositVal))}</strong>
+                  </div>
+                </>
+              )}
+            </div>
+
+            <label style={S.label}>{lang==="PT"?"Valor do aporte (€)":"Deposit amount (€)"}</label>
+            <input style={S.input} type="number" placeholder="ex: 100" value={depositVal} onChange={e=>setDepositVal(e.target.value)} autoFocus/>
+
+            <p style={{fontSize:12,color:"#9ca3af",lineHeight:1.5,margin:"10px 0 16px"}}>
+              {lang==="PT"?"O valor é somado à banca declarada. O histórico de apostas não é alterado.":"The amount is added to the declared bankroll. Bet history is not affected."}
+            </p>
+
+            <button style={{...S.btnPrimary,background:"#059669",border:"none",marginBottom:8}} onClick={handleDeposit} disabled={!depositVal||parseFloat(depositVal)<=0}>
+              {lang==="PT"?"Confirmar aporte":"Confirm deposit"}
+            </button>
+            <button style={S.btnGhost} onClick={()=>{setShowDeposit(false);setDepositVal("");}}>
+              {lang==="PT"?"Cancelar":"Cancel"}
+            </button>
           </div>
         </div>
       )}
