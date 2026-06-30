@@ -129,22 +129,34 @@ const monthLabel = d => new Date(d+"T00:00:00").toLocaleString("pt-PT",{month:"l
 const fmtDate = d => { const dt=new Date(d+"T00:00:00"); return dt.toLocaleDateString("pt-PT",{weekday:"long",day:"numeric",month:"long"}).replace(/^\w/,c=>c.toUpperCase()); };
 const padDate = dt => { const y=dt.getFullYear(),m=String(dt.getMonth()+1).padStart(2,"0"),d=String(dt.getDate()).padStart(2,"0"); return `${y}-${m}-${d}`; };
 
-function parseTelegramTips(text) {
+function parseTelegramTips(rawText) {
   const bets = [];
   let currentEvent = null;
   let currentSelection = null;
   let bingoMode = false;
   let bingoSelections = [];
+  let multiMode = false;
+  let multiLegs = [];
+
+  // Normaliza caracteres invisíveis comuns ao copiar do Telegram (NBSP, zero-width, etc.)
+  const text = rawText
+    .replace(/\u00A0/g, " ")
+    .replace(/[\u200B-\u200D\uFEFF]/g, "")
+    .replace(/\r\n/g, "\n");
 
   const SPORT = ["🎾","⚽","🏀","🏒","⚾","🏉","🥊","🏸","🎱","🏓"];
   const hasSport = l => SPORT.some(e => l.includes(e));
   const cleanSport = l => { let r=l; SPORT.forEach(e=>{r=r.split(e).join("");}); return r.trim(); };
+  // Normaliza acentos para comparação resistente (MÚLTIPLA / MULTIPLA / Múltipla tudo bate certo)
+  const norm = s => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
+  const MULTI_LABELS = ["DUPLA","TRIPLA","MULTIPLA","ACUMULADOR","COMBO","ACCA"];
 
-  for (let line of text.split("\n")) {
-    line = line.trim();
+  for (let rawLine of text.split("\n")) {
+    const line = rawLine.trim();
     if (!line) continue;
+    const lineN = norm(line);
 
-    if (line.includes("🎲") && line.toUpperCase().includes("BINGO")) {
+    if (line.includes("🎲") && lineN.includes("BINGO")) {
       bingoMode = true; bingoSelections = []; continue;
     }
 
@@ -160,6 +172,28 @@ function parseTelegramTips(text) {
           if (odd > 1) bets.push({ event:"BINGO", selection:bingoSelections.join(" + "), units, odd, market:"Múltipla", result:"PENDING", notes:"" });
         }
         bingoMode = false; bingoSelections = [];
+      }
+      continue;
+    }
+
+    // Detect start of a multi-leg bet: 🎯 DUPLA / TRIPLA / MÚLTIPLA etc. (resistente a acentos/maiúsculas)
+    if (line.includes("🎯") && MULTI_LABELS.some(l => lineN.includes(l))) {
+      multiMode = true; multiLegs = [];
+      continue;
+    }
+
+    if (multiMode) {
+      if (hasSport(line) && !line.includes("💰")) {
+        multiLegs.push(cleanSport(line));
+      } else if (line.includes("💰") && line.includes("@") && multiLegs.length) {
+        const um = line.match(/([\d.,]+)\s*un/i);
+        const om = line.match(/@\s*([\d.,]+)/);
+        if (om) {
+          const odd = parseFloat(om[1].replace(",","."));
+          const units = um ? parseFloat(um[1].replace(",",".")) : 1;
+          if (odd > 1) bets.push({ event:multiLegs.length+" jogos", selection:multiLegs.join(" + "), units, odd, market:"Múltipla", result:"PENDING", notes:"" });
+        }
+        multiMode = false; multiLegs = [];
       }
       continue;
     }
