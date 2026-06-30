@@ -322,6 +322,8 @@ export default function App() {
   const [showEditBR, setShowEditBR] = useState(false);
   const [showDeposit, setShowDeposit] = useState(false);
   const [depositVal, setDepositVal] = useState("");
+  const [showWithdraw, setShowWithdraw] = useState(false);
+  const [withdrawVal, setWithdrawVal] = useState("");
   const [editBRTarget, setEditBRTarget] = useState(null);
   const [brForm, setBRForm]       = useState({name:"",sport:"Ténis",bankroll:"",unit_pct:"2",reset:false,stake_mode:"variable"});
   const [showForm, setShowForm]   = useState(false);
@@ -430,6 +432,23 @@ export default function App() {
       setBankrolls(prev=>prev.map(b=>b.id===data.id?data:b));
       setShowDeposit(false);
       setDepositVal("");
+    }
+  }
+
+  async function handleWithdraw(){
+    const val = parseFloat(withdrawVal);
+    if(!val || val <= 0 || !br) return;
+    const declaredBankroll = parseFloat(br.bankroll||0);
+    if(val > declaredBankroll){
+      alert(lang==="PT"?"O valor do saque não pode ser maior que a banca declarada.":"Withdrawal amount cannot exceed the declared bankroll.");
+      return;
+    }
+    const newBankroll = declaredBankroll - val;
+    const{data} = await supabase.from("profiles").update({bankroll: newBankroll, last_stake_review: new Date().toISOString()}).eq("id", br.id).select().single();
+    if(data){
+      setBankrolls(prev=>prev.map(b=>b.id===data.id?data:b));
+      setShowWithdraw(false);
+      setWithdrawVal("");
     }
   }
 
@@ -1112,6 +1131,9 @@ export default function App() {
             <button style={{...S.btnGhost,marginTop:8,color:"#059669",border:"1px solid #bbf7d0",background:"#f0fdf4",fontWeight:700}} onClick={()=>{setShowEditBR(false);setShowDeposit(true);}}>
               💰 {lang==="PT"?"Fazer aporte":"Add funds"}
             </button>
+            <button style={{...S.btnGhost,marginTop:8,color:"#dc2626",border:"1px solid #fca5a5",background:"#fef2f2",fontWeight:700}} onClick={()=>{setShowEditBR(false);setShowWithdraw(true);}}>
+              💸 {lang==="PT"?"Fazer saque":"Withdraw"}
+            </button>
           </div>
         </div>
       )}
@@ -1154,6 +1176,50 @@ export default function App() {
               {lang==="PT"?"Confirmar aporte":"Confirm deposit"}
             </button>
             <button style={S.btnGhost} onClick={()=>{setShowDeposit(false);setDepositVal("");}}>
+              {lang==="PT"?"Cancelar":"Cancel"}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {showWithdraw && br && (
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.4)",zIndex:100,display:"flex",alignItems:"center",justifyContent:"center",padding:20}}>
+          <div style={{background:"#fff",borderRadius:16,padding:24,width:"100%",maxWidth:380,boxShadow:"0 20px 60px rgba(0,0,0,.2)"}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+              <h3 style={{margin:0,fontSize:16,fontWeight:700,color:"#111827"}}>💸 {lang==="PT"?"Fazer saque":"Withdraw"}</h3>
+              <button style={{background:"none",border:"none",color:"#9ca3af",fontSize:22,cursor:"pointer"}} onClick={()=>{setShowWithdraw(false);setWithdrawVal("");}}>×</button>
+            </div>
+
+            <div style={{background:"#f9fafb",border:"1px solid #f3f4f6",borderRadius:10,padding:"12px 16px",marginBottom:16}}>
+              <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}>
+                <span style={{fontSize:12,color:"#9ca3af"}}>{lang==="PT"?"Banca atual":"Current bankroll"}</span>
+                <strong style={{fontSize:13,color:"#374151"}}>{fmt(parseFloat(br.bankroll||0))}</strong>
+              </div>
+              {withdrawVal && parseFloat(withdrawVal)>0 && (
+                <>
+                  <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}>
+                    <span style={{fontSize:12,color:"#9ca3af"}}>{lang==="PT"?"Saque":"Withdrawal"}</span>
+                    <strong style={{fontSize:13,color:"#dc2626"}}>-{fmt(parseFloat(withdrawVal))}</strong>
+                  </div>
+                  <div style={{display:"flex",justifyContent:"space-between",borderTop:"1px solid #e5e7eb",paddingTop:8}}>
+                    <span style={{fontSize:12,color:"#9ca3af"}}>{lang==="PT"?"Nova banca":"New bankroll"}</span>
+                    <strong style={{fontSize:14,color:parseFloat(br.bankroll||0)-parseFloat(withdrawVal)>=0?sc.color:"#dc2626"}}>{fmt(parseFloat(br.bankroll||0)-parseFloat(withdrawVal))}</strong>
+                  </div>
+                </>
+              )}
+            </div>
+
+            <label style={S.label}>{lang==="PT"?"Valor do saque (€)":"Withdrawal amount (€)"}</label>
+            <input style={S.input} type="number" max={br.bankroll} placeholder="ex: 100" value={withdrawVal} onChange={e=>setWithdrawVal(e.target.value)} autoFocus/>
+
+            <p style={{fontSize:12,color:"#9ca3af",lineHeight:1.5,margin:"10px 0 16px"}}>
+              {lang==="PT"?"O valor é subtraído da banca declarada. O histórico de apostas não é alterado.":"The amount is subtracted from the declared bankroll. Bet history is not affected."}
+            </p>
+
+            <button style={{...S.btnPrimary,background:"#dc2626",border:"none",marginBottom:8}} onClick={handleWithdraw} disabled={!withdrawVal||parseFloat(withdrawVal)<=0||parseFloat(withdrawVal)>parseFloat(br.bankroll||0)}>
+              {lang==="PT"?"Confirmar saque":"Confirm withdrawal"}
+            </button>
+            <button style={S.btnGhost} onClick={()=>{setShowWithdraw(false);setWithdrawVal("");}}>
               {lang==="PT"?"Cancelar":"Cancel"}
             </button>
           </div>
