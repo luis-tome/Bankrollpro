@@ -147,8 +147,14 @@ function parseTelegramTips(rawText) {
   const SPORT = ["🎾","⚽","🏀","🏒","⚾","🏉","🥊","🏸","🎱","🏓"];
   const hasSport = l => SPORT.some(e => l.includes(e));
   const cleanSport = l => { let r=l; SPORT.forEach(e=>{r=r.split(e).join("");}); return r.trim(); };
-  // Normaliza acentos para comparação resistente (MÚLTIPLA / MULTIPLA / Múltipla tudo bate certo)
-  const norm = s => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
+  // Normaliza acentos sem depender de String.normalize (evita problemas de build/minificação)
+  const norm = s => s.toUpperCase()
+    .replace(/Ú/g,"U").replace(/Ù/g,"U").replace(/Û/g,"U").replace(/Ü/g,"U")
+    .replace(/Á/g,"A").replace(/À/g,"A").replace(/Â/g,"A").replace(/Ã/g,"A")
+    .replace(/É/g,"E").replace(/È/g,"E").replace(/Ê/g,"E")
+    .replace(/Í/g,"I").replace(/Ì/g,"I").replace(/Î/g,"I")
+    .replace(/Ó/g,"O").replace(/Ò/g,"O").replace(/Ô/g,"O").replace(/Õ/g,"O")
+    .replace(/Ç/g,"C");
   const MULTI_LABELS = ["DUPLA","TRIPLA","MULTIPLA","ACUMULADOR","COMBO","ACCA"];
 
   for (let rawLine of text.split("\n")) {
