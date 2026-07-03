@@ -3,8 +3,8 @@ import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 
 const SUPABASE_URL = "https://opeuermurrbzpglbkmrf.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9wZXVlcm11cnJienBnbGJrbXJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMjA2NTAsImV4cCI6MjA5NDU5NjY1MH0.M-VclAmrSl0gop_7IvXh7-HH7nj5DwMFLVCMIOa3Qfw";
-const STRIPE_MONTHLY = "https://buy.stripe.com/00wfZg8Z0dIb5TRbiTgQE01";
-const STRIPE_ANNUAL  = "https://buy.stripe.com/28E00iejkfQj0zx9aLgQE00";
+const STRIPE_MONTHLY = "https://buy.stripe.com/fZu6oGdfgavZdmjgDdgQE03";
+const STRIPE_ANNUAL  = "https://buy.stripe.com/eVq3cu1wy9rVfur2MngQE02";
 const TRIAL_DAYS = 7;
 const MAX_BANKROLLS = 3;
 const ADMIN_EMAIL = "luistome.work@gmail.com";
@@ -82,7 +82,7 @@ const PROMO_MONTHLY = 3.99;
 const PROMO_ANNUAL  = 19.99;
 const NORMAL_MONTHLY = 6.99;
 const NORMAL_ANNUAL  = 29.99;
-const PROMO_END = new Date("2026-06-30T23:59:59");
+const PROMO_END = new Date("2026-08-31T23:59:59");
 const PROMO_DAYS_LEFT = () => Math.max(0, Math.ceil((PROMO_END.getTime() - Date.now()) / 86400000));
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -612,7 +612,7 @@ export default function App() {
 
       <div style={{padding:"28px 20px 80px",maxWidth:480,margin:"0 auto"}}>
         <div style={{display:"inline-block",background:"#f8f9fa",border:"1px solid #e9ecef",color:"#92400e",borderRadius:6,padding:"3px 12px",fontSize:11,fontWeight:700,marginBottom:18}}>
-          🔥 Oferta de lançamento — termina 30 de Junho
+          🔥 Oferta de lançamento — termina 31 de Agosto
         </div>
 
         <h1 style={{fontSize:36,fontWeight:900,lineHeight:1.05,letterSpacing:"-2px",margin:"0 0 12px",color:"#111827"}}>
@@ -627,7 +627,7 @@ export default function App() {
 
         <div style={{background:"#fff",border:"1px solid #e5e7eb",borderRadius:14,padding:16,marginBottom:20,boxShadow:"0 2px 8px rgba(0,0,0,.06)"}}>
           <div style={{textAlign:"center",marginBottom:12,fontSize:12,color:"#dc2626",fontWeight:700}}>
-            ⏰ Preço de lançamento — só até 30 de Junho · {PROMO_DAYS_LEFT()} dias restantes
+            ⏰ Preço de lançamento — só até 31 de Agosto · {PROMO_DAYS_LEFT()} dias restantes
           </div>
           <div style={{display:"flex",gap:10}}>
             <div style={{flex:1,background:"#f7f8fa",border:"1px solid #e5e7eb",borderRadius:12,padding:"12px 10px"}}>
@@ -714,7 +714,7 @@ export default function App() {
             <div>
               <div style={{fontSize:32,marginBottom:10}}>📊</div>
               <h2 style={{fontSize:20,fontWeight:800,color:"#111827",margin:"0 0 4px"}}>{authMode==="login"?"Bem-vindo de volta":"Criar conta grátis"}</h2>
-              <p style={{fontSize:13,color:"#9ca3af",marginBottom:14}}>{authMode==="login"?"Entra na tua conta.":"7 dias grátis · Preço de lançamento até 30 de Junho."}</p>
+              <p style={{fontSize:13,color:"#9ca3af",marginBottom:14}}>{authMode==="login"?"Entra na tua conta.":"7 dias grátis · Preço de lançamento até 31 de Agosto."}</p>
               {authMode==="register" && (
                 <div>
                   <label style={{...S.label,color:"#111827"}}>Nome</label>
@@ -749,7 +749,7 @@ export default function App() {
           <h2 style={{fontSize:20,fontWeight:800,color:"#111827",margin:"0 0 4px"}}>Primeira banca</h2>
           <p style={{fontSize:13,color:"#9ca3af",marginBottom:12}}>Olá, {userName}! Configura a tua banca.</p>
           <div style={{background:"#f0fdf4",border:"1px solid #bbf7d0",borderRadius:8,padding:"8px 12px",fontSize:12,color:"#15803d",marginBottom:12,fontWeight:600,textAlign:"center"}}>
-            🎯 7 dias de trial grátis · Preço de lançamento até 30 Jun
+            🎯 7 dias de trial grátis · Preço de lançamento até 31 Ago
           </div>
           <BRForm form={brForm} setForm={setBRForm} showReset={false} lang={lang}/>
           <button style={{...S.btnPrimary,marginTop:20}} onClick={()=>handleCreateBR(false)}>Criar banca</button>
@@ -765,7 +765,7 @@ export default function App() {
           <div style={{fontSize:40,marginBottom:8,textAlign:"center"}}>⏰</div>
           <h2 style={{fontSize:20,fontWeight:800,color:"#111827",margin:"0 0 4px",textAlign:"center"}}>Trial terminado</h2>
           <p style={{fontSize:13,color:"#9ca3af",textAlign:"center",marginBottom:4}}>Escolhe um plano para continuar.</p>
-          <div style={{background:"#fef3c7",border:"1px solid #fde68a",borderRadius:8,padding:"8px 12px",fontSize:12,color:"#92400e",fontWeight:600,textAlign:"center",marginBottom:16}}>🔥 Preço de lançamento até 30 de Junho</div>
+          <div style={{background:"#fef3c7",border:"1px solid #fde68a",borderRadius:8,padding:"8px 12px",fontSize:12,color:"#92400e",fontWeight:600,textAlign:"center",marginBottom:16}}>🔥 Preço de lançamento até 31 de Agosto</div>
 
           <div style={{display:"flex",gap:4,background:"#f7f8fa",padding:4,borderRadius:10,marginBottom:12}}>
             <button style={{flex:1,padding:"8px 10px",borderRadius:8,border:"none",background:subView==="monthly"?"#fff":"transparent",color:subView==="monthly"?"#111827":"#9ca3af",cursor:"pointer",fontSize:13,fontWeight:700,boxShadow:subView==="monthly"?"0 1px 3px rgba(0,0,0,.1)":"none"}} onClick={()=>setSubView("monthly")}>Mensal</button>
