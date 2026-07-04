@@ -341,11 +341,6 @@ async function getAIFeedback(bets, stats, bankroll, sport) {
 
 
 
-const ONBOARDING_STEPS = {
-  PT: [("🎯", "Bem-vindo ao BankrollPro", "A tua ferramenta de gestão de banca desportiva. Vamos mostrar-te como tirar o máximo partido em 30 segundos."), ("💼", "Cria a tua banca", "Começa por criar uma banca — dá-lhe um nome, escolhe o desporto, define o valor e a percentagem por unidade. Podes ter até 3 bancas separadas."), ("➕", "Regista as tuas apostas", "Clica no botão + no canto inferior direito. Preenche o evento, seleção, odd e unidades. Podes registar com resultado imediato ou deixar pendente."), ("📋", "Importa do Telegram", "Tens apostas num grupo do Telegram? Clica no ícone 📋, cola o texto ou faz upload de um print — a app importa tudo automaticamente."), ("🤖", "Análise IA", "Depois de 3 apostas liquidadas, vai ao separador IA. Recebes um feedback real sobre onde ganhas e perdes — por mercado, tipo de aposta e padrões específicos."), ("📊", "Aporte, saque e revisão", "Podes adicionar ou retirar dinheiro da banca a qualquer momento. A cada 30 dias, a app sugere rever o valor da stake com base nos teus resultados.")],
-  EN: [("🎯", "Welcome to BankrollPro", "Your sports betting bankroll management tool. Let us show you how to get the most out of it in 30 seconds."), ("💼", "Create your bankroll", "Start by creating a bankroll — give it a name, choose your sport, set the amount and unit percentage. You can have up to 3 separate bankrolls."), ("➕", "Log your bets", "Tap the + button in the bottom right corner. Fill in the event, selection, odds and units. You can log with an immediate result or leave as pending."), ("📋", "Import from Telegram", "Got bets in a Telegram group? Tap the 📋 icon, paste the text or upload a screenshot — the app imports everything automatically."), ("🤖", "AI Analysis", "After 3 settled bets, go to the AI tab. Get real feedback on where you win and lose — by market, bet type and specific patterns."), ("📊", "Deposit, withdraw & review", "You can add or remove money from your bankroll at any time. Every 30 days, the app suggests reviewing your stake based on your results.")]
-};
-
 export default function App() {
   const [screen, setScreen]       = useState("loading");
   const [authMode, setAuthMode]   = useState("register");
@@ -395,13 +390,6 @@ export default function App() {
   const [showOnboarding, setShowOnboarding] = useState(()=>{ try{ return !localStorage.getItem("bpOnboarded"); }catch(e){ return false; } });
   const [onboardStep, setOnboardStep] = useState(0);
   const [showTooltip, setShowTooltip] = useState(null);
-  const [showOnboarding, setShowOnboarding] = useState(()=>{ try{ return localStorage.getItem("bpOnboarded")!=="1"; }catch(e){ return false; } });
-  const [onboardStep, setOnboardStep] = useState(0);
-  const [showTooltip, setShowTooltip] = useState(null);
-  const [showOnboarding, setShowOnboarding] = useState(()=>{
-    try { return localStorage.getItem("bpOnboarded") !== "true"; } catch(e){ return false; }
-  });
-  const [onboardStep, setOnboardStep] = useState(0);
   const [showHelp, setShowHelp] = useState(false);
   const [showStakeReview, setShowStakeReview] = useState(false);
   const touchX = useRef(null);
