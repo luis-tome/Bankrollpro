@@ -103,17 +103,17 @@ const ONBOARDING_STEPS = {
   PT: [
     { icon:"📊", title:"Bem-vindo ao BankrollPro", body:"A maioria dos apostadores não perde por falta de conhecimento — perde por falta de controlo. Aqui vais construir disciplina, proteger a tua banca e transformar cada aposta numa decisão consciente, não num impulso. Vamos mostrar-te o essencial em 6 passos." },
     { icon:"➕", title:"Regista as tuas apostas", body:"Clica no botão + verde para adicionar uma aposta. Podes registar com resultado imediato (Green/Red) ou deixar pendente para liquidar depois." },
-    { icon:"📋", title:"Importa do Telegram", body:"Clica no botão 📋 para colar apostas de um grupo. A app detecta automaticamente todas as apostas — simples e múltiplas. Admins podem também fazer upload de um print." },
+    { icon:"📸", title:"Importa apostas em segundos", body:"Clica no botão 📋 para colar o texto de um grupo, ou carrega um print — de Telegram, WhatsApp ou até do bilhete da casa de apostas (Bet365, Betano, etc.). A IA lê a imagem e regista tudo automaticamente por ti, incluindo apostas simples e múltiplas." },
     { icon:"🎯", title:"Filtra por estratégia", body:"Ao registar apostas podes definir uma estratégia (ex: ATP, WTA, Liga Principal). No Diário e Relatório podes filtrar por estratégia para ver os resultados separados." },
-    { icon:"🤖", title:"Análise com IA", body:"Depois de 3+ apostas liquidadas, vai à tab IA e clica Analisar. Recebes feedback real sobre onde estás a ganhar e a perder dinheiro — com referência às apostas específicas." },
+    { icon:"🤖", title:"Análise com IA", body:"Depois de 3+ apostas liquidadas, vai à tab IA e clica Analisar. Recebes feedback real sobre onde estás a ganhar e a perder dinheiro, com gráficos por mercado, odds, estratégia e evolução anual." },
     { icon:"💰", title:"Aporte e saque", body:"No menu ☰ clica no ✏️ da tua banca para aceder a Fazer aporte ou Fazer saque — ajusta a banca declarada sem alterar o histórico de apostas." },
   ],
   EN: [
     { icon:"📊", title:"Welcome to BankrollPro", body:"Most bettors don't lose because they lack knowledge — they lose because they lack control. Here you'll build discipline, protect your bankroll, and turn every bet into a conscious decision, not an impulse. Let's show you the essentials in 6 steps." },
     { icon:"➕", title:"Log your bets", body:"Tap the green + button to add a bet. You can record with an immediate result (Win/Loss) or leave it pending to settle later." },
-    { icon:"📋", title:"Import from Telegram", body:"Tap the 📋 button to paste bets from a group. The app auto-detects all bets — singles and multiples. Admins can also upload a screenshot." },
+    { icon:"📸", title:"Import bets in seconds", body:"Tap the 📋 button to paste text from a group, or upload a screenshot — from Telegram, WhatsApp, or even a bookmaker's bet slip (Bet365, Betano, etc.). The AI reads the image and logs everything for you automatically, including singles and multiples." },
     { icon:"🎯", title:"Filter by strategy", body:"When logging bets you can set a strategy (e.g. ATP, WTA, Main League). In Diary and Report you can filter by strategy to see results separately." },
-    { icon:"🤖", title:"AI Analysis", body:"After 3+ settled bets, go to the AI tab and tap Analyse. You get real feedback on where you're winning and losing money — referencing specific bets." },
+    { icon:"🤖", title:"AI Analysis", body:"After 3+ settled bets, go to the AI tab and tap Analyse. You get real feedback on where you're winning and losing money, with charts by market, odds, strategy and yearly evolution." },
     { icon:"💰", title:"Deposit & withdraw", body:"In the ☰ menu tap the ✏️ on your bankroll to access Add funds or Withdraw — adjusts your declared bankroll without affecting bet history." },
   ]
 };
