@@ -99,6 +99,45 @@ const QUOTES = [
   { text: "Na subida do Monte Evereste está cheio de corpos de gente super motivada.", author: "Theo Borges" },
 ];
 
+const ONBOARDING_STEPS = {
+  PT: [
+    { icon:"📊", title:"Bem-vindo ao BankrollPro", body:"Gere a tua banca desportiva como um profissional. Vamos mostrar-te o essencial em 5 passos." },
+    { icon:"➕", title:"Regista as tuas apostas", body:"Clica no botão + verde para adicionar uma aposta. Podes registar com resultado imediato (Green/Red) ou deixar pendente para liquidar depois." },
+    { icon:"📋", title:"Importa do Telegram", body:"Clica no botão 📋 para colar apostas de um grupo. A app detecta automaticamente todas as apostas — simples e múltiplas. Admins podem também fazer upload de um print." },
+    { icon:"🎯", title:"Filtra por estratégia", body:"Ao registar apostas podes definir uma estratégia (ex: ATP, WTA, Liga Principal). No Diário e Relatório podes filtrar por estratégia para ver os resultados separados." },
+    { icon:"🤖", title:"Análise com IA", body:"Depois de 3+ apostas liquidadas, vai à tab IA e clica Analisar. Recebes feedback real sobre onde estás a ganhar e a perder dinheiro — com referência às apostas específicas." },
+    { icon:"💰", title:"Aporte e saque", body:"No menu ☰ clica no ✏️ da tua banca para aceder a Fazer aporte ou Fazer saque — ajusta a banca declarada sem alterar o histórico de apostas." },
+  ],
+  EN: [
+    { icon:"📊", title:"Welcome to BankrollPro", body:"Manage your sports bankroll like a professional. Let us show you the essentials in 5 steps." },
+    { icon:"➕", title:"Log your bets", body:"Tap the green + button to add a bet. You can record with an immediate result (Win/Loss) or leave it pending to settle later." },
+    { icon:"📋", title:"Import from Telegram", body:"Tap the 📋 button to paste bets from a group. The app auto-detects all bets — singles and multiples. Admins can also upload a screenshot." },
+    { icon:"🎯", title:"Filter by strategy", body:"When logging bets you can set a strategy (e.g. ATP, WTA, Main League). In Diary and Report you can filter by strategy to see results separately." },
+    { icon:"🤖", title:"AI Analysis", body:"After 3+ settled bets, go to the AI tab and tap Analyse. You get real feedback on where you're winning and losing money — referencing specific bets." },
+    { icon:"💰", title:"Deposit & withdraw", body:"In the ☰ menu tap the ✏️ on your bankroll to access Add funds or Withdraw — adjusts your declared bankroll without affecting bet history." },
+  ]
+};
+
+const HELP_TIPS = {
+  PT: {
+    dashboard: { title:"Banca", body:"Aqui vês o resumo completo da tua banca — valor actual, P&L total, ROI, strike rate e apostas pendentes. O gráfico da banca actualiza em tempo real com cada aposta." },
+    diary: { title:"Diário", body:"Navega dia a dia para ver todas as apostas. Usa os chips de estratégia para filtrar por ATP, WTA, etc. Podes liquidar apostas pendentes directamente aqui." },
+    report: { title:"Relatório", body:"Resumo mensal com lucro, ROI, acertos e detalhes por dia. Filtra por estratégia para comparar performance entre tipos de aposta." },
+    chart: { title:"Gráfico", body:"A curva mostra a evolução da tua banca aposta a aposta. As barras mostram o resultado por mês. A linha tracejada é a banca inicial." },
+    ai: { title:"Análise IA", body:"A IA lê as tuas apostas individualmente e identifica padrões — onde perdes, que mercados evitar, que odds funcionam para ti. Preenche o campo Notas com contexto (ex: 'Alcaraz @1.23, terra') para análises mais precisas." },
+    sobre: { title:"Info", body:"Vês o teu plano actual, o que está incluído e como contactar suporte. O trial de 7 dias dá-te acesso completo sem cartão." },
+  },
+  EN: {
+    dashboard: { title:"Bankroll", body:"Here you see the full summary — current value, total P&L, ROI, strike rate and pending bets. The bankroll chart updates in real time with each bet." },
+    diary: { title:"Diary", body:"Navigate day by day to see all bets. Use strategy chips to filter by ATP, WTA, etc. You can settle pending bets directly here." },
+    report: { title:"Report", body:"Monthly summary with profit, ROI, wins and daily breakdown. Filter by strategy to compare performance between bet types." },
+    chart: { title:"Chart", body:"The curve shows your bankroll evolution bet by bet. The bars show monthly results. The dashed line is the initial bankroll." },
+    ai: { title:"AI Analysis", body:"The AI reads your bets individually and identifies patterns — where you lose, which markets to avoid, which odds work for you. Fill in the Notes field with context (e.g. 'Alcaraz @1.23, clay') for more precise analysis." },
+    sobre: { title:"Info", body:"See your current plan, what's included and how to contact support. The 7-day trial gives you full access with no card required." },
+  }
+};
+
+
 function useQuote(interval = 8000) {
   const [idx, setIdx] = React.useState(0);
   React.useEffect(() => {
@@ -301,6 +340,12 @@ async function getAIFeedback(bets, stats, bankroll, sport) {
 
 
 
+
+const ONBOARDING_STEPS = {
+  PT: [("🎯", "Bem-vindo ao BankrollPro", "A tua ferramenta de gestão de banca desportiva. Vamos mostrar-te como tirar o máximo partido em 30 segundos."), ("💼", "Cria a tua banca", "Começa por criar uma banca — dá-lhe um nome, escolhe o desporto, define o valor e a percentagem por unidade. Podes ter até 3 bancas separadas."), ("➕", "Regista as tuas apostas", "Clica no botão + no canto inferior direito. Preenche o evento, seleção, odd e unidades. Podes registar com resultado imediato ou deixar pendente."), ("📋", "Importa do Telegram", "Tens apostas num grupo do Telegram? Clica no ícone 📋, cola o texto ou faz upload de um print — a app importa tudo automaticamente."), ("🤖", "Análise IA", "Depois de 3 apostas liquidadas, vai ao separador IA. Recebes um feedback real sobre onde ganhas e perdes — por mercado, tipo de aposta e padrões específicos."), ("📊", "Aporte, saque e revisão", "Podes adicionar ou retirar dinheiro da banca a qualquer momento. A cada 30 dias, a app sugere rever o valor da stake com base nos teus resultados.")],
+  EN: [("🎯", "Welcome to BankrollPro", "Your sports betting bankroll management tool. Let us show you how to get the most out of it in 30 seconds."), ("💼", "Create your bankroll", "Start by creating a bankroll — give it a name, choose your sport, set the amount and unit percentage. You can have up to 3 separate bankrolls."), ("➕", "Log your bets", "Tap the + button in the bottom right corner. Fill in the event, selection, odds and units. You can log with an immediate result or leave as pending."), ("📋", "Import from Telegram", "Got bets in a Telegram group? Tap the 📋 icon, paste the text or upload a screenshot — the app imports everything automatically."), ("🤖", "AI Analysis", "After 3 settled bets, go to the AI tab. Get real feedback on where you win and lose — by market, bet type and specific patterns."), ("📊", "Deposit, withdraw & review", "You can add or remove money from your bankroll at any time. Every 30 days, the app suggests reviewing your stake based on your results.")]
+};
+
 export default function App() {
   const [screen, setScreen]       = useState("loading");
   const [authMode, setAuthMode]   = useState("register");
@@ -347,6 +392,17 @@ export default function App() {
   const [reportStrategyFilter, setReportStrategyFilter] = useState("all");
   const [reportMonth, setReportMonth] = useState(today().slice(0,7));
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(()=>{ try{ return !localStorage.getItem("bpOnboarded"); }catch(e){ return false; } });
+  const [onboardStep, setOnboardStep] = useState(0);
+  const [showTooltip, setShowTooltip] = useState(null);
+  const [showOnboarding, setShowOnboarding] = useState(()=>{ try{ return localStorage.getItem("bpOnboarded")!=="1"; }catch(e){ return false; } });
+  const [onboardStep, setOnboardStep] = useState(0);
+  const [showTooltip, setShowTooltip] = useState(null);
+  const [showOnboarding, setShowOnboarding] = useState(()=>{
+    try { return localStorage.getItem("bpOnboarded") !== "true"; } catch(e){ return false; }
+  });
+  const [onboardStep, setOnboardStep] = useState(0);
+  const [showHelp, setShowHelp] = useState(false);
   const [showStakeReview, setShowStakeReview] = useState(false);
   const touchX = useRef(null);
 
@@ -651,15 +707,17 @@ export default function App() {
           <div style={{fontSize:12,fontWeight:800,color:"#111827",textTransform:"uppercase",letterSpacing:.8,marginBottom:12}}>✅ O que está incluído</div>
           {[
             ["📊","Até 3 bancas separadas por desporto"],
-            ["📅","Diário por dia — registo imediato ou pendente"],
-            ["📈","Relatório mensal — lucro, ROI, % acertos"],
-            ["📉","Gráfico de evolução da banca"],
-            ["🎯","Apostas simples e múltiplas com unidades configuráveis"],
-            ["📋","Importação de apostas via Telegram"],
-            ["🤖","Análise IA — score, padrões e recomendações reais"],
-            ["🏅","Ténis, Futebol, NBA, MMA e mais desportos"],
-            ["💱","€, R$ e $ — múltiplas moedas"],
-            ["🚫","Sem anúncios"],
+            ["📅","Diário com navegação por data — incluindo datas passadas"],
+            ["📈","Relatório mensal — lucro, ROI, % acertos, por dia"],
+            ["📉","Gráfico de evolução da banca aposta a aposta"],
+            ["🎯","Simples e múltiplas — stake fixa ou variável"],
+            ["🏷️","Estratégias por aposta com filtros (ATP, WTA, Liga, etc.)"],
+            ["📋","Importa do Telegram — texto ou print de ecrã"],
+            ["🤖","Análise IA — padrões reais, apostas específicas, recomendações"],
+            ["💰","Aporte e saque sem alterar histórico"],
+            ["🔔","Revisão automática de stake a cada 30 dias"],
+            ["🏅","Ténis, Futebol, NBA, MMA e mais"],
+            ["💱","€, R$ e $ — sem anúncios"],
           ].map(([ico,txt])=>(
             <div key={txt} style={{display:"flex",gap:10,padding:"6px 0",borderBottom:"1px solid #f9fafb",alignItems:"flex-start"}}>
               <span style={{fontSize:16,flexShrink:0}}>{ico}</span>
@@ -782,14 +840,15 @@ export default function App() {
             <div style={{borderTop:"1px solid #e5e7eb",paddingTop:12,marginBottom:16}}>
               {[
                 ["✓","Até 3 bancas separadas por desporto"],
-                ["✓","Diário por dia — registo imediato ou pendente"],
+                ["✓","Diário com navegação por data — incluindo passadas"],
                 ["✓","Relatório mensal — lucro, ROI, % acertos"],
                 ["✓","Gráfico de evolução da banca"],
-                ["✓","Apostas simples e múltiplas com unidades"],
-                ["✓","Importação de apostas via Telegram"],
+                ["✓","Simples e múltiplas — stake fixa ou variável"],
+                ["✓","Estratégias com filtros (ATP, WTA, Liga, etc.)"],
+                ["✓","Importa do Telegram — texto ou print de ecrã"],
                 ["✓",`Análise IA — ${subView==="annual"?AI_LIMIT_ANNUAL:AI_LIMIT_MONTHLY} análises/mês`],
-                ["✓","Ténis, Futebol, NBA, MMA e mais"],
-                ["✓","€, R$ e $ — múltiplas moedas"],
+                ["✓","Aporte e saque — revisão de stake a cada 30 dias"],
+                ["✓","Ténis, Futebol, NBA, MMA e mais · €, R$, $"],
                 ["✓","Sem anúncios"],
               ].map(([ico,txt])=>(
                 <div key={txt} style={{display:"flex",gap:8,marginBottom:6,fontSize:12,color:"#111827"}}>
@@ -973,6 +1032,71 @@ export default function App() {
         </div>
       )}
 
+
+      {showTooltip && (
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.4)",zIndex:200,display:"flex",alignItems:"flex-end",justifyContent:"center"}} onClick={()=>setShowTooltip(null)}>
+          <div style={{background:"#fff",borderRadius:"16px 16px 0 0",padding:"24px 20px 36px",width:"100%",maxWidth:500}} onClick={e=>e.stopPropagation()}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+              <div style={{fontSize:13,fontWeight:800,color:"#111827",textTransform:"uppercase",letterSpacing:.8}}>{lang==="PT"?"Como funciona":"How it works"}</div>
+              <button style={{background:"none",border:"none",color:"#9ca3af",fontSize:22,cursor:"pointer"}} onClick={()=>setShowTooltip(null)}>×</button>
+            </div>
+            <p style={{fontSize:14,color:"#374151",lineHeight:1.7,margin:0}}>
+              {showTooltip==="dashboard" && (lang==="PT"?"O separador Banca mostra o teu resumo geral — banca actual, P&L total, ROI, strike rate e odd média. As apostas pendentes aparecem aqui para liquidares rapidamente com ✓ ou ✗.":"The Bankroll tab shows your overall summary — current bankroll, total P&L, ROI, strike rate and average odd. Pending bets appear here for quick settlement with ✓ or ✗.")}
+              {showTooltip==="diary" && (lang==="PT"?"O Diário mostra as tuas apostas dia a dia. Navega por qualquer data, incluindo passadas. Filtra por estratégia (ATP, WTA, etc.). Liquida apostas pendentes com Green / Red / Cashout / Void.":"The Diary shows your bets day by day. Navigate any date including past ones. Filter by strategy (ATP, WTA, etc.). Settle pending bets with Win / Loss / Cashout / Void.")}
+              {showTooltip==="report" && (lang==="PT"?"O Relatório mostra o resumo mensal completo — lucro, ROI, % de acertos, valor investido e retorno. Navega entre meses e filtra por estratégia para ver o desempenho de cada abordagem.":"The Report shows the full monthly summary — profit, ROI, win rate, staked and return. Navigate between months and filter by strategy to see each approach's performance.")}
+              {showTooltip==="chart" && (lang==="PT"?"O Gráfico mostra a evolução da tua banca aposta a aposta e os resultados de cada mês em barras. Inclui a linha de referência da banca inicial para veres claramente se estás acima ou abaixo.":"The Chart shows your bankroll evolution bet by bet and each month's results in bars. Includes the initial bankroll reference line so you can clearly see if you're above or below.")}
+              {showTooltip==="ai" && (lang==="PT"?"A Análise IA lê as tuas apostas individualmente e identifica padrões reais — mercados onde perdes, ranges de odds problemáticos, e recomendações concretas. Precisa de pelo menos 3 apostas liquidadas. Preenche o campo Notas com contexto (ex: 'Alcaraz @1.23, terra') para análises mais precisas.":"AI Analysis reads your bets individually and identifies real patterns — markets where you lose, problematic odd ranges, and concrete recommendations. Needs at least 3 settled bets. Fill in the Notes field with context (e.g. 'Alcaraz @1.23, clay') for more accurate analysis.")}
+              {showTooltip==="sobre" && (lang==="PT"?"A tab Info mostra o teu plano actual, todas as funcionalidades incluídas na app e o contacto de suporte directo.":"The Info tab shows your current plan, all features included in the app and direct support contact.")}
+            </p>
+            <button style={{...S.btnPrimary,marginTop:20,background:sc.color,border:"none"}} onClick={()=>setShowTooltip(null)}>
+              {lang==="PT"?"Percebido 👍":"Got it 👍"}
+            </button>
+          </div>
+        </div>
+      )}
+
+
+      {showOnboarding && screen==="app" && isActive && (
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.6)",zIndex:300,display:"flex",alignItems:"flex-end",justifyContent:"center"}}>
+          <div style={{background:"#fff",borderRadius:"20px 20px 0 0",padding:"28px 24px 40px",width:"100%",maxWidth:500}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
+              <div style={{fontSize:13,color:"#9ca3af",fontWeight:600}}>{onboardStep+1} / 6</div>
+              <div style={{display:"flex",gap:4}}>
+                {[0,1,2,3,4,5].map(i=>(
+                  <div key={i} style={{width:i===onboardStep?20:6,height:6,borderRadius:3,background:i===onboardStep?sc.color:"#e5e7eb",transition:"width .2s"}}/>
+                ))}
+              </div>
+              <button style={{background:"none",border:"none",color:"#9ca3af",fontSize:13,cursor:"pointer",fontWeight:600}} onClick={()=>{try{localStorage.setItem("bpOnboarded","1");}catch(e){}setShowOnboarding(false);}}>
+                {lang==="PT"?"Saltar":"Skip"}
+              </button>
+            </div>
+
+            {(lang==="PT"?[[['🏦', 'Cria a tua banca', 'Define o nome, desporto, valor inicial e tipo de stake (fixa ou variável). Podes ter até 3 bancas separadas.'], ['➕', 'Regista apostas', 'Clica no botão verde + para adicionar uma aposta. Podes registar com resultado imediato ou deixar pendente para liquidar depois.'], ['📋', 'Importa do Telegram', 'Clica no ícone 📋 para importar apostas directamente do grupo — cola o texto ou faz upload de um print.'], ['📊', 'Acompanha os resultados', 'No Diário vês as apostas do dia. No Relatório vês o mês completo. No Gráfico vês a evolução da banca.'], ['🤖', 'Análise IA', 'Depois de 3+ apostas liquidadas, vai ao separador IA para receberes feedback real sobre onde estás a ganhar e a perder.'], ['💰', 'Aporte e saque', 'Para adicionar ou retirar dinheiro da banca, vai ao menu ☰ → lápis ✏️ ao lado da banca → Fazer aporte / Fazer saque.']]]:[['🏦', 'Create your bankroll', 'Set the name, sport, initial amount and stake type (fixed or variable). You can have up to 3 separate bankrolls.'], ['➕', 'Log bets', 'Tap the green + button to add a bet. Log with immediate result or leave pending to settle later.'], ['📋', 'Import from Telegram', 'Tap the 📋 icon to import bets directly from your group — paste text or upload a screenshot.'], ['📊', 'Track your results', 'Diary shows daily bets. Report shows the full month. Chart shows your bankroll evolution.'], ['🤖', 'AI Analysis', "After 3+ settled bets, go to the AI tab for real feedback on where you're winning and losing."], ['💰', 'Deposit & withdraw', 'To add or remove money from your bankroll, go to ☰ → pencil ✏️ next to the bankroll → Add funds / Withdraw.']]).map(([ico,title,desc],i)=> i===onboardStep && (
+              <div key={i} style={{textAlign:"center",padding:"0 8px"}}>
+                <div style={{fontSize:56,marginBottom:16}}>{ico}</div>
+                <div style={{fontSize:20,fontWeight:900,color:"#111827",marginBottom:10}}>{title}</div>
+                <div style={{fontSize:14,color:"#6b7280",lineHeight:1.7,marginBottom:28}}>{desc}</div>
+              </div>
+            ))}
+
+            <div style={{display:"flex",gap:10}}>
+              {onboardStep > 0 && (
+                <button style={{...S.btnGhost,flex:1}} onClick={()=>setOnboardStep(s=>s-1)}>
+                  ←
+                </button>
+              )}
+              <button style={{...S.btnPrimary,flex:2,background:sc.color,border:"none"}}
+                onClick={()=>{
+                  if(onboardStep<5){ setOnboardStep(s=>s+1); }
+                  else { try{localStorage.setItem("bpOnboarded","1");}catch(e){} setShowOnboarding(false); }
+                }}>
+                {onboardStep<5?(lang==="PT"?"Seguinte →":"Next →"):(lang==="PT"?"Começar!":"Let's go!")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {showStakeReview && br && (
         <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.5)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center",padding:20}}>
           <div style={{background:"#fff",borderRadius:16,padding:28,maxWidth:380,width:"100%"}} onClick={e=>e.stopPropagation()}>
@@ -1014,6 +1138,137 @@ export default function App() {
             <button style={S.btnGhost} onClick={dismissStakeReview}>
               {lang==="PT"?"Manter como está · lembrar em 30 dias":"Keep as is · remind in 30 days"}
             </button>
+          </div>
+        </div>
+      )}
+
+      {showOnboarding && (
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.6)",zIndex:300,display:"flex",alignItems:"flex-end",justifyContent:"center"}}>
+          <div style={{background:"#fff",borderRadius:"20px 20px 0 0",padding:"28px 24px 36px",width:"100%",maxWidth:500}}>
+            {/* Progress dots */}
+            <div style={{display:"flex",justifyContent:"center",gap:6,marginBottom:24}}>
+              {(ONBOARDING_STEPS[lang]||ONBOARDING_STEPS.PT).map((_,i)=>(
+                <div key={i} style={{width:i===onboardStep?20:8,height:8,borderRadius:4,background:i===onboardStep?sc.color:"#e5e7eb",transition:"all .3s"}}/>
+              ))}
+            </div>
+
+            {/* Step content */}
+            {(()=>{
+              const steps = ONBOARDING_STEPS[lang]||ONBOARDING_STEPS.PT;
+              const [ico, title, desc] = steps[onboardStep];
+              return (
+                <div style={{textAlign:"center"}}>
+                  <div style={{fontSize:52,marginBottom:16}}>{ico}</div>
+                  <div style={{fontSize:20,fontWeight:900,color:"#111827",marginBottom:10}}>{title}</div>
+                  <div style={{fontSize:14,color:"#6b7280",lineHeight:1.6,marginBottom:28}}>{desc}</div>
+                </div>
+              );
+            })()}
+
+            {/* Navigation */}
+            <div style={{display:"flex",gap:10}}>
+              {onboardStep > 0 && (
+                <button style={{...S.btnGhost,flex:1}} onClick={()=>setOnboardStep(s=>s-1)}>
+                  ← {lang==="PT"?"Anterior":"Back"}
+                </button>
+              )}
+              <button style={{...S.btnPrimary,flex:2,background:sc.color,border:"none"}}
+                onClick={()=>{
+                  const steps = ONBOARDING_STEPS[lang]||ONBOARDING_STEPS.PT;
+                  if(onboardStep < steps.length-1){
+                    setOnboardStep(s=>s+1);
+                  } else {
+                    try{ localStorage.setItem("bpOnboarded","1"); }catch(e){}
+                    setShowOnboarding(false);
+                  }
+                }}>
+                {onboardStep < (ONBOARDING_STEPS[lang]||ONBOARDING_STEPS.PT).length-1
+                  ? (lang==="PT"?"Próximo →":"Next →")
+                  : (lang==="PT"?"Começar 🚀":"Get started 🚀")}
+              </button>
+            </div>
+
+            <button style={{width:"100%",background:"none",border:"none",color:"#9ca3af",fontSize:12,cursor:"pointer",marginTop:12,padding:8}}
+              onClick={()=>{ try{localStorage.setItem("bpOnboarded","1");}catch(e){} setShowOnboarding(false); }}>
+              {lang==="PT"?"Saltar tutorial":"Skip tutorial"}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {showTooltip && (
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.3)",zIndex:250,display:"flex",alignItems:"center",justifyContent:"center",padding:20}}
+          onClick={()=>setShowTooltip(null)}>
+          <div style={{background:"#fff",borderRadius:14,padding:24,maxWidth:360,width:"100%",boxShadow:"0 8px 32px rgba(0,0,0,.15)"}} onClick={e=>e.stopPropagation()}>
+            <div style={{fontSize:28,marginBottom:10,textAlign:"center"}}>{showTooltip.ico}</div>
+            <div style={{fontSize:16,fontWeight:800,color:"#111827",marginBottom:8,textAlign:"center"}}>{showTooltip.title}</div>
+            <div style={{fontSize:13,color:"#6b7280",lineHeight:1.6,textAlign:"center"}}>{showTooltip.desc}</div>
+            <button style={{...S.btnPrimary,marginTop:20}} onClick={()=>setShowTooltip(null)}>OK</button>
+          </div>
+        </div>
+      )}
+
+      {showTooltip && (
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.4)",zIndex:200,display:"flex",alignItems:"flex-end",justifyContent:"center"}} onClick={()=>setShowTooltip(null)}>
+          <div style={{background:"#fff",borderRadius:"16px 16px 0 0",padding:"24px 20px 36px",width:"100%",maxWidth:500}} onClick={e=>e.stopPropagation()}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+              <div style={{fontSize:13,fontWeight:800,color:"#111827",textTransform:"uppercase",letterSpacing:.8}}>{lang==="PT"?"Como funciona":"How it works"}</div>
+              <button style={{background:"none",border:"none",color:"#9ca3af",fontSize:22,cursor:"pointer"}} onClick={()=>setShowTooltip(null)}>×</button>
+            </div>
+            <p style={{fontSize:14,color:"#374151",lineHeight:1.7,margin:0}}>
+              {showTooltip==="dashboard" && (lang==="PT"?"O separador Banca mostra o teu resumo geral — banca actual, P&L total, ROI, strike rate e odd média. As apostas pendentes aparecem aqui para liquidares rapidamente com ✓ ou ✗.":"The Bankroll tab shows your overall summary — current bankroll, total P&L, ROI, strike rate and average odd. Pending bets appear here for quick settlement with ✓ or ✗.")}
+              {showTooltip==="diary" && (lang==="PT"?"O Diário mostra as tuas apostas dia a dia. Navega por qualquer data, incluindo passadas. Filtra por estratégia (ATP, WTA, etc.). Liquida apostas pendentes com Green / Red / Cashout / Void.":"The Diary shows your bets day by day. Navigate any date including past ones. Filter by strategy (ATP, WTA, etc.). Settle pending bets with Win / Loss / Cashout / Void.")}
+              {showTooltip==="report" && (lang==="PT"?"O Relatório mostra o resumo mensal completo — lucro, ROI, % de acertos, valor investido e retorno. Navega entre meses e filtra por estratégia para ver o desempenho de cada abordagem.":"The Report shows the full monthly summary — profit, ROI, win rate, staked and return. Navigate between months and filter by strategy to see each approach's performance.")}
+              {showTooltip==="chart" && (lang==="PT"?"O Gráfico mostra a evolução da tua banca aposta a aposta e os resultados de cada mês em barras. Inclui a linha de referência da banca inicial para veres claramente se estás acima ou abaixo.":"The Chart shows your bankroll evolution bet by bet and each month's results in bars. Includes the initial bankroll reference line so you can clearly see if you're above or below.")}
+              {showTooltip==="ai" && (lang==="PT"?"A Análise IA lê as tuas apostas individualmente e identifica padrões reais — mercados onde perdes, ranges de odds problemáticos, e recomendações concretas. Precisa de pelo menos 3 apostas liquidadas. Preenche o campo Notas com contexto (ex: 'Alcaraz @1.23, terra') para análises mais precisas.":"AI Analysis reads your bets individually and identifies real patterns — markets where you lose, problematic odd ranges, and concrete recommendations. Needs at least 3 settled bets. Fill in the Notes field with context (e.g. 'Alcaraz @1.23, clay') for more accurate analysis.")}
+              {showTooltip==="sobre" && (lang==="PT"?"A tab Info mostra o teu plano actual, todas as funcionalidades incluídas na app e o contacto de suporte directo.":"The Info tab shows your current plan, all features included in the app and direct support contact.")}
+            </p>
+            <button style={{...S.btnPrimary,marginTop:20,background:sc.color,border:"none"}} onClick={()=>setShowTooltip(null)}>
+              {lang==="PT"?"Percebido 👍":"Got it 👍"}
+            </button>
+          </div>
+        </div>
+      )}
+
+
+      {showOnboarding && screen==="app" && isActive && (
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.6)",zIndex:300,display:"flex",alignItems:"flex-end",justifyContent:"center"}}>
+          <div style={{background:"#fff",borderRadius:"20px 20px 0 0",padding:"28px 24px 40px",width:"100%",maxWidth:480}}>
+            {(() => {
+              const steps = ONBOARDING_STEPS[lang]||ONBOARDING_STEPS.PT;
+              const step = steps[onboardStep];
+              const isLast = onboardStep === steps.length - 1;
+              return (
+                <>
+                  <div style={{display:"flex",justifyContent:"center",gap:6,marginBottom:20}}>
+                    {steps.map((_,i)=>(
+                      <div key={i} style={{width:i===onboardStep?20:6,height:6,borderRadius:3,background:i===onboardStep?sc.color:"#e5e7eb",transition:"width .2s"}}/>
+                    ))}
+                  </div>
+                  <div style={{fontSize:48,textAlign:"center",marginBottom:12}}>{step.icon}</div>
+                  <h2 style={{fontSize:20,fontWeight:900,color:"#111827",textAlign:"center",margin:"0 0 10px"}}>{step.title}</h2>
+                  <p style={{fontSize:14,color:"#6b7280",lineHeight:1.6,textAlign:"center",marginBottom:24}}>{step.body}</p>
+                  <button style={{...S.btnPrimary,background:sc.color,border:"none",marginBottom:8}} onClick={()=>{
+                    if(isLast){ try{localStorage.setItem("bpOnboarded","true");}catch(e){} setShowOnboarding(false); }
+                    else setOnboardStep(s=>s+1);
+                  }}>{isLast?(lang==="PT"?"Começar":"Get started →"):(lang==="PT"?"Próximo →":"Next →")}</button>
+                  <button style={S.btnGhost} onClick={()=>{ try{localStorage.setItem("bpOnboarded","true");}catch(e){} setShowOnboarding(false); }}>
+                    {lang==="PT"?"Saltar tutorial":"Skip tutorial"}
+                  </button>
+                </>
+              );
+            })()}
+          </div>
+        </div>
+      )}
+
+      {showHelp && (
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.4)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center",padding:20}} onClick={()=>setShowHelp(false)}>
+          <div style={{background:"#fff",borderRadius:16,padding:24,maxWidth:380,width:"100%"}} onClick={e=>e.stopPropagation()}>
+            <div style={{fontSize:36,textAlign:"center",marginBottom:8}}>{(HELP_TIPS[lang]||HELP_TIPS.PT)[tab]?.icon||"💡"}</div>
+            <h3 style={{fontSize:18,fontWeight:800,color:"#111827",textAlign:"center",margin:"0 0 10px"}}>{(HELP_TIPS[lang]||HELP_TIPS.PT)[tab]?.title||""}</h3>
+            <p style={{fontSize:13,color:"#6b7280",lineHeight:1.6,marginBottom:20,textAlign:"center"}}>{(HELP_TIPS[lang]||HELP_TIPS.PT)[tab]?.body||""}</p>
+            <button style={{...S.btnPrimary,background:sc.color,border:"none"}} onClick={()=>setShowHelp(false)}>OK</button>
           </div>
         </div>
       )}
@@ -1347,6 +1602,7 @@ export default function App() {
         <div style={{display:"flex",alignItems:"center",gap:6}}>
           {isInTrial && !isAdmin && <span style={{borderRadius:6,padding:"3px 10px",fontSize:12,fontWeight:600,color:"#92400e",background:"#f8f9fa",border:"1px solid #e9ecef",cursor:"pointer"}} onClick={()=>setDrawerOpen(true)}>{trialLeft}d ⏰</span>}
           <span style={{borderRadius:6,padding:"3px 8px",fontSize:10,fontWeight:700,color:"#6b7280",background:"#f3f4f6",border:"1px solid #e5e7eb"}}>{br?.stake_mode==="fixed"?"🔒 Fixa":"📈 Var"}</span>
+          <button style={{background:"none",border:"1px solid #e5e7eb",borderRadius:6,padding:"3px 8px",fontSize:12,fontWeight:700,color:"#9ca3af",cursor:"pointer"}} onClick={()=>setShowHelp(true)}>?</button>
           <span style={{borderRadius:6,padding:"3px 10px",fontSize:13,fontWeight:800,color:sc.color,background:sc.color+"15",border:`1px solid ${sc.color}33`}}>{fmt(currentBR)}</span>
         </div>
       </header>
@@ -1360,9 +1616,15 @@ export default function App() {
 
       <nav style={{display:"flex",background:"#fff",borderBottom:"1px solid #f3f4f6",overflowX:"auto",scrollbarWidth:"none"}}>
         {[["dashboard",(I18N[lang]||I18N.PT).tabs[0]],["diary",(I18N[lang]||I18N.PT).tabs[1]],["report",(I18N[lang]||I18N.PT).tabs[2]],["chart",(I18N[lang]||I18N.PT).tabs[3]],["ai",(I18N[lang]||I18N.PT).tabs[4]],["sobre",(I18N[lang]||I18N.PT).tabs[5]]].concat(isAdmin?[["admin","Admin"]]:[]).map(([v,l])=>(
-          <button key={v} style={{flex:1,padding:"11px 4px",border:"none",borderBottom:`2px solid ${tab===v?sc.color:"transparent"}`,background:"transparent",color:tab===v?sc.color:"#9ca3af",cursor:"pointer",fontSize:11,fontWeight:700,whiteSpace:"nowrap"}} onClick={()=>setTab(v)}>{l}</button>
+          <button key={v} style={{flex:1,padding:"11px 4px",border:"none",borderBottom:`2px solid ${tab===v?sc.color:"transparent"}`,background:"transparent",color:tab===v?sc.color:"#9ca3af",cursor:"pointer",fontSize:11,fontWeight:700,whiteSpace:"nowrap",position:"relative"}} onClick={()=>setTab(v)}>{l}</button>
         ))}
       </nav>
+
+      <div style={{display:"flex",justifyContent:"flex-end",padding:"6px 14px 0"}}>
+        <button style={{background:"none",border:"1px solid #e5e7eb",borderRadius:20,padding:"3px 12px",fontSize:11,color:"#9ca3af",cursor:"pointer",fontWeight:600}} onClick={()=>setShowTooltip(tab)}>
+          ❓ {lang==="PT"?"Como funciona?":"How does this work?"}
+        </button>
+      </div>
 
       <main style={{maxWidth:680,margin:"0 auto",padding:"14px 12px"}}>
 
@@ -1804,24 +2066,44 @@ export default function App() {
               </div>
               <a href={`mailto:tome.luis.pt@gmail.com?subject=Suporte BankrollPro&body=Olá BankrollPro Team,%0A%0A`}
                 style={{display:"flex",alignItems:"center",justifyContent:"center",gap:10,background:"#111827",color:"#fff",textDecoration:"none",padding:"14px",borderRadius:10,fontSize:14,fontWeight:700}}>
-                ✉️ Contactar Suporte
+                ✉️ {lang==="PT"?"Contactar Suporte":"Contact Support"}
               </a>
+              <button style={{...S.btnGhost,marginTop:10,fontSize:13}} onClick={()=>{setOnboardStep(0);setShowOnboarding(true);}}>
+                📖 {lang==="PT"?"Rever tutorial":"View tutorial again"}
+              </button>
             </div>
 
             <div style={{background:"#fff",border:"1px solid #fff",borderRadius:14,padding:16,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
               <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,fontWeight:800,marginBottom:14}}>{lang==="PT"?"O que está incluído":"What's included"}</div>
-              {[
+              {(lang==="PT"?[
                 ["📊","Múltiplas bancas","Até 3 bancas separadas por desporto"],
-                ["📅","Diário de apostas","Registo por dia — Green/Red/Cashout/Void — imediato ou pendente"],
-                ["📈","Relatório mensal","Lucro, ROI, % acertos, investido e retorno — por dia e por mês"],
-                ["📉","Gráfico de evolução","Curva da banca e resultados por mês em barras"],
-                ["🎯","Simples e múltiplas","Unidades configuráveis, cálculo automático de stake e retorno"],
-                ["📋","Importação Telegram","Cola o texto do grupo e importa apostas automaticamente"],
-                ["🤖","Análise IA","Score de saúde, padrões por mercado e recomendações reais"],
-                ["🏅","Múltiplos desportos","Ténis, Futebol, Basquetebol, MMA, Hóquei, Rugby e mais"],
+                ["📅","Diário de apostas","Registo por dia — Green/Red/Cashout/Void — imediato ou pendente. Navega por qualquer data, incluindo datas passadas."],
+                ["📈","Relatório mensal","Lucro, ROI, % acertos, investido e retorno — por dia e por mês. Filtra por estratégia."],
+                ["📉","Gráfico de evolução","Curva da banca aposta a aposta e resultados por mês em barras."],
+                ["🎯","Simples e múltiplas","Unidades configuráveis (stake fixa ou variável), cálculo automático de stake e retorno potencial."],
+                ["🏷️","Estratégias","Define estratégias por aposta (ATP, WTA, Liga Principal, etc.) e filtra resultados por estratégia."],
+                ["📋","Importação Telegram","Cola o texto do grupo ou faz upload de um print — a app detecta e importa apostas automaticamente."],
+                ["🤖","Análise IA","Lê as tuas apostas individualmente. Identifica padrões, mercados problemáticos e dá recomendações reais."],
+                ["💰","Aporte e saque","Adiciona ou retira dinheiro da banca declarada sem alterar o histórico de apostas."],
+                ["🔔","Revisão de 30 dias","A cada 30 dias, a app sugere rever e actualizar o valor da stake com base nos resultados reais."],
+                ["🏅","Múltiplos desportos","Ténis, Futebol, Basquetebol, MMA, Hóquei, Rugby e mais — cada um com os seus mercados específicos."],
                 ["💱","Múltiplas moedas","€, R$ e $"],
                 ["🚫","Sem anúncios","Experiência limpa e focada"],
-              ].map(([ico,t,d])=>(
+              ]:[
+                ["📊","Multiple bankrolls","Up to 3 bankrolls separated by sport"],
+                ["📅","Betting diary","Log by day — Win/Loss/Cashout/Void — immediate or pending. Navigate any date including past dates."],
+                ["📈","Monthly report","Profit, ROI, win rate, staked and return — by day and by month. Filter by strategy."],
+                ["📉","Evolution chart","Bankroll curve bet by bet and monthly results in bars."],
+                ["🎯","Singles & multiples","Configurable units (fixed or variable stake), automatic stake and potential return calculation."],
+                ["🏷️","Strategies","Set strategies per bet (ATP, WTA, Main League, etc.) and filter results by strategy."],
+                ["📋","Telegram import","Paste group text or upload a screenshot — the app auto-detects and imports bets."],
+                ["🤖","AI Analysis","Reads your bets individually. Identifies patterns, problem markets and gives real recommendations."],
+                ["💰","Deposit & withdraw","Add or remove money from the declared bankroll without affecting bet history."],
+                ["🔔","30-day review","Every 30 days, the app suggests reviewing and updating your stake based on actual results."],
+                ["🏅","Multiple sports","Tennis, Football, Basketball, MMA, Hockey, Rugby and more — each with specific markets."],
+                ["💱","Multiple currencies","€, R$ and $"],
+                ["🚫","No ads","Clean, focused experience"],
+              ]).map(([ico,t,d])=>(
                 <div key={t} style={{display:"flex",gap:12,padding:"10px 0",borderBottom:"1px solid #f3f4f6"}}>
                   <span style={{fontSize:20,flexShrink:0}}>{ico}</span>
                   <div>
