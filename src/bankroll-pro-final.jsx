@@ -1194,39 +1194,6 @@ export default function App() {
         </div>
       )}
 
-      {showTooltip && (
-        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.3)",zIndex:250,display:"flex",alignItems:"center",justifyContent:"center",padding:20}}
-          onClick={()=>setShowTooltip(null)}>
-          <div style={{background:"#fff",borderRadius:14,padding:24,maxWidth:360,width:"100%",boxShadow:"0 8px 32px rgba(0,0,0,.15)"}} onClick={e=>e.stopPropagation()}>
-            <div style={{fontSize:28,marginBottom:10,textAlign:"center"}}>{showTooltip.ico}</div>
-            <div style={{fontSize:16,fontWeight:800,color:"#111827",marginBottom:8,textAlign:"center"}}>{showTooltip.title}</div>
-            <div style={{fontSize:13,color:"#6b7280",lineHeight:1.6,textAlign:"center"}}>{showTooltip.desc}</div>
-            <button style={{...S.btnPrimary,marginTop:20}} onClick={()=>setShowTooltip(null)}>OK</button>
-          </div>
-        </div>
-      )}
-
-      {showTooltip && (
-        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.5)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center",padding:"20px"}} onClick={()=>setShowTooltip(null)}>
-          <div style={{background:"#fff",borderRadius:16,padding:"24px 20px 28px",width:"100%",maxWidth:420,boxShadow:"0 20px 60px rgba(0,0,0,.3)"}} onClick={e=>e.stopPropagation()}>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
-              <div style={{fontSize:13,fontWeight:800,color:"#111827",textTransform:"uppercase",letterSpacing:.8}}>{lang==="PT"?"Como funciona":"How it works"}</div>
-              <button style={{background:"none",border:"none",color:"#9ca3af",fontSize:22,cursor:"pointer"}} onClick={()=>setShowTooltip(null)}>×</button>
-            </div>
-            <p style={{fontSize:14,color:"#374151",lineHeight:1.7,margin:0}}>
-              {showTooltip==="dashboard" && (lang==="PT"?"O separador Banca mostra o teu resumo geral — banca actual, P&L total, ROI, strike rate e odd média. As apostas pendentes aparecem aqui para liquidares rapidamente com ✓ ou ✗.":"The Bankroll tab shows your overall summary — current bankroll, total P&L, ROI, strike rate and average odd. Pending bets appear here for quick settlement with ✓ or ✗.")}
-              {showTooltip==="diary" && (lang==="PT"?"O Diário mostra as tuas apostas dia a dia. Navega por qualquer data, incluindo passadas. Filtra por estratégia (ATP, WTA, etc.). Liquida apostas pendentes com Green / Red / Cashout / Void.":"The Diary shows your bets day by day. Navigate any date including past ones. Filter by strategy (ATP, WTA, etc.). Settle pending bets with Win / Loss / Cashout / Void.")}
-              {showTooltip==="report" && (lang==="PT"?"O Relatório mostra o resumo mensal completo — lucro, ROI, % de acertos, valor investido e retorno. Navega entre meses e filtra por estratégia para ver o desempenho de cada abordagem.":"The Report shows the full monthly summary — profit, ROI, win rate, staked and return. Navigate between months and filter by strategy to see each approach's performance.")}
-              {showTooltip==="chart" && (lang==="PT"?"O Gráfico mostra a evolução da tua banca aposta a aposta e os resultados de cada mês em barras. Inclui a linha de referência da banca inicial para veres claramente se estás acima ou abaixo.":"The Chart shows your bankroll evolution bet by bet and each month's results in bars. Includes the initial bankroll reference line so you can clearly see if you're above or below.")}
-              {showTooltip==="ai" && (lang==="PT"?"A Análise IA lê as tuas apostas individualmente e identifica padrões reais — mercados onde perdes, ranges de odds problemáticos, e recomendações concretas. Precisa de pelo menos 3 apostas liquidadas. Preenche o campo Notas com contexto (ex: 'Alcaraz @1.23, terra') para análises mais precisas.":"AI Analysis reads your bets individually and identifies real patterns — markets where you lose, problematic odd ranges, and concrete recommendations. Needs at least 3 settled bets. Fill in the Notes field with context (e.g. 'Alcaraz @1.23, clay') for more accurate analysis.")}
-              {showTooltip==="sobre" && (lang==="PT"?"A tab Info mostra o teu plano actual, todas as funcionalidades incluídas na app e o contacto de suporte directo.":"The Info tab shows your current plan, all features included in the app and direct support contact.")}
-            </p>
-            <button style={{...S.btnPrimary,marginTop:20,background:sc.color,border:"none"}} onClick={()=>setShowTooltip(null)}>
-              {lang==="PT"?"Percebido 👍":"Got it 👍"}
-            </button>
-          </div>
-        </div>
-      )}
 
       {showHelp && (
         <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.4)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center",padding:20}} onClick={()=>setShowHelp(false)}>
