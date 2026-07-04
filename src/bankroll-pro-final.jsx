@@ -1588,7 +1588,7 @@ export default function App() {
       </nav>
 
       <div style={{display:"flex",justifyContent:"flex-end",padding:"6px 14px 0"}}>
-        <button style={{background:"none",border:"1px solid #e5e7eb",borderRadius:20,padding:"3px 12px",fontSize:11,color:"#9ca3af",cursor:"pointer",fontWeight:600}} onClick={()=>setShowTooltip(tab)}>
+        <button style={{background:"none",border:"1px solid #e5e7eb",borderRadius:20,padding:"3px 12px",fontSize:11,color:"#9ca3af",cursor:"pointer",fontWeight:600}} onClick={e=>{e.stopPropagation();setShowTooltip(tab);}}>
           ❓ {lang==="PT"?"Como funciona?":"How does this work?"}
         </button>
       </div>
