@@ -341,8 +341,45 @@ async function getAIFeedback(bets, stats, bankroll, sport) {
 
 
 
-export default function App() {
-  const [screen, setScreen]       = useState("loading");
+// Gráfico de barras vertical estilo dashboard — eixo, grelha, valores em cima das barras.
+// value pode ser negativo (perdas) — as barras "divergem" a partir da linha zero.
+function DashboardBarChart({ data, lang="PT", unit="€" }) {
+  if(!data || !data.length) return null;
+  const W=320, H=176, padTop=14, padBottom=30, chartH=H-padTop-padBottom;
+  const maxPos = Math.max(0, ...data.map(d=>d.value));
+  const maxNeg = Math.max(0, ...data.map(d=>-d.value));
+  const range = (maxPos+maxNeg) || 1;
+  const zeroY = padTop + (maxPos/range)*chartH;
+  const bw = W/data.length;
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:180,display:"block"}}>
+      {[0,0.25,0.5,0.75,1].map(p=>(
+        <line key={p} x1={0} y1={padTop+chartH*p} x2={W} y2={padTop+chartH*p} stroke="#f1f2f4" strokeWidth="1"/>
+      ))}
+      <line x1={0} y1={zeroY} x2={W} y2={zeroY} stroke="#d1d5db" strokeWidth="1"/>
+      {data.map((d,i)=>{
+        const barH = Math.max(Math.abs(d.value)/range*chartH, d.value!==0?2:0);
+        const x = i*bw + bw*0.22;
+        const bwReal = bw*0.56;
+        const y = d.value>=0 ? zeroY-barH : zeroY;
+        const color = d.value>=0 ? "#059669" : "#dc2626";
+        return (
+          <g key={d.label+i}>
+            <rect x={x} y={y} width={bwReal} height={barH} rx={3} fill={color}/>
+            <text x={x+bwReal/2} y={d.value>=0?y-4:Math.min(y+barH+11,H-16)} textAnchor="middle" fontSize="8.5" fontWeight="800" fill="#111827">
+              {d.value>=0?"+":"-"}{unit}{Math.abs(d.value).toFixed(0)}
+            </text>
+            <text x={x+bwReal/2} y={H-6} textAnchor="middle" fontSize="7.5" fill="#9ca3af" fontWeight="600">
+              {d.label.length>9?d.label.slice(0,8)+"…":d.label}
+            </text>
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
+
+export default function App() {  const [screen, setScreen]       = useState("loading");
   const [authMode, setAuthMode]   = useState("register");
   const [user, setUser]           = useState(null);
   const [bankrolls, setBankrolls] = useState([]);
@@ -600,8 +637,47 @@ export default function App() {
 
     const maxAbsMarket = Math.max(1,...byMarketList.map(m=>Math.abs(m.pnl)));
     const maxAbsOdd = Math.max(1,...byOddList.map(o=>Math.abs(o.pnl)));
-    return { byMarketList, byOddList, maxAbsMarket, maxAbsOdd };
-  },[bets]);
+
+    // Breakdown por estratégia
+    const byStrategy = {};
+    settled.forEach(b=>{
+      const strat = b.strategy || (lang==="PT"?"Sem estratégia":"No strategy");
+      if(!byStrategy[strat]) byStrategy[strat] = {wins:0,losses:0,pnl:0,count:0};
+      byStrategy[strat].count++;
+      if(b.result==="WIN"){ byStrategy[strat].wins++; byStrategy[strat].pnl+=b.stake*(b.odd-1); }
+      else if(b.result==="LOSS"){ byStrategy[strat].losses++; byStrategy[strat].pnl-=b.stake; }
+      else if(b.result==="CASHOUT"){ byStrategy[strat].pnl+=(b.cashout_val||0)-b.stake; }
+    });
+    const byStrategyList = Object.entries(byStrategy)
+      .map(([strategy,v])=>({strategy,count:v.count,wins:v.wins,losses:v.losses,pnl:Number(v.pnl.toFixed(2)),sr:v.wins+v.losses>0?Number((v.wins/(v.wins+v.losses)*100).toFixed(0)):0}))
+      .sort((a,b)=>a.pnl-b.pnl);
+
+    // Evolução mensal (últimos 6 meses com registos)
+    const byMonth = {};
+    settled.forEach(b=>{
+      const month = (b.created_at||"").slice(0,7);
+      if(!month) return;
+      if(!byMonth[month]) byMonth[month] = {pnl:0,count:0};
+      byMonth[month].count++;
+      if(b.result==="WIN") byMonth[month].pnl+=b.stake*(b.odd-1);
+      else if(b.result==="LOSS") byMonth[month].pnl-=b.stake;
+      else if(b.result==="CASHOUT") byMonth[month].pnl+=(b.cashout_val||0)-b.stake;
+    });
+    const MONTH_ABBR_PT=["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
+    const MONTH_ABBR_EN=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    const byMonthList = Object.entries(byMonth)
+      .sort(([a],[b])=>a.localeCompare(b))
+      .slice(-6)
+      .map(([month,v])=>{
+        const mIdx = parseInt(month.slice(5,7),10)-1;
+        const label = (lang==="PT"?MONTH_ABBR_PT:MONTH_ABBR_EN)[mIdx] || month;
+        return { month, count:v.count, pnl:Number(v.pnl.toFixed(2)), label };
+      });
+    const maxAbsStrategy = Math.max(1,...byStrategyList.map(s=>Math.abs(s.pnl)));
+    const maxAbsMonth = Math.max(1,...byMonthList.map(m=>Math.abs(m.pnl)));
+
+    return { byMarketList, byOddList, maxAbsMarket, maxAbsOdd, byStrategyList, maxAbsStrategy, byMonthList, maxAbsMonth };
+  },[bets,lang]);
 
   const brHistory = useMemo(()=>{
     let r=parseFloat(br?.bankroll||0);
@@ -957,9 +1033,16 @@ export default function App() {
                             });
                             const data = await response.json();
                             if(data.error) throw new Error(data.error);
-                            const text = data.text || "";
-                            setImportText(text);
-                            setImportBets(parseTelegramTips(text));
+                            const extracted = data.bets || [];
+                            if(extracted.length===0) throw new Error(lang==="PT"?"Não foi possível identificar nenhuma aposta nesta imagem.":"Could not identify any bet in this image.");
+                            const normalized = extracted.map(b=>{
+                              let units = b.units;
+                              if(!units && b.stakeAmount && unitVal>0) units = Number((b.stakeAmount/unitVal).toFixed(2));
+                              if(!units) units = 1;
+                              return { event:b.event, selection:b.selection, market:b.market||"Outros", odd:b.odd, units, result:"PENDING", notes:b.notes||"" };
+                            });
+                            setImportText(normalized.map(b=>`${b.event} — ${b.selection} @${b.odd} (${b.units}un)`).join("\n"));
+                            setImportBets(normalized);
                           } catch(err) {
                             setImportImageError("Erro ao ler imagem: " + err.message);
                             setImportImage(null);
@@ -1942,42 +2025,64 @@ export default function App() {
               )}
 
               {stats.settled>=3 && (
-                <div style={{marginTop:4}}>
-                  <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,fontWeight:800,marginBottom:12}}>
-                    {lang==="PT"?"Onde estás a ganhar / perder valor":"Where you're winning / losing value"}
-                  </div>
-                  {marketOddBreakdown.byMarketList.map(m=>(
-                    <div key={m.market} style={{marginBottom:14}}>
-                      <div style={{display:"flex",justifyContent:"space-between",fontSize:12,marginBottom:4}}>
-                        <span style={{fontWeight:700,color:"#111827"}}>{m.market}</span>
-                        <span style={{fontWeight:800,color:m.pnl>=0?"#059669":"#dc2626"}}>{m.pnl>=0?"+":"-"}€{Math.abs(m.pnl).toFixed(2)}</span>
+                <div style={{position:"relative",marginTop:4}}>
+                  {(!br?.subscribed && !isAdmin) && (
+                    <div style={{position:"absolute",inset:0,zIndex:5,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",background:"linear-gradient(180deg, rgba(255,255,255,.35), rgba(255,255,255,.94) 40%)",borderRadius:14,padding:20}}>
+                      <div style={{fontSize:26,marginBottom:8}}>🔒</div>
+                      <div style={{fontSize:13,fontWeight:800,color:"#111827",marginBottom:4,textAlign:"center"}}>
+                        {lang==="PT"?"Gráficos exclusivos para subscritores":"Charts exclusive to subscribers"}
                       </div>
-                      <div style={{background:"#f3f4f6",borderRadius:6,height:8,overflow:"hidden"}}>
-                        <div style={{width:`${Math.min(100,Math.abs(m.pnl)/marketOddBreakdown.maxAbsMarket*100)}%`,height:"100%",background:m.pnl>=0?"#059669":"#dc2626",borderRadius:6,transition:"width .3s"}}/>
+                      <div style={{fontSize:12,color:"#6b7280",marginBottom:14,textAlign:"center",maxWidth:260,lineHeight:1.5}}>
+                        {lang==="PT"?"Desbloqueia gráficos detalhados por mercado, odds, estratégia e evolução mensal.":"Unlock detailed charts by market, odds, strategy and monthly evolution."}
                       </div>
-                      <div style={{fontSize:10,color:"#9ca3af",marginTop:3}}>
-                        {m.count} {lang==="PT"?"apostas":"bets"} · {m.sr}% {lang==="PT"?"acertos":"win rate"} · {lang==="PT"?"odd média":"avg odd"} {m.avgOdd}
-                      </div>
+                      <a href={STRIPE_MONTHLY} target="_blank" rel="noreferrer" style={{...S.btnPrimary,background:sc.color,border:"none",textDecoration:"none",padding:"11px 28px",fontSize:13,display:"inline-block"}}>
+                        {lang==="PT"?"Subscrever":"Subscribe"}
+                      </a>
                     </div>
-                  ))}
+                  )}
 
-                  <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,fontWeight:800,margin:"18px 0 12px"}}>
-                    {lang==="PT"?"Performance por range de odds":"Performance by odd range"}
-                  </div>
-                  {marketOddBreakdown.byOddList.map(o=>(
-                    <div key={o.range} style={{marginBottom:14}}>
-                      <div style={{display:"flex",justifyContent:"space-between",fontSize:12,marginBottom:4}}>
-                        <span style={{fontWeight:700,color:"#111827"}}>@{o.range}</span>
-                        <span style={{fontWeight:800,color:o.pnl>=0?"#059669":"#dc2626"}}>{o.pnl>=0?"+":"-"}€{Math.abs(o.pnl).toFixed(2)}</span>
-                      </div>
-                      <div style={{background:"#f3f4f6",borderRadius:6,height:8,overflow:"hidden"}}>
-                        <div style={{width:`${Math.min(100,Math.abs(o.pnl)/marketOddBreakdown.maxAbsOdd*100)}%`,height:"100%",background:o.pnl>=0?"#059669":"#dc2626",borderRadius:6,transition:"width .3s"}}/>
-                      </div>
-                      <div style={{fontSize:10,color:"#9ca3af",marginTop:3}}>
-                        {o.count} {lang==="PT"?"apostas":"bets"} · {o.sr}% {lang==="PT"?"acertos":"win rate"}
-                      </div>
+                  <div style={{filter:(!br?.subscribed && !isAdmin)?"blur(5px)":"none",pointerEvents:(!br?.subscribed && !isAdmin)?"none":"auto",userSelect:(!br?.subscribed && !isAdmin)?"none":"auto"}}>
+
+                    <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,fontWeight:800,marginBottom:8}}>
+                      {lang==="PT"?"Onde estás a ganhar / perder valor":"Where you're winning / losing value"}
                     </div>
-                  ))}
+                    <DashboardBarChart data={marketOddBreakdown.byMarketList.map(m=>({label:m.market,value:m.pnl}))} lang={lang}/>
+                    <div style={{fontSize:10,color:"#9ca3af",textAlign:"center",marginTop:2,marginBottom:20}}>
+                      {lang==="PT"?"P&L por mercado":"P&L by market"}
+                    </div>
+
+                    <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,fontWeight:800,marginBottom:8}}>
+                      {lang==="PT"?"Performance por range de odds":"Performance by odd range"}
+                    </div>
+                    <DashboardBarChart data={marketOddBreakdown.byOddList.map(o=>({label:o.range,value:o.pnl}))} lang={lang}/>
+                    <div style={{fontSize:10,color:"#9ca3af",textAlign:"center",marginTop:2,marginBottom:20}}>
+                      {lang==="PT"?"P&L por faixa de odd":"P&L by odd range"}
+                    </div>
+
+                    {marketOddBreakdown.byStrategyList.length>1 && (
+                      <>
+                        <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,fontWeight:800,marginBottom:8}}>
+                          {lang==="PT"?"Performance por estratégia":"Performance by strategy"}
+                        </div>
+                        <DashboardBarChart data={marketOddBreakdown.byStrategyList.map(s=>({label:s.strategy,value:s.pnl}))} lang={lang}/>
+                        <div style={{fontSize:10,color:"#9ca3af",textAlign:"center",marginTop:2,marginBottom:20}}>
+                          {lang==="PT"?"P&L por estratégia":"P&L by strategy"}
+                        </div>
+                      </>
+                    )}
+
+                    {marketOddBreakdown.byMonthList.length>1 && (
+                      <>
+                        <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,fontWeight:800,marginBottom:8}}>
+                          {lang==="PT"?"Evolução mensal":"Monthly evolution"}
+                        </div>
+                        <DashboardBarChart data={marketOddBreakdown.byMonthList.map(m=>({label:m.label,value:m.pnl}))} lang={lang}/>
+                        <div style={{fontSize:10,color:"#9ca3af",textAlign:"center",marginTop:2}}>
+                          {lang==="PT"?`P&L por mês · últimos ${marketOddBreakdown.byMonthList.length} meses com registos`:`P&L by month · last ${marketOddBreakdown.byMonthList.length} months with records`}
+                        </div>
+                      </>
+                    )}
+                  </div>
                 </div>
               )}
 
