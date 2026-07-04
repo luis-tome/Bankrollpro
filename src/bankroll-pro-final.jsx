@@ -364,6 +364,8 @@ export default function App() {
   const [depositVal, setDepositVal] = useState("");
   const [showWithdraw, setShowWithdraw] = useState(false);
   const [withdrawVal, setWithdrawVal] = useState("");
+  const [withdrawError, setWithdrawError] = useState("");
+  const [importImageError, setImportImageError] = useState("");
   const [editBRTarget, setEditBRTarget] = useState(null);
   const [brForm, setBRForm]       = useState({name:"",sport:"Ténis",bankroll:"",unit_pct:"2",reset:false,stake_mode:"variable"});
   const [showForm, setShowForm]   = useState(false);
@@ -484,7 +486,7 @@ export default function App() {
     if(!val || val <= 0 || !br) return;
     const declaredBankroll = parseFloat(br.bankroll||0);
     if(val > declaredBankroll){
-      alert(lang==="PT"?"O valor do saque não pode ser maior que a banca declarada.":"Withdrawal amount cannot exceed the declared bankroll.");
+      setWithdrawError(lang==="PT"?"O valor do saque não pode ser maior que a banca declarada.":"Withdrawal amount cannot exceed the declared bankroll."); return;
       return;
     }
     const newBankroll = declaredBankroll - val;
@@ -919,8 +921,9 @@ export default function App() {
                             setImportText(text);
                             setImportBets(parseTelegramTips(text));
                           } catch(err) {
-                            alert("Erro ao ler imagem: " + err.message);
+                            setImportImageError("Erro ao ler imagem: " + err.message);
                             setImportImage(null);
+                            setImportImageLoading(false);
                           } finally {
                             setImportImageLoading(false);
                             e.target.value = "";
@@ -995,6 +998,7 @@ export default function App() {
               </div>
             )}
 
+            {importImageError && <div style={{marginTop:8,padding:"10px 12px",background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:8,fontSize:12,color:"#dc2626"}}>{importImageError}</div>}
             {importText.length>0 && importBets.length===0 && (
               <div style={{marginTop:10,padding:"10px 12px",background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:8,fontSize:12,color:"#dc2626"}}>
                 Formato não reconhecido. Usa o formato com 🎾 🎯 💰
@@ -1022,8 +1026,8 @@ export default function App() {
 
 
       {showTooltip && (
-        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.4)",zIndex:200,display:"flex",alignItems:"flex-end",justifyContent:"center"}} onClick={()=>setShowTooltip(null)}>
-          <div style={{background:"#fff",borderRadius:"16px 16px 0 0",padding:"24px 20px 36px",width:"100%",maxWidth:500}} onClick={e=>e.stopPropagation()}>
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.5)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center",padding:"20px"}} onClick={()=>setShowTooltip(null)}>
+          <div style={{background:"#fff",borderRadius:16,padding:"24px 20px 28px",width:"100%",maxWidth:420,boxShadow:"0 20px 60px rgba(0,0,0,.3)"}} onClick={e=>e.stopPropagation()}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
               <div style={{fontSize:13,fontWeight:800,color:"#111827",textTransform:"uppercase",letterSpacing:.8}}>{lang==="PT"?"Como funciona":"How it works"}</div>
               <button style={{background:"none",border:"none",color:"#9ca3af",fontSize:22,cursor:"pointer"}} onClick={()=>setShowTooltip(null)}>×</button>
@@ -1045,8 +1049,8 @@ export default function App() {
 
 
       {showOnboarding && screen==="app" && isActive && (
-        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.6)",zIndex:300,display:"flex",alignItems:"flex-end",justifyContent:"center"}}>
-          <div style={{background:"#fff",borderRadius:"20px 20px 0 0",padding:"28px 24px 40px",width:"100%",maxWidth:500}}>
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.8)",zIndex:500,display:"flex",alignItems:"flex-end",justifyContent:"center"}}>
+          <div style={{background:"#fff",borderRadius:20,padding:"28px 24px 32px",width:"100%",maxWidth:420,boxShadow:"0 20px 60px rgba(0,0,0,.3)"}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
               <div style={{fontSize:13,color:"#9ca3af",fontWeight:600}}>{onboardStep+1} / 6</div>
               <div style={{display:"flex",gap:4}}>
@@ -1131,7 +1135,7 @@ export default function App() {
       )}
 
       {showOnboarding && (
-        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.6)",zIndex:300,display:"flex",alignItems:"flex-end",justifyContent:"center"}}>
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.8)",zIndex:500,display:"flex",alignItems:"flex-end",justifyContent:"center"}}>
           <div style={{background:"#fff",borderRadius:"20px 20px 0 0",padding:"28px 24px 36px",width:"100%",maxWidth:500}}>
             {/* Progress dots */}
             <div style={{display:"flex",justifyContent:"center",gap:6,marginBottom:24}}>
@@ -1197,8 +1201,8 @@ export default function App() {
       )}
 
       {showTooltip && (
-        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.4)",zIndex:200,display:"flex",alignItems:"flex-end",justifyContent:"center"}} onClick={()=>setShowTooltip(null)}>
-          <div style={{background:"#fff",borderRadius:"16px 16px 0 0",padding:"24px 20px 36px",width:"100%",maxWidth:500}} onClick={e=>e.stopPropagation()}>
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.5)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center",padding:"20px"}} onClick={()=>setShowTooltip(null)}>
+          <div style={{background:"#fff",borderRadius:16,padding:"24px 20px 28px",width:"100%",maxWidth:420,boxShadow:"0 20px 60px rgba(0,0,0,.3)"}} onClick={e=>e.stopPropagation()}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
               <div style={{fontSize:13,fontWeight:800,color:"#111827",textTransform:"uppercase",letterSpacing:.8}}>{lang==="PT"?"Como funciona":"How it works"}</div>
               <button style={{background:"none",border:"none",color:"#9ca3af",fontSize:22,cursor:"pointer"}} onClick={()=>setShowTooltip(null)}>×</button>
@@ -1214,38 +1218,6 @@ export default function App() {
             <button style={{...S.btnPrimary,marginTop:20,background:sc.color,border:"none"}} onClick={()=>setShowTooltip(null)}>
               {lang==="PT"?"Percebido 👍":"Got it 👍"}
             </button>
-          </div>
-        </div>
-      )}
-
-
-      {showOnboarding && screen==="app" && isActive && (
-        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.6)",zIndex:300,display:"flex",alignItems:"flex-end",justifyContent:"center"}}>
-          <div style={{background:"#fff",borderRadius:"20px 20px 0 0",padding:"28px 24px 40px",width:"100%",maxWidth:480}}>
-            {(() => {
-              const steps = ONBOARDING_STEPS[lang]||ONBOARDING_STEPS.PT;
-              const step = steps[onboardStep];
-              const isLast = onboardStep === steps.length - 1;
-              return (
-                <>
-                  <div style={{display:"flex",justifyContent:"center",gap:6,marginBottom:20}}>
-                    {steps.map((_,i)=>(
-                      <div key={i} style={{width:i===onboardStep?20:6,height:6,borderRadius:3,background:i===onboardStep?sc.color:"#e5e7eb",transition:"width .2s"}}/>
-                    ))}
-                  </div>
-                  <div style={{fontSize:48,textAlign:"center",marginBottom:12}}>{step.icon}</div>
-                  <h2 style={{fontSize:20,fontWeight:900,color:"#111827",textAlign:"center",margin:"0 0 10px"}}>{step.title}</h2>
-                  <p style={{fontSize:14,color:"#6b7280",lineHeight:1.6,textAlign:"center",marginBottom:24}}>{step.body}</p>
-                  <button style={{...S.btnPrimary,background:sc.color,border:"none",marginBottom:8}} onClick={()=>{
-                    if(isLast){ try{localStorage.setItem("bpOnboarded","true");}catch(e){} setShowOnboarding(false); }
-                    else setOnboardStep(s=>s+1);
-                  }}>{isLast?(lang==="PT"?"Começar":"Get started →"):(lang==="PT"?"Próximo →":"Next →")}</button>
-                  <button style={S.btnGhost} onClick={()=>{ try{localStorage.setItem("bpOnboarded","true");}catch(e){} setShowOnboarding(false); }}>
-                    {lang==="PT"?"Saltar tutorial":"Skip tutorial"}
-                  </button>
-                </>
-              );
-            })()}
           </div>
         </div>
       )}
@@ -1430,7 +1402,7 @@ export default function App() {
           <div style={{background:"#fff",borderRadius:16,padding:24,width:"100%",maxWidth:380,boxShadow:"0 20px 60px rgba(0,0,0,.2)"}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
               <h3 style={{margin:0,fontSize:16,fontWeight:700,color:"#111827"}}>💸 {lang==="PT"?"Fazer saque":"Withdraw"}</h3>
-              <button style={{background:"none",border:"none",color:"#9ca3af",fontSize:22,cursor:"pointer"}} onClick={()=>{setShowWithdraw(false);setWithdrawVal("");}}>×</button>
+              <button style={{background:"none",border:"none",color:"#9ca3af",fontSize:22,cursor:"pointer"}} onClick={()=>{setShowWithdraw(false);setWithdrawVal("");setWithdrawError("");}}>×</button>
             </div>
 
             <div style={{background:"#f9fafb",border:"1px solid #f3f4f6",borderRadius:10,padding:"12px 16px",marginBottom:16}}>
@@ -1452,6 +1424,7 @@ export default function App() {
               )}
             </div>
 
+            {withdrawError && <div style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:8,padding:"8px 12px",fontSize:12,color:"#dc2626",marginBottom:8}}>{withdrawError}</div>}
             <label style={S.label}>{lang==="PT"?"Valor do saque (€)":"Withdrawal amount (€)"}</label>
             <input style={S.input} type="number" max={br.bankroll} placeholder="ex: 100" value={withdrawVal} onChange={e=>setWithdrawVal(e.target.value)} autoFocus/>
 
@@ -1462,7 +1435,7 @@ export default function App() {
             <button style={{...S.btnPrimary,background:"#dc2626",border:"none",marginBottom:8}} onClick={handleWithdraw} disabled={!withdrawVal||parseFloat(withdrawVal)<=0||parseFloat(withdrawVal)>parseFloat(br.bankroll||0)}>
               {lang==="PT"?"Confirmar saque":"Confirm withdrawal"}
             </button>
-            <button style={S.btnGhost} onClick={()=>{setShowWithdraw(false);setWithdrawVal("");}}>
+            <button style={S.btnGhost} onClick={()=>{setShowWithdraw(false);setWithdrawVal("");setWithdrawError("");}}>
               {lang==="PT"?"Cancelar":"Cancel"}
             </button>
           </div>
