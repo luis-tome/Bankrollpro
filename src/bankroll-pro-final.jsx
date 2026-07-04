@@ -364,6 +364,7 @@ export default function App() {
   const [depositVal, setDepositVal] = useState("");
   const [showWithdraw, setShowWithdraw] = useState(false);
   const [withdrawVal, setWithdrawVal] = useState("");
+  const [confirmModal, setConfirmModal] = useState(null); // {message, onConfirm}
   const [withdrawError, setWithdrawError] = useState("");
   const [importImageError, setImportImageError] = useState("");
   const [editBRTarget, setEditBRTarget] = useState(null);
@@ -505,14 +506,16 @@ export default function App() {
   }
 
   async function deleteBankroll(id){
-    if(!window.confirm(lang==="PT"?"Apagar esta banca e todos os registos? Esta ação não pode ser revertida.":"Delete this bankroll and all records? This action cannot be undone.")) return;
-    await supabase.from("bets").delete().eq("bankroll_id",id);
-    await supabase.from("profiles").delete().eq("id",id);
-    const remaining=bankrolls.filter(b=>b.id!==id);
-    setBankrolls(remaining);
-    if(remaining.length>0){setActiveBR(remaining[0].id);await loadBets(remaining[0].id);}
-    else{setActiveBR(null);setBets([]);setScreen("setup");}
-    setShowEditBR(false);setDrawerOpen(false);
+    setConfirmModal({message: lang==="PT"?"Apagar esta banca e todos os registos? Esta ação não pode ser revertida.":"Delete this bankroll and all records? This action cannot be undone.", onConfirm: async ()=>{
+      setConfirmModal(null);
+      await supabase.from("bets").delete().eq("bankroll_id",id);
+      await supabase.from("profiles").delete().eq("id",id);
+      const remaining=bankrolls.filter(b=>b.id!==id);
+      setBankrolls(remaining);
+      if(remaining.length>0){setActiveBR(remaining[0].id);await loadBets(remaining[0].id);}
+      else{setActiveBR(null);setBets([]);setScreen("setup");}
+      setShowEditBR(false);setDrawerOpen(false);
+    }});
   }
 
   async function handleSaveBet(){
@@ -542,9 +545,8 @@ export default function App() {
   }
 
   async function deleteBet(id){
-    if(!window.confirm(lang==="PT"?"Apagar este registo?":"Delete this record?")) return;
-    await supabase.from("bets").delete().eq("id",id);
-    setBets(prev=>prev.filter(b=>b.id!==id));
+    setConfirmModal({message: lang==="PT"?"Apagar este registo?":"Delete this record?", onConfirm: async ()=>{ await supabase.from("bets").delete().eq("id",id); setBets(prev=>prev.filter(b=>b.id!==id)); setConfirmModal(null); }});
+    return;
   }
 
   function openEditBet(b){
@@ -1088,6 +1090,19 @@ export default function App() {
                 }}>
                 {onboardStep<5?(lang==="PT"?"Seguinte →":"Next →"):(lang==="PT"?"Começar!":"Let's go!")}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {confirmModal && (
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.5)",zIndex:400,display:"flex",alignItems:"center",justifyContent:"center",padding:20}} onClick={()=>setConfirmModal(null)}>
+          <div style={{background:"#fff",borderRadius:16,padding:24,maxWidth:340,width:"100%",boxShadow:"0 20px 60px rgba(0,0,0,.2)"}} onClick={e=>e.stopPropagation()}>
+            <div style={{fontSize:32,textAlign:"center",marginBottom:12}}>⚠️</div>
+            <p style={{fontSize:14,color:"#374151",textAlign:"center",lineHeight:1.6,marginBottom:20}}>{confirmModal.message}</p>
+            <div style={{display:"flex",gap:8}}>
+              <button style={{...S.btnGhost,flex:1}} onClick={()=>setConfirmModal(null)}>{lang==="PT"?"Cancelar":"Cancel"}</button>
+              <button style={{flex:1,padding:"13px",border:"none",background:"#dc2626",color:"#fff",borderRadius:8,cursor:"pointer",fontSize:14,fontWeight:700}} onClick={confirmModal.onConfirm}>{lang==="PT"?"Apagar":"Delete"}</button>
             </div>
           </div>
         </div>
