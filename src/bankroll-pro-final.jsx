@@ -1143,12 +1143,12 @@ export default function App() {
             {/* Step content */}
             {(()=>{
               const steps = ONBOARDING_STEPS[lang]||ONBOARDING_STEPS.PT;
-              const [ico, title, desc] = steps[onboardStep];
+              const step = steps[onboardStep]||{};
               return (
                 <div style={{textAlign:"center"}}>
-                  <div style={{fontSize:52,marginBottom:16}}>{ico}</div>
-                  <div style={{fontSize:20,fontWeight:900,color:"#111827",marginBottom:10}}>{title}</div>
-                  <div style={{fontSize:14,color:"#6b7280",lineHeight:1.6,marginBottom:28}}>{desc}</div>
+                  <div style={{fontSize:52,marginBottom:16}}>{step.icon}</div>
+                  <div style={{fontSize:20,fontWeight:900,color:"#111827",marginBottom:10}}>{step.title}</div>
+                  <div style={{fontSize:14,color:"#6b7280",lineHeight:1.6,marginBottom:28}}>{step.body}</div>
                 </div>
               );
             })()}
