@@ -2330,11 +2330,15 @@ function LandingQuote() {
 function AdminPanel({ supabase, fmt, daysLeft }) {
   const [data, setData]     = useState(null);
   const [loading, setLoading] = useState(true);
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+  const [confirmRevokeId, setConfirmRevokeId] = useState(null);
+  const [busyId, setBusyId] = useState(null);
+  const [deleteError, setDeleteError] = useState(null);
 
   useEffect(()=>{
     async function load(){
       setLoading(true);
-      const{data:profiles}=await supabase.from("profiles").select("user_id,name,user_name,email,subscribed,plan,trial_start,user_trial_start,bankroll,sport,created_at").order("created_at",{ascending:false});
+      const{data:profiles}=await supabase.from("profiles").select("user_id,name,user_name,email,subscribed,plan,trial_start,user_trial_start,bankroll,sport,created_at,amount_paid,is_promo,subscription_start,current_period_end").order("created_at",{ascending:false});
       if(profiles){
         const users={};
         profiles.forEach(p=>{ if(!users[p.user_id]) users[p.user_id]={...p,bancas:1}; else users[p.user_id].bancas++; });
@@ -2345,6 +2349,37 @@ function AdminPanel({ supabase, fmt, daysLeft }) {
     }
     load();
   },[]);
+
+  async function handleAction(action, user_id){
+    setBusyId(user_id); setDeleteError(null);
+    try{
+      const r = await fetch("/api/admin", {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({ action, user_id })
+      });
+      const res = await r.json();
+      if(!r.ok || res.error) throw new Error(res.error||"Erro desconhecido");
+      if(action==="delete"){
+        setData(prev=>{
+          const users = prev.users.filter(u=>u.user_id!==user_id);
+          return { total:users.length, paid:users.filter(u=>u.subscribed).length, trial:users.filter(u=>!u.subscribed&&daysLeft(u.user_trial_start||u.trial_start)>0).length, expired:users.filter(u=>!u.subscribed&&daysLeft(u.user_trial_start||u.trial_start)===0).length, users };
+        });
+      } else {
+        setData(prev=>{
+          const users = prev.users.map(u=> u.user_id===user_id
+            ? { ...u, subscribed: action==="vip", plan: action==="vip" ? "vip" : null }
+            : u
+          );
+          return { total:users.length, paid:users.filter(u=>u.subscribed).length, trial:users.filter(u=>!u.subscribed&&daysLeft(u.user_trial_start||u.trial_start)>0).length, expired:users.filter(u=>!u.subscribed&&daysLeft(u.user_trial_start||u.trial_start)===0).length, users };
+        });
+      }
+    }catch(e){
+      setDeleteError(e.message);
+    }finally{
+      setBusyId(null); setConfirmDeleteId(null); setConfirmRevokeId(null);
+    }
+  }
 
   if(loading) return <div style={{textAlign:"center",padding:40}}><div style={{...S.spinner,border:"2px solid #e5e7eb",borderTop:"2px solid #111827"}}/></div>;
 
@@ -2359,12 +2394,23 @@ function AdminPanel({ supabase, fmt, daysLeft }) {
           </div>
         ))}
       </div>
+      {deleteError && (
+        <div style={{background:"#fff1f2",border:"1px solid #fecaca",color:"#991b1b",borderRadius:10,padding:"10px 14px",fontSize:12,marginBottom:12}}>
+          Erro ao apagar: {deleteError}
+        </div>
+      )}
       <div style={{background:"#fff",border:"1px solid #fff",borderRadius:14,padding:16,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
         <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,fontWeight:800,marginBottom:14}}>Utilizadores</div>
         {data?.users.map(u=>{
           const tl=daysLeft(u.user_trial_start||u.trial_start);
           const status=u.subscribed?"Pago":tl>0?`Trial (${tl}d)`:"Expirado";
           const sc=u.subscribed?"#059669":tl>0?"#d97706":"#dc2626";
+          const isConfirming = confirmDeleteId===u.user_id;
+          const isConfirmingRevoke = confirmRevokeId===u.user_id;
+          const isBusy = busyId===u.user_id;
+          const planLabel = u.plan==="vip"?"VIP":u.plan==="annual"?"Anual":u.plan==="monthly"?"Mensal":null;
+          const promoLabel = u.plan!=="vip" && u.is_promo!=null ? (u.is_promo?"Promo":"Normal") : null;
+          const daysRemaining = u.current_period_end ? Math.ceil((new Date(u.current_period_end).getTime()-Date.now())/86400000) : null;
           return (
             <div key={u.user_id} style={{padding:"12px 0",borderBottom:"1px solid #f3f4f6"}}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8}}>
@@ -2372,11 +2418,75 @@ function AdminPanel({ supabase, fmt, daysLeft }) {
                   <div style={{fontSize:13,fontWeight:600,color:"#111827",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{u.user_name||u.email||u.user_id.slice(0,8)+"..."}</div>
                   <div style={{fontSize:11,color:"#111827"}}>{u.email&&u.user_name?u.email:""}</div>
                   <div style={{fontSize:11,color:"#111827"}}>{u.bancas} banca{u.bancas>1?"s":""} · {new Date(u.created_at).toLocaleDateString("pt-PT")}</div>
+                  {u.subscribed && (
+                    <div style={{fontSize:11,color:"#6b7280",marginTop:3}}>
+                      {planLabel}{promoLabel?` · ${promoLabel}`:""}
+                      {u.subscription_start && <> · desde {new Date(u.subscription_start).toLocaleDateString("pt-PT")}</>}
+                      {u.plan==="vip"
+                        ? <> · sem expiração</>
+                        : daysRemaining!=null && <> · {daysRemaining>=0?`expira em ${daysRemaining}d`:"expirado, a aguardar renovação"}</>
+                      }
+                    </div>
+                  )}
                 </div>
                 <div style={{textAlign:"right",flexShrink:0,marginLeft:10}}>
-                  <div style={{fontSize:12,fontWeight:700,color:sc}}>{status}</div>
+                  <div style={{fontSize:12,fontWeight:700,color:sc,marginBottom:6}}>{status}</div>
+                  {!isConfirming && !isConfirmingRevoke && (
+                    <div style={{display:"flex",gap:6,flexWrap:"wrap",justifyContent:"flex-end"}}>
+                      {!u.subscribed && (
+                        <button onClick={()=>handleAction("vip",u.user_id)} disabled={isBusy}
+                          style={{border:"1px solid #bbf7d0",background:"#f0fdf4",color:"#065f46",borderRadius:6,padding:"4px 10px",fontSize:11,fontWeight:700,cursor:"pointer"}}>
+                          {isBusy?"...":"VIP"}
+                        </button>
+                      )}
+                      {u.subscribed && u.plan!=="vip" && (
+                        <button onClick={()=>setConfirmRevokeId(u.user_id)} disabled={isBusy}
+                          style={{border:"1px solid #fde68a",background:"#fffbeb",color:"#92400e",borderRadius:6,padding:"4px 10px",fontSize:11,fontWeight:700,cursor:"pointer"}}>
+                          Revogar
+                        </button>
+                      )}
+                      <button onClick={()=>setConfirmDeleteId(u.user_id)} disabled={isBusy}
+                        style={{border:"1px solid #fecaca",background:"#fff1f2",color:"#991b1b",borderRadius:6,padding:"4px 10px",fontSize:11,fontWeight:700,cursor:"pointer"}}>
+                        Apagar
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
+              {isConfirmingRevoke && (
+                <div style={{background:"#fffbeb",border:"1px solid #fde68a",borderRadius:8,padding:10,marginTop:4}}>
+                  <div style={{fontSize:12,color:"#92400e",marginBottom:8,lineHeight:1.5}}>
+                    Revogar a subscrição de {u.user_name||u.email||"este utilizador"}? Ele deixa de ter acesso premium imediatamente.
+                  </div>
+                  <div style={{display:"flex",gap:8}}>
+                    <button onClick={()=>setConfirmRevokeId(null)} disabled={isBusy}
+                      style={{flex:1,border:"1px solid #e5e7eb",background:"#fff",color:"#6b7280",borderRadius:6,padding:"8px",fontSize:12,fontWeight:700,cursor:"pointer"}}>
+                      Cancelar
+                    </button>
+                    <button onClick={()=>handleAction("revoke",u.user_id)} disabled={isBusy}
+                      style={{flex:1,border:"none",background:"#d97706",color:"#fff",borderRadius:6,padding:"8px",fontSize:12,fontWeight:700,cursor:"pointer",opacity:isBusy?.6:1}}>
+                      {isBusy?"A revogar...":"Confirmar"}
+                    </button>
+                  </div>
+                </div>
+              )}
+              {isConfirming && (
+                <div style={{background:"#fff1f2",border:"1px solid #fecaca",borderRadius:8,padding:10,marginTop:4}}>
+                  <div style={{fontSize:12,color:"#991b1b",marginBottom:8,lineHeight:1.5}}>
+                    Apagar {u.user_name||u.email||"este utilizador"} para sempre? Isto remove todas as apostas, o perfil e a conta de login. Não pode ser revertido.
+                  </div>
+                  <div style={{display:"flex",gap:8}}>
+                    <button onClick={()=>setConfirmDeleteId(null)} disabled={isBusy}
+                      style={{flex:1,border:"1px solid #e5e7eb",background:"#fff",color:"#6b7280",borderRadius:6,padding:"8px",fontSize:12,fontWeight:700,cursor:"pointer"}}>
+                      Cancelar
+                    </button>
+                    <button onClick={()=>handleAction("delete",u.user_id)} disabled={isBusy}
+                      style={{flex:1,border:"none",background:"#dc2626",color:"#fff",borderRadius:6,padding:"8px",fontSize:12,fontWeight:700,cursor:"pointer",opacity:isBusy?.6:1}}>
+                      {isBusy?"A apagar...":"Confirmar"}
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           );
         })}
