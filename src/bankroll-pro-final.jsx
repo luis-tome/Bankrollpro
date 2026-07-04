@@ -638,10 +638,10 @@ export default function App() {  const [screen, setScreen]       = useState("loa
       .map(([strategy,v])=>({strategy,count:v.count,wins:v.wins,losses:v.losses,pnl:Number(v.pnl.toFixed(2)),sr:v.wins+v.losses>0?Number((v.wins/(v.wins+v.losses)*100).toFixed(0)):0}))
       .sort((a,b)=>a.pnl-b.pnl);
 
-    // Evolução mensal (últimos 6 meses com registos)
+    // Evolução anual — guarda o pnl por mês (todos os anos) para depois filtrar pelo ano selecionado
     const byMonth = {};
     settled.forEach(b=>{
-      const month = (b.created_at||"").slice(0,7);
+      const month = (b.created_at||"").slice(0,7); // "YYYY-MM"
       if(!month) return;
       if(!byMonth[month]) byMonth[month] = {pnl:0,count:0};
       byMonth[month].count++;
@@ -649,21 +649,31 @@ export default function App() {  const [screen, setScreen]       = useState("loa
       else if(b.result==="LOSS") byMonth[month].pnl-=b.stake;
       else if(b.result==="CASHOUT") byMonth[month].pnl+=(b.cashout_val||0)-b.stake;
     });
-    const MONTH_ABBR_PT=["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
-    const MONTH_ABBR_EN=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-    const byMonthList = Object.entries(byMonth)
-      .sort(([a],[b])=>a.localeCompare(b))
-      .slice(-6)
-      .map(([month,v])=>{
-        const mIdx = parseInt(month.slice(5,7),10)-1;
-        const label = (lang==="PT"?MONTH_ABBR_PT:MONTH_ABBR_EN)[mIdx] || month;
-        return { month, count:v.count, pnl:Number(v.pnl.toFixed(2)), label };
-      });
-    const maxAbsStrategy = Math.max(1,...byStrategyList.map(s=>Math.abs(s.pnl)));
-    const maxAbsMonth = Math.max(1,...byMonthList.map(m=>Math.abs(m.pnl)));
+    const yearsWithData = [...new Set(Object.keys(byMonth).map(m=>m.slice(0,4)))];
+    const currentYear = String(new Date().getFullYear());
+    const availableYears = [...new Set([currentYear, ...yearsWithData])].sort((a,b)=>b.localeCompare(a));
 
-    return { byMarketList, byOddList, maxAbsMarket, maxAbsOdd, byStrategyList, maxAbsStrategy, byMonthList, maxAbsMonth };
+    const maxAbsStrategy = Math.max(1,...byStrategyList.map(s=>Math.abs(s.pnl)));
+
+    return { byMarketList, byOddList, maxAbsMarket, maxAbsOdd, byStrategyList, maxAbsStrategy, byMonth, availableYears };
   },[bets,lang]);
+
+  const [analysisYear, setAnalysisYear] = useState(String(new Date().getFullYear()));
+  const MONTH_ABBR_PT=["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
+  const MONTH_ABBR_EN=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const yearlyEvolution = useMemo(()=>{
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const isCurrentYear = Number(analysisYear)===currentYear;
+    const lastMonth = isCurrentYear ? now.getMonth() : 11; // 0-indexed
+    const list = [];
+    for(let m=0; m<=lastMonth; m++){
+      const key = `${analysisYear}-${String(m+1).padStart(2,"0")}`;
+      const v = marketOddBreakdown.byMonth[key];
+      list.push({ month:key, pnl:v?Number(v.pnl.toFixed(2)):0, count:v?v.count:0, label:(lang==="PT"?MONTH_ABBR_PT:MONTH_ABBR_EN)[m] });
+    }
+    return list;
+  },[marketOddBreakdown.byMonth, analysisYear, lang]);
 
   const brHistory = useMemo(()=>{
     let r=parseFloat(br?.bankroll||0);
@@ -2010,7 +2020,7 @@ export default function App() {  const [screen, setScreen]       = useState("loa
                 </div>
               )}
 
-              {stats.settled>=3 && (
+              {feedback && !feedback.error && !loadingFB && (
                 <div style={{position:"relative",marginTop:4}}>
                   {(!br?.subscribed && !isAdmin) && (
                     <div style={{position:"absolute",inset:0,zIndex:5,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",background:"linear-gradient(180deg, rgba(255,255,255,.35), rgba(255,255,255,.94) 40%)",borderRadius:14,padding:20}}>
@@ -2050,17 +2060,27 @@ export default function App() {  const [screen, setScreen]       = useState("loa
                       </div>
                     )}
 
-                    {marketOddBreakdown.byMonthList.length>1 && (
-                      <div style={{borderTop:"1px solid #f1f2f4",marginTop:24,paddingTop:24}}>
-                        <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,fontWeight:800,marginBottom:14}}>
-                          {lang==="PT"?"Evolução mensal":"Monthly evolution"}
+                    <div style={{borderTop:"1px solid #f1f2f4",marginTop:24,paddingTop:24}}>
+                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+                        <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,fontWeight:800}}>
+                          {lang==="PT"?"Evolução anual":"Yearly evolution"}
                         </div>
-                        <DashboardBarChart data={marketOddBreakdown.byMonthList.map(m=>({label:m.label,value:m.pnl}))} lang={lang}/>
-                        <div style={{fontSize:10,color:"#9ca3af",marginTop:10}}>
-                          {lang==="PT"?`Últimos ${marketOddBreakdown.byMonthList.length} meses com registos`:`Last ${marketOddBreakdown.byMonthList.length} months with records`}
-                        </div>
+                        {marketOddBreakdown.availableYears.length>1 && (
+                          <div style={{display:"flex",gap:6}}>
+                            {marketOddBreakdown.availableYears.map(y=>(
+                              <button key={y} onClick={()=>setAnalysisYear(y)}
+                                style={{border:"none",borderRadius:6,padding:"3px 9px",fontSize:11,fontWeight:700,cursor:"pointer",background:analysisYear===y?sc.color:"#f1f2f4",color:analysisYear===y?"#fff":"#6b7280"}}>
+                                {y}
+                              </button>
+                            ))}
+                          </div>
+                        )}
                       </div>
-                    )}
+                      <DashboardBarChart data={yearlyEvolution.map(m=>({label:m.label,value:m.pnl}))} lang={lang}/>
+                      <div style={{fontSize:10,color:"#9ca3af",marginTop:10}}>
+                        {lang==="PT"?`Como está a correr ${analysisYear} até agora`:`How ${analysisYear} is going so far`}
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}
