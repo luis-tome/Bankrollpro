@@ -1069,11 +1069,11 @@ export default function App() {
               </button>
             </div>
 
-            {(lang==="PT"?[['🏦', 'Cria a tua banca', 'Define o nome, desporto, valor inicial e tipo de stake (fixa ou variável). Podes ter até 3 bancas separadas.'], ['➕', 'Regista apostas', 'Clica no botão verde + para adicionar uma aposta. Podes registar com resultado imediato ou deixar pendente para liquidar depois.'], ['📋', 'Importa do Telegram', 'Clica no ícone 📋 para importar apostas directamente do grupo — cola o texto ou faz upload de um print.'], ['📊', 'Acompanha os resultados', 'No Diário vês as apostas do dia. No Relatório vês o mês completo. No Gráfico vês a evolução da banca.'], ['🤖', 'Análise IA', 'Depois de 3+ apostas liquidadas, vai ao separador IA para receberes feedback real sobre onde estás a ganhar e a perder.'], ['💰', 'Aporte e saque', 'Para adicionar ou retirar dinheiro da banca, vai ao menu ☰ → lápis ✏️ ao lado da banca → Fazer aporte / Fazer saque.']]]:[['🏦', 'Create your bankroll', 'Set the name, sport, initial amount and stake type (fixed or variable). You can have up to 3 separate bankrolls.'], ['➕', 'Log bets', 'Tap the green + button to add a bet. Log with immediate result or leave pending to settle later.'], ['📋', 'Import from Telegram', 'Tap the 📋 icon to import bets directly from your group — paste text or upload a screenshot.'], ['📊', 'Track your results', 'Diary shows daily bets. Report shows the full month. Chart shows your bankroll evolution.'], ['🤖', 'AI Analysis', "After 3+ settled bets, go to the AI tab for real feedback on where you're winning and losing."], ['💰', 'Deposit & withdraw', 'To add or remove money from your bankroll, go to ☰ → pencil ✏️ next to the bankroll → Add funds / Withdraw.']]).map(([ico,title,desc],i)=> i===onboardStep && (
+            {(ONBOARDING_STEPS[lang]||ONBOARDING_STEPS.PT).map((step,i)=> i===onboardStep && (
               <div key={i} style={{textAlign:"center",padding:"0 8px"}}>
-                <div style={{fontSize:56,marginBottom:16}}>{ico}</div>
-                <div style={{fontSize:20,fontWeight:900,color:"#111827",marginBottom:10}}>{title}</div>
-                <div style={{fontSize:14,color:"#6b7280",lineHeight:1.7,marginBottom:28}}>{desc}</div>
+                <div style={{fontSize:56,marginBottom:16}}>{step.icon}</div>
+                <div style={{fontSize:20,fontWeight:900,color:"#111827",marginBottom:10}}>{step.title}</div>
+                <div style={{fontSize:14,color:"#6b7280",lineHeight:1.7,marginBottom:28}}>{step.body}</div>
               </div>
             ))}
 
