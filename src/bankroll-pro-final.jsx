@@ -101,7 +101,7 @@ const QUOTES = [
 
 const ONBOARDING_STEPS = {
   PT: [
-    { icon:"📊", title:"Bem-vindo ao BankrollPro", body:"Gere a tua banca desportiva como um profissional. Vamos mostrar-te o essencial em 5 passos." },
+    { icon:"📊", title:"Bem-vindo ao BankrollPro", body:"A maioria dos apostadores não perde por falta de conhecimento — perde por falta de controlo. Aqui vais construir disciplina, proteger a tua banca e transformar cada aposta numa decisão consciente, não num impulso. Vamos mostrar-te o essencial em 6 passos." },
     { icon:"➕", title:"Regista as tuas apostas", body:"Clica no botão + verde para adicionar uma aposta. Podes registar com resultado imediato (Green/Red) ou deixar pendente para liquidar depois." },
     { icon:"📋", title:"Importa do Telegram", body:"Clica no botão 📋 para colar apostas de um grupo. A app detecta automaticamente todas as apostas — simples e múltiplas. Admins podem também fazer upload de um print." },
     { icon:"🎯", title:"Filtra por estratégia", body:"Ao registar apostas podes definir uma estratégia (ex: ATP, WTA, Liga Principal). No Diário e Relatório podes filtrar por estratégia para ver os resultados separados." },
@@ -109,7 +109,7 @@ const ONBOARDING_STEPS = {
     { icon:"💰", title:"Aporte e saque", body:"No menu ☰ clica no ✏️ da tua banca para aceder a Fazer aporte ou Fazer saque — ajusta a banca declarada sem alterar o histórico de apostas." },
   ],
   EN: [
-    { icon:"📊", title:"Welcome to BankrollPro", body:"Manage your sports bankroll like a professional. Let us show you the essentials in 5 steps." },
+    { icon:"📊", title:"Welcome to BankrollPro", body:"Most bettors don't lose because they lack knowledge — they lose because they lack control. Here you'll build discipline, protect your bankroll, and turn every bet into a conscious decision, not an impulse. Let's show you the essentials in 6 steps." },
     { icon:"➕", title:"Log your bets", body:"Tap the green + button to add a bet. You can record with an immediate result (Win/Loss) or leave it pending to settle later." },
     { icon:"📋", title:"Import from Telegram", body:"Tap the 📋 button to paste bets from a group. The app auto-detects all bets — singles and multiples. Admins can also upload a screenshot." },
     { icon:"🎯", title:"Filter by strategy", body:"When logging bets you can set a strategy (e.g. ATP, WTA, Main League). In Diary and Report you can filter by strategy to see results separately." },
@@ -392,6 +392,7 @@ export default function App() {  const [screen, setScreen]       = useState("loa
   const [importImageError, setImportImageError] = useState("");
   const [editBRTarget, setEditBRTarget] = useState(null);
   const [brForm, setBRForm]       = useState({name:"",sport:"Ténis",bankroll:"",unit_pct:"2",reset:false,stake_mode:"variable"});
+  const [brFormErrors, setBrFormErrors] = useState({});
   const [showForm, setShowForm]   = useState(false);
   const [editBet, setEditBet]     = useState(null);
   const [formMode, setFormMode]   = useState("immediate");
@@ -404,6 +405,7 @@ export default function App() {  const [screen, setScreen]       = useState("loa
   const [importDate, setImportDate] = useState(today());
   const [betSport, setBetSport]     = useState("");
   const [form, setForm]           = useState({event:"",market:"Vencedor do Jogo",selection:"",odd:"",units:1,result:"WIN",notes:"",cashoutVal:"",betDate:today(),strategy:""});
+  const [formErrors, setFormErrors] = useState({});
   const [subView, setSubView]     = useState("annual");
   const [feedback, setFeedback]   = useState(null);
   const [loadingFB, setLoadingFB] = useState(false);
@@ -481,7 +483,9 @@ export default function App() {  const [screen, setScreen]       = useState("loa
 
   async function handleCreateBR(isEdit){
     const brv=parseFloat(brForm.bankroll);
-    if(!brv||brv<=0||!brForm.name) return;
+    const errors = { name: !brForm.name, bankroll: !brv||brv<=0 };
+    if(errors.name||errors.bankroll){ setBrFormErrors(errors); return; }
+    setBrFormErrors({});
     if(isEdit&&editBRTarget){
       const updates={name:brForm.name,sport:brForm.sport,unit_pct:parseFloat(brForm.unit_pct),stake_mode:brForm.stake_mode||"variable"};
       if(brForm.reset){ updates.bankroll=brv; updates.last_stake_review=new Date().toISOString(); }
@@ -542,9 +546,10 @@ export default function App() {  const [screen, setScreen]       = useState("loa
   }
 
   async function handleSaveBet(){
-    if(!form.event||!form.odd||!form.selection||!activeBR) return;
     const odd=parseFloat(form.odd);
-    if(odd<=1) return;
+    const errors = { event: !form.event, selection: !form.selection, odd: !form.odd||odd<=1 };
+    if(errors.event||errors.selection||errors.odd||!activeBR){ setFormErrors(errors); return; }
+    setFormErrors({});
     const stake=unitVal*(parseFloat(form.units)||1);
     const result=formMode==="immediate"?form.result:"PENDING";
     // Preserve time-of-day from "now", but use the selected date
@@ -576,6 +581,7 @@ export default function App() {  const [screen, setScreen]       = useState("loa
     setEditBet(b);
     setForm({event:b.event||"",market:b.market||markets[0],selection:b.selection||"",odd:b.odd||"",units:b.units||1,result:b.result||"WIN",notes:b.notes||"",cashoutVal:b.cashout_val||"",betDate:b.created_at?b.created_at.slice(0,10):today(),strategy:b.strategy||""});
     setFormMode(b.result==="PENDING"?"pending":"immediate");
+    setFormErrors({});
     setShowForm(true);
   }
 
@@ -753,6 +759,48 @@ export default function App() {  const [screen, setScreen]       = useState("loa
   function swipeStart(e){ touchX.current=e.touches[0].clientX; }
   function swipeEnd(e){ if(touchX.current!==null&&touchX.current-e.changedTouches[0].clientX>60) setDrawerOpen(false); touchX.current=null; }
 
+  const onboardSteps = ONBOARDING_STEPS[lang]||ONBOARDING_STEPS.PT;
+  const onboardingModal = showOnboarding && (
+    <div style={{position:"fixed",inset:0,background:"#fff",zIndex:500,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"32px 24px"}}>
+      <div style={{width:"100%",maxWidth:420,display:"flex",flexDirection:"column",alignItems:"center"}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:28,width:"100%"}}>
+          <div style={{fontSize:13,color:"#9ca3af",fontWeight:600}}>{onboardStep+1} / {onboardSteps.length}</div>
+          <div style={{display:"flex",gap:4}}>
+            {onboardSteps.map((_,i)=>(
+              <div key={i} style={{width:i===onboardStep?20:6,height:6,borderRadius:3,background:i===onboardStep?sc.color:"#e5e7eb",transition:"width .2s"}}/>
+            ))}
+          </div>
+          <button style={{background:"none",border:"none",color:"#9ca3af",fontSize:13,cursor:"pointer",fontWeight:600}} onClick={()=>{try{localStorage.setItem("bpOnboarded","1");}catch(e){}setShowOnboarding(false);}}>
+            {lang==="PT"?"Saltar":"Skip"}
+          </button>
+        </div>
+
+        {onboardSteps.map((step,i)=> i===onboardStep && (
+          <div key={i} style={{textAlign:"center",padding:"0 8px"}}>
+            <div style={{fontSize:56,marginBottom:16}}>{step.icon}</div>
+            <div style={{fontSize:20,fontWeight:900,color:"#111827",marginBottom:10}}>{step.title}</div>
+            <div style={{fontSize:14,color:"#6b7280",lineHeight:1.7,marginBottom:28}}>{step.body}</div>
+          </div>
+        ))}
+
+        <div style={{display:"flex",gap:10}}>
+          {onboardStep > 0 && (
+            <button style={{...S.btnGhost,flex:1}} onClick={()=>setOnboardStep(s=>s-1)}>
+              ←
+            </button>
+          )}
+          <button style={{...S.btnPrimary,flex:2,background:sc.color,border:"none"}}
+            onClick={()=>{
+              if(onboardStep<onboardSteps.length-1){ setOnboardStep(s=>s+1); }
+              else { try{localStorage.setItem("bpOnboarded","1");}catch(e){} setShowOnboarding(false); }
+            }}>
+            {onboardStep<onboardSteps.length-1?(lang==="PT"?"Seguinte →":"Next →"):(lang==="PT"?"Começar!":"Let's go!")}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
   if(screen==="loading") return (
     <div style={{display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100vh",background:"#f7f8fa"}}>
       <div style={{...S.spinner,border:"2px solid #e5e7eb",borderTop:"2px solid #111827"}}/>
@@ -904,6 +952,7 @@ export default function App() {  const [screen, setScreen]       = useState("loa
 
   if(screen==="setup") return (
     <div style={{background:"#f7f8fa",minHeight:"100vh",fontFamily:"-apple-system,'Segoe UI',sans-serif"}}>
+      {onboardingModal}
       <div style={{display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100vh",padding:20}}>
         <div style={{width:"100%",maxWidth:380,background:"#fff",border:"1px solid #e5e7eb",borderRadius:16,padding:"28px 24px",boxShadow:"0 4px 24px rgba(0,0,0,.06)"}}>
           <div style={{fontSize:32,marginBottom:8}}>💼</div>
@@ -912,7 +961,7 @@ export default function App() {  const [screen, setScreen]       = useState("loa
           <div style={{background:"#f0fdf4",border:"1px solid #bbf7d0",borderRadius:8,padding:"8px 12px",fontSize:12,color:"#15803d",marginBottom:12,fontWeight:600,textAlign:"center"}}>
             🎯 7 dias de trial grátis · Preço de lançamento até 31 Ago
           </div>
-          <BRForm form={brForm} setForm={setBRForm} showReset={false} lang={lang}/>
+          <BRForm form={brForm} setForm={setBRForm} showReset={false} lang={lang} errors={brFormErrors}/>
           <button style={{...S.btnPrimary,marginTop:20}} onClick={()=>handleCreateBR(false)}>Criar banca</button>
         </div>
       </div>
@@ -1166,46 +1215,7 @@ export default function App() {  const [screen, setScreen]       = useState("loa
       )}
 
 
-      {showOnboarding && screen==="app" && isActive && (
-        <div style={{position:"fixed",inset:0,background:"#fff",zIndex:500,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"32px 24px"}}>
-          <div style={{width:"100%",maxWidth:420,display:"flex",flexDirection:"column",alignItems:"center"}}>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:28,width:"100%"}}>
-              <div style={{fontSize:13,color:"#9ca3af",fontWeight:600}}>{onboardStep+1} / 6</div>
-              <div style={{display:"flex",gap:4}}>
-                {[0,1,2,3,4,5].map(i=>(
-                  <div key={i} style={{width:i===onboardStep?20:6,height:6,borderRadius:3,background:i===onboardStep?sc.color:"#e5e7eb",transition:"width .2s"}}/>
-                ))}
-              </div>
-              <button style={{background:"none",border:"none",color:"#9ca3af",fontSize:13,cursor:"pointer",fontWeight:600}} onClick={()=>{try{localStorage.setItem("bpOnboarded","1");}catch(e){}setShowOnboarding(false);}}>
-                {lang==="PT"?"Saltar":"Skip"}
-              </button>
-            </div>
-
-            {(ONBOARDING_STEPS[lang]||ONBOARDING_STEPS.PT).map((step,i)=> i===onboardStep && (
-              <div key={i} style={{textAlign:"center",padding:"0 8px"}}>
-                <div style={{fontSize:56,marginBottom:16}}>{step.icon}</div>
-                <div style={{fontSize:20,fontWeight:900,color:"#111827",marginBottom:10}}>{step.title}</div>
-                <div style={{fontSize:14,color:"#6b7280",lineHeight:1.7,marginBottom:28}}>{step.body}</div>
-              </div>
-            ))}
-
-            <div style={{display:"flex",gap:10}}>
-              {onboardStep > 0 && (
-                <button style={{...S.btnGhost,flex:1}} onClick={()=>setOnboardStep(s=>s-1)}>
-                  ←
-                </button>
-              )}
-              <button style={{...S.btnPrimary,flex:2,background:sc.color,border:"none"}}
-                onClick={()=>{
-                  if(onboardStep<5){ setOnboardStep(s=>s+1); }
-                  else { try{localStorage.setItem("bpOnboarded","1");}catch(e){} setShowOnboarding(false); }
-                }}>
-                {onboardStep<5?(lang==="PT"?"Seguinte →":"Next →"):(lang==="PT"?"Começar!":"Let's go!")}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {onboardingModal}
 
       {confirmModal && (
         <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.5)",zIndex:400,display:"flex",alignItems:"center",justifyContent:"center",padding:20}} onClick={()=>setConfirmModal(null)}>
@@ -1264,61 +1274,6 @@ export default function App() {  const [screen, setScreen]       = useState("loa
           </div>
         </div>
       )}
-
-      {showOnboarding && (
-        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.8)",zIndex:500,display:"flex",alignItems:"flex-end",justifyContent:"center"}}>
-          <div style={{background:"#fff",borderRadius:"20px 20px 0 0",padding:"28px 24px 36px",width:"100%",maxWidth:500}}>
-            {/* Progress dots */}
-            <div style={{display:"flex",justifyContent:"center",gap:6,marginBottom:24}}>
-              {(ONBOARDING_STEPS[lang]||ONBOARDING_STEPS.PT).map((_,i)=>(
-                <div key={i} style={{width:i===onboardStep?20:8,height:8,borderRadius:4,background:i===onboardStep?sc.color:"#e5e7eb",transition:"all .3s"}}/>
-              ))}
-            </div>
-
-            {/* Step content */}
-            {(()=>{
-              const steps = ONBOARDING_STEPS[lang]||ONBOARDING_STEPS.PT;
-              const step = steps[onboardStep]||{};
-              return (
-                <div style={{textAlign:"center"}}>
-                  <div style={{fontSize:52,marginBottom:16}}>{step.icon}</div>
-                  <div style={{fontSize:20,fontWeight:900,color:"#111827",marginBottom:10}}>{step.title}</div>
-                  <div style={{fontSize:14,color:"#6b7280",lineHeight:1.6,marginBottom:28}}>{step.body}</div>
-                </div>
-              );
-            })()}
-
-            {/* Navigation */}
-            <div style={{display:"flex",gap:10}}>
-              {onboardStep > 0 && (
-                <button style={{...S.btnGhost,flex:1}} onClick={()=>setOnboardStep(s=>s-1)}>
-                  ← {lang==="PT"?"Anterior":"Back"}
-                </button>
-              )}
-              <button style={{...S.btnPrimary,flex:2,background:sc.color,border:"none"}}
-                onClick={()=>{
-                  const steps = ONBOARDING_STEPS[lang]||ONBOARDING_STEPS.PT;
-                  if(onboardStep < steps.length-1){
-                    setOnboardStep(s=>s+1);
-                  } else {
-                    try{ localStorage.setItem("bpOnboarded","1"); }catch(e){}
-                    setShowOnboarding(false);
-                  }
-                }}>
-                {onboardStep < (ONBOARDING_STEPS[lang]||ONBOARDING_STEPS.PT).length-1
-                  ? (lang==="PT"?"Próximo →":"Next →")
-                  : (lang==="PT"?"Começar 🚀":"Get started 🚀")}
-              </button>
-            </div>
-
-            <button style={{width:"100%",background:"none",border:"none",color:"#9ca3af",fontSize:12,cursor:"pointer",marginTop:12,padding:8}}
-              onClick={()=>{ try{localStorage.setItem("bpOnboarded","1");}catch(e){} setShowOnboarding(false); }}>
-              {lang==="PT"?"Saltar tutorial":"Skip tutorial"}
-            </button>
-          </div>
-        </div>
-      )}
-
 
       {showHelp && (
         <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.4)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center",padding:20}} onClick={()=>setShowHelp(false)}>
@@ -1394,13 +1349,13 @@ export default function App() {  const [screen, setScreen]       = useState("loa
                     </div>
                     <span style={{fontSize:13,fontWeight:700,color:bsc?.color}}>{fmt(parseFloat(b.bankroll))}</span>
                   </button>
-                  <button style={{background:"none",border:"none",color:"#d1d5db",cursor:"pointer",padding:"0 4px",fontSize:14}} onClick={()=>{setEditBRTarget(b);setBRForm({name:b.name,sport:b.sport,bankroll:b.bankroll,unit_pct:b.unit_pct,reset:false,stake_mode:b.stake_mode||"variable"});setShowEditBR(true);setDrawerOpen(false);}}>✏️</button>
+                  <button style={{background:"none",border:"none",color:"#d1d5db",cursor:"pointer",padding:"0 4px",fontSize:14}} onClick={()=>{setEditBRTarget(b);setBRForm({name:b.name,sport:b.sport,bankroll:b.bankroll,unit_pct:b.unit_pct,reset:false,stake_mode:b.stake_mode||"variable"});setShowEditBR(true);setDrawerOpen(false);setBrFormErrors({});}}>✏️</button>
                 </div>
               );
             })}
 
             {bankrolls.length<MAX_BANKROLLS && (
-              <button style={{display:"flex",alignItems:"center",width:"100%",padding:"10px",border:"1px dashed #e5e7eb",background:"transparent",cursor:"pointer",borderRadius:10,fontSize:13,marginTop:4,color:"#111827"}} onClick={()=>{setBRForm({name:"",sport:"Ténis",bankroll:"",unit_pct:"2",reset:false,stake_mode:"variable"});setShowNewBR(true);setDrawerOpen(false);}}>
+              <button style={{display:"flex",alignItems:"center",width:"100%",padding:"10px",border:"1px dashed #e5e7eb",background:"transparent",cursor:"pointer",borderRadius:10,fontSize:13,marginTop:4,color:"#111827"}} onClick={()=>{setBRForm({name:"",sport:"Ténis",bankroll:"",unit_pct:"2",reset:false,stake_mode:"variable"});setShowNewBR(true);setDrawerOpen(false);setBrFormErrors({});}}>
                 <span style={{marginRight:8,color:"#9ca3af",fontSize:18}}>+</span>
                 {lang==="PT"?"Nova banca":"New bankroll"} ({bankrolls.length}/{MAX_BANKROLLS})
               </button>
@@ -1423,7 +1378,7 @@ export default function App() {  const [screen, setScreen]       = useState("loa
               <h3 style={{margin:0,fontSize:16,fontWeight:700,color:"#111827"}}>{lang==="PT"?"Nova Banca":"New Bankroll"}</h3>
               <button style={{background:"none",border:"none",color:"#9ca3af",fontSize:22,cursor:"pointer"}} onClick={()=>setShowNewBR(false)}>×</button>
             </div>
-            <BRForm form={brForm} setForm={setBRForm} showReset={false} lang={lang}/>
+            <BRForm form={brForm} setForm={setBRForm} showReset={false} lang={lang} errors={brFormErrors}/>
             <button style={{...S.btnPrimary,marginTop:16}} onClick={()=>handleCreateBR(false)}>Criar banca</button>
           </div>
         </div>
@@ -1436,7 +1391,7 @@ export default function App() {  const [screen, setScreen]       = useState("loa
               <h3 style={{margin:0,fontSize:16,fontWeight:700,color:"#111827"}}>{lang==="PT"?"Editar Banca":"Edit Bankroll"}</h3>
               <button style={{background:"none",border:"none",color:"#9ca3af",fontSize:22,cursor:"pointer"}} onClick={()=>setShowEditBR(false)}>×</button>
             </div>
-            <BRForm form={brForm} setForm={setBRForm} showReset={true} lang={lang}/>
+            <BRForm form={brForm} setForm={setBRForm} showReset={true} lang={lang} errors={brFormErrors}/>
             <div style={{display:"flex",gap:8,marginTop:16}}>
               <button style={{...S.btnPrimary,flex:1}} onClick={()=>handleCreateBR(true)}>{lang==="PT"?"Guardar":"Save"}</button>
               <button style={{padding:"13px 16px",border:"1px solid #fca5a5",background:"#fef2f2",color:"#dc2626",borderRadius:8,cursor:"pointer",fontSize:13,fontWeight:700}} onClick={()=>deleteBankroll(editBRTarget?.id)}>🗑</button>
@@ -1545,7 +1500,7 @@ export default function App() {  const [screen, setScreen]       = useState("loa
           <div style={{background:"#fff",borderRadius:16,padding:24,width:"100%",maxWidth:440,maxHeight:"92vh",overflowY:"auto",boxShadow:"0 20px 60px rgba(0,0,0,.2)"}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
               <h3 style={{margin:0,fontSize:16,fontWeight:700,color:"#111827"}}>{editBet?tx("editRecord"):`${sc.icon} ${tx("newRecord")}`}</h3>
-              <button style={{background:"none",border:"none",color:"#9ca3af",fontSize:22,cursor:"pointer"}} onClick={()=>{setShowForm(false);setEditBet(null);setForm(emptyForm);}}>×</button>
+              <button style={{background:"none",border:"none",color:"#9ca3af",fontSize:22,cursor:"pointer"}} onClick={()=>{setShowForm(false);setEditBet(null);setForm(emptyForm);setFormErrors({});}}>×</button>
             </div>
 
             {!editBet && (
@@ -1583,18 +1538,21 @@ export default function App() {  const [screen, setScreen]       = useState("loa
               </div>
             )}
             <label style={{...S.label,color:"#111827"}}>{betType==="multiple"?"Nome da múltipla":tx("event")}</label>
-            <input style={S.input} placeholder={betType==="multiple"?lang==="PT"?"ex: Múltipla Ténis 3 jogos":"e.g. Tennis Multi 3 games":lang==="PT"?"ex: Sinner vs Alcaraz":"e.g. Sinner vs Alcaraz"} value={form.event} onChange={e=>setForm(f=>({...f,event:e.target.value}))}/>
+            <input style={{...S.input,...(formErrors.event?{border:"1.5px solid #dc2626",background:"#fef2f2"}:{})}} placeholder={betType==="multiple"?lang==="PT"?"ex: Múltipla Ténis 3 jogos":"e.g. Tennis Multi 3 games":lang==="PT"?"ex: Sinner vs Alcaraz":"e.g. Sinner vs Alcaraz"} value={form.event} onChange={e=>setForm(f=>({...f,event:e.target.value}))}/>
+            {formErrors.event && <div style={{fontSize:11,color:"#dc2626",marginTop:-8,marginBottom:8,fontWeight:600}}>{lang==="PT"?"Campo obrigatório":"Required field"}</div>}
             {betType==="multiple" && (
               <div>
                 <label style={{...S.label,color:"#111827"}}>{lang==="PT"?"Seleções (uma por linha)":"Selections (one per line)"}</label>
-                <textarea style={{...S.input,height:80,resize:"none",fontFamily:"inherit"}} placeholder={lang==="PT"?"ex: Sinner a ganhar":"e.g. Sinner to win"} value={form.selections||""} onChange={e=>{const v=e.target.value;setForm(f=>({...f,selections:v,selection:v.split(/\r?\n/).filter(Boolean).join(" + ")}));}}/>
+                <textarea style={{...S.input,height:80,resize:"none",fontFamily:"inherit",...(formErrors.selection?{border:"1.5px solid #dc2626",background:"#fef2f2"}:{})}} placeholder={lang==="PT"?"ex: Sinner a ganhar":"e.g. Sinner to win"} value={form.selections||""} onChange={e=>{const v=e.target.value;setForm(f=>({...f,selections:v,selection:v.split(/\r?\n/).filter(Boolean).join(" + ")}));}}/>
+                {formErrors.selection && <div style={{fontSize:11,color:"#dc2626",marginTop:4,fontWeight:600}}>{lang==="PT"?"Adiciona pelo menos uma seleção":"Add at least one selection"}</div>}
               </div>
             )}
 
             <div style={{display:"flex",gap:10}}>
               <div style={{flex:1}}>
                 <label style={{...S.label,color:"#111827"}}>{tx("odd")}</label>
-                <input style={S.input} type="number" step="0.01" min="1.01" placeholder="1.85" value={form.odd} onChange={e=>setForm(f=>({...f,odd:e.target.value}))}/>
+                <input style={{...S.input,...(formErrors.odd?{border:"1.5px solid #dc2626",background:"#fef2f2"}:{})}} type="number" step="0.01" min="1.01" placeholder="1.85" value={form.odd} onChange={e=>setForm(f=>({...f,odd:e.target.value}))}/>
+                {formErrors.odd && <div style={{fontSize:11,color:"#dc2626",marginTop:4,fontWeight:600}}>{lang==="PT"?"Odd inválida":"Invalid odd"}</div>}
               </div>
               <div style={{flex:1}}>
                 <label style={{...S.label,color:"#111827"}}>{tx("units")}</label>
@@ -1620,7 +1578,8 @@ export default function App() {  const [screen, setScreen]       = useState("loa
                   {markets.map(m=><option key={m}>{m}</option>)}
                 </select>
                 <label style={{...S.label,color:"#111827"}}>{tx("selection")}</label>
-                <input style={S.input} placeholder="ex: Sinner / Over 22.5 Games" value={form.selection} onChange={e=>setForm(f=>({...f,selection:e.target.value}))}/>
+                <input style={{...S.input,...(formErrors.selection?{border:"1.5px solid #dc2626",background:"#fef2f2"}:{})}} placeholder="ex: Sinner / Over 22.5 Games" value={form.selection} onChange={e=>setForm(f=>({...f,selection:e.target.value}))}/>
+                {formErrors.selection && <div style={{fontSize:11,color:"#dc2626",marginTop:4,fontWeight:600}}>{lang==="PT"?"Campo obrigatório":"Required field"}</div>}
               </div>
             )}
 
@@ -2248,17 +2207,18 @@ export default function App() {  const [screen, setScreen]       = useState("loa
 
       <button style={{position:"fixed",bottom:90,right:18,width:44,height:44,borderRadius:"50%",border:"none",color:"#fff",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 16px rgba(0,0,0,.15)",zIndex:20,fontSize:18,background:"#374151"}} onClick={()=>{setShowImport(true);setImportText("");setImportBets([]);setImportDate(today());setImportImage(null);}}>📋</button>
 
-      <button style={{position:"fixed",bottom:24,right:18,width:56,height:56,borderRadius:"50%",border:"none",color:"#fff",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 16px rgba(0,0,0,.2)",zIndex:20,fontSize:28,lineHeight:1,background:sc.color}} onClick={()=>{setForm(emptyForm);setEditBet(null);setBetSport("");setShowForm(true);}}>+</button>
+      <button style={{position:"fixed",bottom:24,right:18,width:56,height:56,borderRadius:"50%",border:"none",color:"#fff",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 16px rgba(0,0,0,.2)",zIndex:20,fontSize:28,lineHeight:1,background:sc.color}} onClick={()=>{setForm(emptyForm);setEditBet(null);setBetSport("");setShowForm(true);setFormErrors({});}}>+</button>
 
     </div>
   );
 }
 
-function BRForm({ form, setForm, showReset, lang="PT", T={card:"#fff",cardBorder:"#e5e7eb",inputBg:"#fff",inputBorder:"#e5e7eb",text:"#111827",text2:"#6b7280",bg3:"#f9fafb"} }) {
+function BRForm({ form, setForm, showReset, lang="PT", errors={}, T={card:"#fff",cardBorder:"#e5e7eb",inputBg:"#fff",inputBorder:"#e5e7eb",text:"#111827",text2:"#6b7280",bg3:"#f9fafb"} }) {
   return (
     <div>
       <label style={{...S.label,color:"#111827"}}>{lang==="PT"?"Nome da banca":"Bankroll name"}</label>
-      <input style={S.input} placeholder="ex: Ténis Principal" value={form.name} onChange={e=>setForm(f=>({...f,name:e.target.value}))}/>
+      <input style={{...S.input,...(errors.name?{border:"1.5px solid #dc2626",background:"#fef2f2"}:{})}} placeholder="ex: Ténis Principal" value={form.name} onChange={e=>setForm(f=>({...f,name:e.target.value}))}/>
+      {errors.name && <div style={{fontSize:11,color:"#dc2626",marginTop:4,fontWeight:600}}>{lang==="PT"?"Dá um nome à tua banca":"Give your bankroll a name"}</div>}
       <label style={{...S.label,color:"#111827"}}>{lang==="PT"?"Desporto":"Sport"}</label>
       <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:6,marginTop:4}}>
         {Object.keys(SPORTS).map(s=>(
@@ -2269,7 +2229,8 @@ function BRForm({ form, setForm, showReset, lang="PT", T={card:"#fff",cardBorder
         ))}
       </div>
       <label style={{...S.label,color:"#111827"}}>{lang==="PT"?`Bankroll ${showReset?"(novo valor se repuser)":""} (€)`:`Bankroll ${showReset?"(reset value)":""} (€)`}</label>
-      <input style={S.input} type="number" placeholder="ex: 500" value={form.bankroll} onChange={e=>setForm(f=>({...f,bankroll:e.target.value}))}/>
+      <input style={{...S.input,...(errors.bankroll?{border:"1.5px solid #dc2626",background:"#fef2f2"}:{})}} type="number" placeholder="ex: 500" value={form.bankroll} onChange={e=>setForm(f=>({...f,bankroll:e.target.value}))}/>
+      {errors.bankroll && <div style={{fontSize:11,color:"#dc2626",marginTop:4,fontWeight:600}}>{lang==="PT"?"Indica um valor de banca válido":"Enter a valid bankroll amount"}</div>}
 
       <label style={{...S.label,color:"#111827"}}>{lang==="PT"?"Tipo de stake":"Stake type"}</label>
       <div style={{display:"flex",gap:8,marginTop:4,marginBottom:4}}>
