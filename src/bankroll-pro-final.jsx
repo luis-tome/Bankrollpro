@@ -345,37 +345,23 @@ async function getAIFeedback(bets, stats, bankroll, sport) {
 // value pode ser negativo (perdas) — as barras "divergem" a partir da linha zero.
 function DashboardBarChart({ data, lang="PT", unit="€" }) {
   if(!data || !data.length) return null;
-  const W=320, H=176, padTop=14, padBottom=30, chartH=H-padTop-padBottom;
-  const maxPos = Math.max(0, ...data.map(d=>d.value));
-  const maxNeg = Math.max(0, ...data.map(d=>-d.value));
-  const range = (maxPos+maxNeg) || 1;
-  const zeroY = padTop + (maxPos/range)*chartH;
-  const bw = W/data.length;
+  const maxAbs = Math.max(1, ...data.map(d=>Math.abs(d.value)));
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:180,display:"block"}}>
-      {[0,0.25,0.5,0.75,1].map(p=>(
-        <line key={p} x1={0} y1={padTop+chartH*p} x2={W} y2={padTop+chartH*p} stroke="#f1f2f4" strokeWidth="1"/>
-      ))}
-      <line x1={0} y1={zeroY} x2={W} y2={zeroY} stroke="#d1d5db" strokeWidth="1"/>
-      {data.map((d,i)=>{
-        const barH = Math.max(Math.abs(d.value)/range*chartH, d.value!==0?2:0);
-        const x = i*bw + bw*0.22;
-        const bwReal = bw*0.56;
-        const y = d.value>=0 ? zeroY-barH : zeroY;
-        const color = d.value>=0 ? "#059669" : "#dc2626";
-        return (
-          <g key={d.label+i}>
-            <rect x={x} y={y} width={bwReal} height={barH} rx={3} fill={color}/>
-            <text x={x+bwReal/2} y={d.value>=0?y-4:Math.min(y+barH+11,H-16)} textAnchor="middle" fontSize="8.5" fontWeight="800" fill="#111827">
+    <div>
+      {data.map((d,i)=>(
+        <div key={d.label+i} style={{marginBottom:i===data.length-1?0:15}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:5}}>
+            <span style={{fontSize:12,fontWeight:700,color:"#111827"}}>{d.label}</span>
+            <span style={{fontSize:12,fontWeight:800,color:d.value>=0?"#059669":"#dc2626"}}>
               {d.value>=0?"+":"-"}{unit}{Math.abs(d.value).toFixed(0)}
-            </text>
-            <text x={x+bwReal/2} y={H-6} textAnchor="middle" fontSize="7.5" fill="#9ca3af" fontWeight="600">
-              {d.label.length>9?d.label.slice(0,8)+"…":d.label}
-            </text>
-          </g>
-        );
-      })}
-    </svg>
+            </span>
+          </div>
+          <div style={{background:"#f1f2f4",borderRadius:4,height:6,overflow:"hidden"}}>
+            <div style={{width:`${Math.min(100,Math.abs(d.value)/maxAbs*100)}%`,height:"100%",background:d.value>=0?"#059669":"#dc2626",borderRadius:4,transition:"width .3s"}}/>
+          </div>
+        </div>
+      ))}
+    </div>
   );
 }
 
@@ -2043,44 +2029,37 @@ export default function App() {  const [screen, setScreen]       = useState("loa
 
                   <div style={{filter:(!br?.subscribed && !isAdmin)?"blur(5px)":"none",pointerEvents:(!br?.subscribed && !isAdmin)?"none":"auto",userSelect:(!br?.subscribed && !isAdmin)?"none":"auto"}}>
 
-                    <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,fontWeight:800,marginBottom:8}}>
+                    <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,fontWeight:800,marginBottom:14}}>
                       {lang==="PT"?"Onde estás a ganhar / perder valor":"Where you're winning / losing value"}
                     </div>
                     <DashboardBarChart data={marketOddBreakdown.byMarketList.map(m=>({label:m.market,value:m.pnl}))} lang={lang}/>
-                    <div style={{fontSize:10,color:"#9ca3af",textAlign:"center",marginTop:2,marginBottom:20}}>
-                      {lang==="PT"?"P&L por mercado":"P&L by market"}
-                    </div>
 
-                    <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,fontWeight:800,marginBottom:8}}>
-                      {lang==="PT"?"Performance por range de odds":"Performance by odd range"}
-                    </div>
-                    <DashboardBarChart data={marketOddBreakdown.byOddList.map(o=>({label:o.range,value:o.pnl}))} lang={lang}/>
-                    <div style={{fontSize:10,color:"#9ca3af",textAlign:"center",marginTop:2,marginBottom:20}}>
-                      {lang==="PT"?"P&L por faixa de odd":"P&L by odd range"}
+                    <div style={{borderTop:"1px solid #f1f2f4",marginTop:24,paddingTop:24}}>
+                      <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,fontWeight:800,marginBottom:14}}>
+                        {lang==="PT"?"Performance por range de odds":"Performance by odd range"}
+                      </div>
+                      <DashboardBarChart data={marketOddBreakdown.byOddList.map(o=>({label:"@"+o.range,value:o.pnl}))} lang={lang}/>
                     </div>
 
                     {marketOddBreakdown.byStrategyList.length>1 && (
-                      <>
-                        <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,fontWeight:800,marginBottom:8}}>
+                      <div style={{borderTop:"1px solid #f1f2f4",marginTop:24,paddingTop:24}}>
+                        <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,fontWeight:800,marginBottom:14}}>
                           {lang==="PT"?"Performance por estratégia":"Performance by strategy"}
                         </div>
                         <DashboardBarChart data={marketOddBreakdown.byStrategyList.map(s=>({label:s.strategy,value:s.pnl}))} lang={lang}/>
-                        <div style={{fontSize:10,color:"#9ca3af",textAlign:"center",marginTop:2,marginBottom:20}}>
-                          {lang==="PT"?"P&L por estratégia":"P&L by strategy"}
-                        </div>
-                      </>
+                      </div>
                     )}
 
                     {marketOddBreakdown.byMonthList.length>1 && (
-                      <>
-                        <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,fontWeight:800,marginBottom:8}}>
+                      <div style={{borderTop:"1px solid #f1f2f4",marginTop:24,paddingTop:24}}>
+                        <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,fontWeight:800,marginBottom:14}}>
                           {lang==="PT"?"Evolução mensal":"Monthly evolution"}
                         </div>
                         <DashboardBarChart data={marketOddBreakdown.byMonthList.map(m=>({label:m.label,value:m.pnl}))} lang={lang}/>
-                        <div style={{fontSize:10,color:"#9ca3af",textAlign:"center",marginTop:2}}>
-                          {lang==="PT"?`P&L por mês · últimos ${marketOddBreakdown.byMonthList.length} meses com registos`:`P&L by month · last ${marketOddBreakdown.byMonthList.length} months with records`}
+                        <div style={{fontSize:10,color:"#9ca3af",marginTop:10}}>
+                          {lang==="PT"?`Últimos ${marketOddBreakdown.byMonthList.length} meses com registos`:`Last ${marketOddBreakdown.byMonthList.length} months with records`}
                         </div>
-                      </>
+                      </div>
                     )}
                   </div>
                 </div>
