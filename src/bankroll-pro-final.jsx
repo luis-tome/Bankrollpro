@@ -389,7 +389,7 @@ export default function App() {
   const [reportStrategyFilter, setReportStrategyFilter] = useState("all");
   const [reportMonth, setReportMonth] = useState(today().slice(0,7));
   const [showSuccess, setShowSuccess] = useState(false);
-  const [showOnboarding, setShowOnboarding] = useState(()=>{ try{ return !localStorage.getItem("bpOnboarded"); }catch(e){ return false; } });
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const [onboardStep, setOnboardStep] = useState(0);
   const [showTooltip, setShowTooltip] = useState(null);
   const [showHelp, setShowHelp] = useState(false);
@@ -413,6 +413,12 @@ export default function App() {
   const userName  = user?.user_metadata?.name||user?.email?.split("@")[0]||"";
   const emptyForm = {event:"",market:markets[0]||"Vencedor do Jogo",selection:"",odd:"",units:1,result:"WIN",notes:"",cashoutVal:"",betDate:today(),strategy:""};
   
+
+  useEffect(()=>{
+    try{
+      if(!localStorage.getItem("bpOnboarded")) setShowOnboarding(true);
+    }catch(e){}
+  },[]);
 
   useEffect(()=>{
     const params = new URLSearchParams(window.location.search);
@@ -1049,15 +1055,19 @@ export default function App() {
 
 
       {showOnboarding && screen==="app" && isActive && (
-        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.8)",zIndex:500,display:"flex",alignItems:"flex-end",justifyContent:"center"}}>
-          <div style={{background:"#fff",borderRadius:20,padding:"28px 24px 32px",width:"100%",maxWidth:420,boxShadow:"0 20px 60px rgba(0,0,0,.3)"}}>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
+        <div style={{position:"fixed",inset:0,background:"#fff",zIndex:500,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"32px 24px"}}>
+          <div style={{width:"100%",maxWidth:420,display:"flex",flexDirection:"column",alignItems:"center"}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:28,width:"100%"}}>
               <div style={{fontSize:13,color:"#9ca3af",fontWeight:600}}>{onboardStep+1} / 6</div>
               <div style={{display:"flex",gap:4}}>
                 {[0,1,2,3,4,5].map(i=>(
                   <div key={i} style={{width:i===onboardStep?20:6,height:6,borderRadius:3,background:i===onboardStep?sc.color:"#e5e7eb",transition:"width .2s"}}/>
                 ))}
               </div>
+              <button style={{background:"none",border:"none",color:"#9ca3af",fontSize:13,cursor:"pointer",fontWeight:600}} onClick={()=>{try{localStorage.setItem("bpOnboarded","1");}catch(e){}setShowOnboarding(false);}}>
+                {lang==="PT"?"Saltar":"Skip"}
+              </button>
+            </div>
               <button style={{background:"none",border:"none",color:"#9ca3af",fontSize:13,cursor:"pointer",fontWeight:600}} onClick={()=>{try{localStorage.setItem("bpOnboarded","1");}catch(e){}setShowOnboarding(false);}}>
                 {lang==="PT"?"Saltar":"Skip"}
               </button>
