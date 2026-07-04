@@ -570,6 +570,39 @@ export default function App() {
     return{settled:settled.length,wins:wins.length,losses:losses.length,pnl,roi,strikeRate,avgOdd,totalStaked,pending:bets.filter(b=>b.result==="PENDING").length};
   },[bets]);
 
+  // Breakdown por mercado e por range de odds — alimenta os gráficos visuais do separador IA
+  const marketOddBreakdown = useMemo(()=>{
+    const settled = bets.filter(b=>b.result!=="PENDING"&&b.result!=="VOID");
+    const byMarket = {};
+    settled.forEach(b=>{
+      const mkt = b.market || "Outros";
+      if(!byMarket[mkt]) byMarket[mkt] = {wins:0,losses:0,pnl:0,count:0,totalOdd:0};
+      byMarket[mkt].count++;
+      byMarket[mkt].totalOdd += b.odd;
+      if(b.result==="WIN"){ byMarket[mkt].wins++; byMarket[mkt].pnl+=b.stake*(b.odd-1); }
+      else if(b.result==="LOSS"){ byMarket[mkt].losses++; byMarket[mkt].pnl-=b.stake; }
+      else if(b.result==="CASHOUT"){ byMarket[mkt].pnl+=(b.cashout_val||0)-b.stake; }
+    });
+    const byMarketList = Object.entries(byMarket)
+      .map(([market,v])=>({market,count:v.count,wins:v.wins,losses:v.losses,pnl:Number(v.pnl.toFixed(2)),sr:v.wins+v.losses>0?Number((v.wins/(v.wins+v.losses)*100).toFixed(0)):0,avgOdd:Number((v.totalOdd/v.count).toFixed(2))}))
+      .sort((a,b)=>a.pnl-b.pnl);
+
+    const byOdd = {"1.01-1.50":{wins:0,losses:0,pnl:0,count:0},"1.51-2.00":{wins:0,losses:0,pnl:0,count:0},"2.01-3.00":{wins:0,losses:0,pnl:0,count:0},"3.01+":{wins:0,losses:0,pnl:0,count:0}};
+    settled.forEach(b=>{
+      const range = b.odd<=1.50?"1.01-1.50":b.odd<=2.00?"1.51-2.00":b.odd<=3.00?"2.01-3.00":"3.01+";
+      const pnl = b.result==="WIN"?b.stake*(b.odd-1):b.result==="LOSS"?-b.stake:(b.cashout_val||0)-b.stake;
+      byOdd[range].count++; byOdd[range].pnl+=pnl;
+      if(pnl>0) byOdd[range].wins++; else byOdd[range].losses++;
+    });
+    const byOddList = Object.entries(byOdd)
+      .filter(([,v])=>v.count>0)
+      .map(([range,v])=>({range,count:v.count,wins:v.wins,losses:v.losses,pnl:Number(v.pnl.toFixed(2)),sr:v.count>0?Number((v.wins/v.count*100).toFixed(0)):0}));
+
+    const maxAbsMarket = Math.max(1,...byMarketList.map(m=>Math.abs(m.pnl)));
+    const maxAbsOdd = Math.max(1,...byOddList.map(o=>Math.abs(o.pnl)));
+    return { byMarketList, byOddList, maxAbsMarket, maxAbsOdd };
+  },[bets]);
+
   const brHistory = useMemo(()=>{
     let r=parseFloat(br?.bankroll||0);
     const pts=[{v:r}];
@@ -1905,6 +1938,46 @@ export default function App() {
                       <div style={{fontSize:12,fontWeight:700,color:"#4ade80",flexShrink:0}}>Subscrever →</div>
                     </a>
                   </div>
+                </div>
+              )}
+
+              {stats.settled>=3 && (
+                <div style={{marginTop:4}}>
+                  <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,fontWeight:800,marginBottom:12}}>
+                    {lang==="PT"?"Onde estás a ganhar / perder valor":"Where you're winning / losing value"}
+                  </div>
+                  {marketOddBreakdown.byMarketList.map(m=>(
+                    <div key={m.market} style={{marginBottom:14}}>
+                      <div style={{display:"flex",justifyContent:"space-between",fontSize:12,marginBottom:4}}>
+                        <span style={{fontWeight:700,color:"#111827"}}>{m.market}</span>
+                        <span style={{fontWeight:800,color:m.pnl>=0?"#059669":"#dc2626"}}>{m.pnl>=0?"+":"-"}€{Math.abs(m.pnl).toFixed(2)}</span>
+                      </div>
+                      <div style={{background:"#f3f4f6",borderRadius:6,height:8,overflow:"hidden"}}>
+                        <div style={{width:`${Math.min(100,Math.abs(m.pnl)/marketOddBreakdown.maxAbsMarket*100)}%`,height:"100%",background:m.pnl>=0?"#059669":"#dc2626",borderRadius:6,transition:"width .3s"}}/>
+                      </div>
+                      <div style={{fontSize:10,color:"#9ca3af",marginTop:3}}>
+                        {m.count} {lang==="PT"?"apostas":"bets"} · {m.sr}% {lang==="PT"?"acertos":"win rate"} · {lang==="PT"?"odd média":"avg odd"} {m.avgOdd}
+                      </div>
+                    </div>
+                  ))}
+
+                  <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,fontWeight:800,margin:"18px 0 12px"}}>
+                    {lang==="PT"?"Performance por range de odds":"Performance by odd range"}
+                  </div>
+                  {marketOddBreakdown.byOddList.map(o=>(
+                    <div key={o.range} style={{marginBottom:14}}>
+                      <div style={{display:"flex",justifyContent:"space-between",fontSize:12,marginBottom:4}}>
+                        <span style={{fontWeight:700,color:"#111827"}}>@{o.range}</span>
+                        <span style={{fontWeight:800,color:o.pnl>=0?"#059669":"#dc2626"}}>{o.pnl>=0?"+":"-"}€{Math.abs(o.pnl).toFixed(2)}</span>
+                      </div>
+                      <div style={{background:"#f3f4f6",borderRadius:6,height:8,overflow:"hidden"}}>
+                        <div style={{width:`${Math.min(100,Math.abs(o.pnl)/marketOddBreakdown.maxAbsOdd*100)}%`,height:"100%",background:o.pnl>=0?"#059669":"#dc2626",borderRadius:6,transition:"width .3s"}}/>
+                      </div>
+                      <div style={{fontSize:10,color:"#9ca3af",marginTop:3}}>
+                        {o.count} {lang==="PT"?"apostas":"bets"} · {o.sr}% {lang==="PT"?"acertos":"win rate"}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
 
