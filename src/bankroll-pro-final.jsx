@@ -101,19 +101,19 @@ const QUOTES = [
 
 const ONBOARDING_STEPS = {
   PT: [
-    { icon:"📊", title:"Bem-vindo ao BankrollPro", body:"A maioria dos apostadores não perde por falta de conhecimento — perde por falta de controlo. Aqui vais construir disciplina, proteger a tua banca e transformar cada aposta numa decisão consciente, não num impulso. Vamos mostrar-te o essencial em 6 passos." },
+    { icon:"📊", title:"Bem-vindo ao BankrollPro", body:"Gere a tua banca desportiva como um profissional. Vamos mostrar-te o essencial em 5 passos." },
     { icon:"➕", title:"Regista as tuas apostas", body:"Clica no botão + verde para adicionar uma aposta. Podes registar com resultado imediato (Green/Red) ou deixar pendente para liquidar depois." },
-    { icon:"📸", title:"Importa apostas em segundos", body:"Clica no botão 📋 para colar o texto de um grupo, ou carrega um print — de Telegram, WhatsApp ou até do bilhete da casa de apostas (Bet365, Betano, etc.). A IA lê a imagem e regista tudo automaticamente por ti, incluindo apostas simples e múltiplas." },
+    { icon:"📋", title:"Importa do Telegram", body:"Clica no botão 📋 para colar apostas de um grupo. A app detecta automaticamente todas as apostas — simples e múltiplas. Admins podem também fazer upload de um print." },
     { icon:"🎯", title:"Filtra por estratégia", body:"Ao registar apostas podes definir uma estratégia (ex: ATP, WTA, Liga Principal). No Diário e Relatório podes filtrar por estratégia para ver os resultados separados." },
-    { icon:"🤖", title:"Análise com IA", body:"Depois de 3+ apostas liquidadas, vai à tab IA e clica Analisar. Recebes feedback real sobre onde estás a ganhar e a perder dinheiro, com gráficos por mercado, odds, estratégia e evolução anual." },
+    { icon:"🤖", title:"Análise com IA", body:"Depois de 3+ apostas liquidadas, vai à tab IA e clica Analisar. Recebes feedback real sobre onde estás a ganhar e a perder dinheiro — com referência às apostas específicas." },
     { icon:"💰", title:"Aporte e saque", body:"No menu ☰ clica no ✏️ da tua banca para aceder a Fazer aporte ou Fazer saque — ajusta a banca declarada sem alterar o histórico de apostas." },
   ],
   EN: [
-    { icon:"📊", title:"Welcome to BankrollPro", body:"Most bettors don't lose because they lack knowledge — they lose because they lack control. Here you'll build discipline, protect your bankroll, and turn every bet into a conscious decision, not an impulse. Let's show you the essentials in 6 steps." },
+    { icon:"📊", title:"Welcome to BankrollPro", body:"Manage your sports bankroll like a professional. Let us show you the essentials in 5 steps." },
     { icon:"➕", title:"Log your bets", body:"Tap the green + button to add a bet. You can record with an immediate result (Win/Loss) or leave it pending to settle later." },
-    { icon:"📸", title:"Import bets in seconds", body:"Tap the 📋 button to paste text from a group, or upload a screenshot — from Telegram, WhatsApp, or even a bookmaker's bet slip (Bet365, Betano, etc.). The AI reads the image and logs everything for you automatically, including singles and multiples." },
+    { icon:"📋", title:"Import from Telegram", body:"Tap the 📋 button to paste bets from a group. The app auto-detects all bets — singles and multiples. Admins can also upload a screenshot." },
     { icon:"🎯", title:"Filter by strategy", body:"When logging bets you can set a strategy (e.g. ATP, WTA, Main League). In Diary and Report you can filter by strategy to see results separately." },
-    { icon:"🤖", title:"AI Analysis", body:"After 3+ settled bets, go to the AI tab and tap Analyse. You get real feedback on where you're winning and losing money, with charts by market, odds, strategy and yearly evolution." },
+    { icon:"🤖", title:"AI Analysis", body:"After 3+ settled bets, go to the AI tab and tap Analyse. You get real feedback on where you're winning and losing money — referencing specific bets." },
     { icon:"💰", title:"Deposit & withdraw", body:"In the ☰ menu tap the ✏️ on your bankroll to access Add funds or Withdraw — adjusts your declared bankroll without affecting bet history." },
   ]
 };
@@ -341,31 +341,8 @@ async function getAIFeedback(bets, stats, bankroll, sport) {
 
 
 
-// Gráfico de barras vertical estilo dashboard — eixo, grelha, valores em cima das barras.
-// value pode ser negativo (perdas) — as barras "divergem" a partir da linha zero.
-function DashboardBarChart({ data, lang="PT", unit="€" }) {
-  if(!data || !data.length) return null;
-  const maxAbs = Math.max(1, ...data.map(d=>Math.abs(d.value)));
-  return (
-    <div>
-      {data.map((d,i)=>(
-        <div key={d.label+i} style={{marginBottom:i===data.length-1?0:15}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:5}}>
-            <span style={{fontSize:12,fontWeight:700,color:"#111827"}}>{d.label}</span>
-            <span style={{fontSize:12,fontWeight:800,color:d.value>=0?"#059669":"#dc2626"}}>
-              {d.value>=0?"+":"-"}{unit}{Math.abs(d.value).toFixed(0)}
-            </span>
-          </div>
-          <div style={{background:"#f1f2f4",borderRadius:4,height:6,overflow:"hidden"}}>
-            <div style={{width:`${Math.min(100,Math.abs(d.value)/maxAbs*100)}%`,height:"100%",background:d.value>=0?"#059669":"#dc2626",borderRadius:4,transition:"width .3s"}}/>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-export default function App() {  const [screen, setScreen]       = useState("loading");
+export default function App() {
+  const [screen, setScreen]       = useState("loading");
   const [authMode, setAuthMode]   = useState("register");
   const [user, setUser]           = useState(null);
   const [bankrolls, setBankrolls] = useState([]);
@@ -392,7 +369,6 @@ export default function App() {  const [screen, setScreen]       = useState("loa
   const [importImageError, setImportImageError] = useState("");
   const [editBRTarget, setEditBRTarget] = useState(null);
   const [brForm, setBRForm]       = useState({name:"",sport:"Ténis",bankroll:"",unit_pct:"2",reset:false,stake_mode:"variable"});
-  const [brFormErrors, setBrFormErrors] = useState({});
   const [showForm, setShowForm]   = useState(false);
   const [editBet, setEditBet]     = useState(null);
   const [formMode, setFormMode]   = useState("immediate");
@@ -405,7 +381,6 @@ export default function App() {  const [screen, setScreen]       = useState("loa
   const [importDate, setImportDate] = useState(today());
   const [betSport, setBetSport]     = useState("");
   const [form, setForm]           = useState({event:"",market:"Vencedor do Jogo",selection:"",odd:"",units:1,result:"WIN",notes:"",cashoutVal:"",betDate:today(),strategy:""});
-  const [formErrors, setFormErrors] = useState({});
   const [subView, setSubView]     = useState("annual");
   const [feedback, setFeedback]   = useState(null);
   const [loadingFB, setLoadingFB] = useState(false);
@@ -458,12 +433,12 @@ export default function App() {  const [screen, setScreen]       = useState("loa
   },[]);
 
   async function loadBankrolls(uid){
-    const{data}=await supabase.from("profiles").select("*").eq("user_id",uid).order("created_at");
+    const{data}=await supabase.from("profiles").select("*").eq("user_id",uid).is("deleted_at",null).order("created_at");
     if(data&&data.length>0){setBankrolls(data);setActiveBR(data[0].id);await loadBets(data[0].id);setScreen("app");}
     else setScreen("setup");
   }
   async function loadBets(brId){
-    const{data}=await supabase.from("bets").select("*").eq("bankroll_id",brId).order("created_at",{ascending:false});
+    const{data}=await supabase.from("bets").select("*").eq("bankroll_id",brId).is("deleted_at",null).order("created_at",{ascending:false});
     if(data) setBets(data.map(b=>({...b,odd:parseFloat(b.odd),stake:parseFloat(b.stake)})));
   }
   async function switchBankroll(id){setActiveBR(id);setBets([]);setDrawerOpen(false);await loadBets(id);setTab("dashboard");}
@@ -483,9 +458,7 @@ export default function App() {  const [screen, setScreen]       = useState("loa
 
   async function handleCreateBR(isEdit){
     const brv=parseFloat(brForm.bankroll);
-    const errors = { name: !brForm.name, bankroll: !brv||brv<=0 };
-    if(errors.name||errors.bankroll){ setBrFormErrors(errors); return; }
-    setBrFormErrors({});
+    if(!brv||brv<=0||!brForm.name) return;
     if(isEdit&&editBRTarget){
       const updates={name:brForm.name,sport:brForm.sport,unit_pct:parseFloat(brForm.unit_pct),stake_mode:brForm.stake_mode||"variable"};
       if(brForm.reset){ updates.bankroll=brv; updates.last_stake_review=new Date().toISOString(); }
@@ -535,8 +508,25 @@ export default function App() {  const [screen, setScreen]       = useState("loa
   async function deleteBankroll(id){
     setConfirmModal({message: lang==="PT"?"Apagar esta banca e todos os registos? Esta ação não pode ser revertida.":"Delete this bankroll and all records? This action cannot be undone.", onConfirm: async ()=>{
       setConfirmModal(null);
-      await supabase.from("bets").delete().eq("bankroll_id",id);
-      await supabase.from("profiles").delete().eq("id",id);
+      const now = new Date().toISOString();
+      // Backup por email antes de apagar
+      try {
+        const brToDelete = bankrolls.find(b=>b.id===id);
+        const {data: betsToDelete} = await supabase.from("bets").select("*").eq("bankroll_id",id);
+        await fetch("/api/backup-email", {
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body: JSON.stringify({
+            userEmail: user?.email,
+            bankroll: brToDelete,
+            bets: betsToDelete||[],
+            adminEmail: "luistome.work@gmail.com"
+          })
+        });
+      } catch(e){ console.error("Backup email failed:", e); }
+      // Soft delete
+      await supabase.from("bets").update({deleted_at: now}).eq("bankroll_id",id);
+      await supabase.from("profiles").update({deleted_at: now}).eq("id",id);
       const remaining=bankrolls.filter(b=>b.id!==id);
       setBankrolls(remaining);
       if(remaining.length>0){setActiveBR(remaining[0].id);await loadBets(remaining[0].id);}
@@ -546,10 +536,9 @@ export default function App() {  const [screen, setScreen]       = useState("loa
   }
 
   async function handleSaveBet(){
+    if(!form.event||!form.odd||!form.selection||!activeBR) return;
     const odd=parseFloat(form.odd);
-    const errors = { event: !form.event, selection: !form.selection, odd: !form.odd||odd<=1 };
-    if(errors.event||errors.selection||errors.odd||!activeBR){ setFormErrors(errors); return; }
-    setFormErrors({});
+    if(odd<=1) return;
     const stake=unitVal*(parseFloat(form.units)||1);
     const result=formMode==="immediate"?form.result:"PENDING";
     // Preserve time-of-day from "now", but use the selected date
@@ -573,7 +562,11 @@ export default function App() {  const [screen, setScreen]       = useState("loa
   }
 
   async function deleteBet(id){
-    setConfirmModal({message: lang==="PT"?"Apagar este registo?":"Delete this record?", onConfirm: async ()=>{ await supabase.from("bets").delete().eq("id",id); setBets(prev=>prev.filter(b=>b.id!==id)); setConfirmModal(null); }});
+    setConfirmModal({message: lang==="PT"?"Apagar este registo?":"Delete this record?", onConfirm: async ()=>{
+      await supabase.from("bets").update({deleted_at: new Date().toISOString()}).eq("id",id);
+      setBets(prev=>prev.filter(b=>b.id!==id));
+      setConfirmModal(null);
+    }});
     return;
   }
 
@@ -581,7 +574,6 @@ export default function App() {  const [screen, setScreen]       = useState("loa
     setEditBet(b);
     setForm({event:b.event||"",market:b.market||markets[0],selection:b.selection||"",odd:b.odd||"",units:b.units||1,result:b.result||"WIN",notes:b.notes||"",cashoutVal:b.cashout_val||"",betDate:b.created_at?b.created_at.slice(0,10):today(),strategy:b.strategy||""});
     setFormMode(b.result==="PENDING"?"pending":"immediate");
-    setFormErrors({});
     setShowForm(true);
   }
 
@@ -598,88 +590,6 @@ export default function App() {  const [screen, setScreen]       = useState("loa
     const avgOdd=settled.length>0?settled.reduce((s,b)=>s+b.odd,0)/settled.length:0;
     return{settled:settled.length,wins:wins.length,losses:losses.length,pnl,roi,strikeRate,avgOdd,totalStaked,pending:bets.filter(b=>b.result==="PENDING").length};
   },[bets]);
-
-  // Breakdown por mercado e por range de odds — alimenta os gráficos visuais do separador IA
-  const marketOddBreakdown = useMemo(()=>{
-    const settled = bets.filter(b=>b.result!=="PENDING"&&b.result!=="VOID");
-    const byMarket = {};
-    settled.forEach(b=>{
-      const mkt = b.market || "Outros";
-      if(!byMarket[mkt]) byMarket[mkt] = {wins:0,losses:0,pnl:0,count:0,totalOdd:0};
-      byMarket[mkt].count++;
-      byMarket[mkt].totalOdd += b.odd;
-      if(b.result==="WIN"){ byMarket[mkt].wins++; byMarket[mkt].pnl+=b.stake*(b.odd-1); }
-      else if(b.result==="LOSS"){ byMarket[mkt].losses++; byMarket[mkt].pnl-=b.stake; }
-      else if(b.result==="CASHOUT"){ byMarket[mkt].pnl+=(b.cashout_val||0)-b.stake; }
-    });
-    const byMarketList = Object.entries(byMarket)
-      .map(([market,v])=>({market,count:v.count,wins:v.wins,losses:v.losses,pnl:Number(v.pnl.toFixed(2)),sr:v.wins+v.losses>0?Number((v.wins/(v.wins+v.losses)*100).toFixed(0)):0,avgOdd:Number((v.totalOdd/v.count).toFixed(2))}))
-      .sort((a,b)=>a.pnl-b.pnl);
-
-    const byOdd = {"1.01-1.50":{wins:0,losses:0,pnl:0,count:0},"1.51-2.00":{wins:0,losses:0,pnl:0,count:0},"2.01-3.00":{wins:0,losses:0,pnl:0,count:0},"3.01+":{wins:0,losses:0,pnl:0,count:0}};
-    settled.forEach(b=>{
-      const range = b.odd<=1.50?"1.01-1.50":b.odd<=2.00?"1.51-2.00":b.odd<=3.00?"2.01-3.00":"3.01+";
-      const pnl = b.result==="WIN"?b.stake*(b.odd-1):b.result==="LOSS"?-b.stake:(b.cashout_val||0)-b.stake;
-      byOdd[range].count++; byOdd[range].pnl+=pnl;
-      if(pnl>0) byOdd[range].wins++; else byOdd[range].losses++;
-    });
-    const byOddList = Object.entries(byOdd)
-      .filter(([,v])=>v.count>0)
-      .map(([range,v])=>({range,count:v.count,wins:v.wins,losses:v.losses,pnl:Number(v.pnl.toFixed(2)),sr:v.count>0?Number((v.wins/v.count*100).toFixed(0)):0}));
-
-    const maxAbsMarket = Math.max(1,...byMarketList.map(m=>Math.abs(m.pnl)));
-    const maxAbsOdd = Math.max(1,...byOddList.map(o=>Math.abs(o.pnl)));
-
-    // Breakdown por estratégia
-    const byStrategy = {};
-    settled.forEach(b=>{
-      const strat = b.strategy || (lang==="PT"?"Sem estratégia":"No strategy");
-      if(!byStrategy[strat]) byStrategy[strat] = {wins:0,losses:0,pnl:0,count:0};
-      byStrategy[strat].count++;
-      if(b.result==="WIN"){ byStrategy[strat].wins++; byStrategy[strat].pnl+=b.stake*(b.odd-1); }
-      else if(b.result==="LOSS"){ byStrategy[strat].losses++; byStrategy[strat].pnl-=b.stake; }
-      else if(b.result==="CASHOUT"){ byStrategy[strat].pnl+=(b.cashout_val||0)-b.stake; }
-    });
-    const byStrategyList = Object.entries(byStrategy)
-      .map(([strategy,v])=>({strategy,count:v.count,wins:v.wins,losses:v.losses,pnl:Number(v.pnl.toFixed(2)),sr:v.wins+v.losses>0?Number((v.wins/(v.wins+v.losses)*100).toFixed(0)):0}))
-      .sort((a,b)=>a.pnl-b.pnl);
-
-    // Evolução anual — guarda o pnl por mês (todos os anos) para depois filtrar pelo ano selecionado
-    const byMonth = {};
-    settled.forEach(b=>{
-      const month = (b.created_at||"").slice(0,7); // "YYYY-MM"
-      if(!month) return;
-      if(!byMonth[month]) byMonth[month] = {pnl:0,count:0};
-      byMonth[month].count++;
-      if(b.result==="WIN") byMonth[month].pnl+=b.stake*(b.odd-1);
-      else if(b.result==="LOSS") byMonth[month].pnl-=b.stake;
-      else if(b.result==="CASHOUT") byMonth[month].pnl+=(b.cashout_val||0)-b.stake;
-    });
-    const yearsWithData = [...new Set(Object.keys(byMonth).map(m=>m.slice(0,4)))];
-    const currentYear = String(new Date().getFullYear());
-    const availableYears = [...new Set([currentYear, ...yearsWithData])].sort((a,b)=>b.localeCompare(a));
-
-    const maxAbsStrategy = Math.max(1,...byStrategyList.map(s=>Math.abs(s.pnl)));
-
-    return { byMarketList, byOddList, maxAbsMarket, maxAbsOdd, byStrategyList, maxAbsStrategy, byMonth, availableYears };
-  },[bets,lang]);
-
-  const [analysisYear, setAnalysisYear] = useState(String(new Date().getFullYear()));
-  const MONTH_ABBR_PT=["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
-  const MONTH_ABBR_EN=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-  const yearlyEvolution = useMemo(()=>{
-    const now = new Date();
-    const currentYear = now.getFullYear();
-    const isCurrentYear = Number(analysisYear)===currentYear;
-    const lastMonth = isCurrentYear ? now.getMonth() : 11; // 0-indexed
-    const list = [];
-    for(let m=0; m<=lastMonth; m++){
-      const key = `${analysisYear}-${String(m+1).padStart(2,"0")}`;
-      const v = marketOddBreakdown.byMonth[key];
-      list.push({ month:key, pnl:v?Number(v.pnl.toFixed(2)):0, count:v?v.count:0, label:(lang==="PT"?MONTH_ABBR_PT:MONTH_ABBR_EN)[m] });
-    }
-    return list;
-  },[marketOddBreakdown.byMonth, analysisYear, lang]);
 
   const brHistory = useMemo(()=>{
     let r=parseFloat(br?.bankroll||0);
@@ -758,48 +668,6 @@ export default function App() {  const [screen, setScreen]       = useState("loa
 
   function swipeStart(e){ touchX.current=e.touches[0].clientX; }
   function swipeEnd(e){ if(touchX.current!==null&&touchX.current-e.changedTouches[0].clientX>60) setDrawerOpen(false); touchX.current=null; }
-
-  const onboardSteps = ONBOARDING_STEPS[lang]||ONBOARDING_STEPS.PT;
-  const onboardingModal = showOnboarding && (
-    <div style={{position:"fixed",inset:0,background:"#fff",zIndex:500,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"32px 24px"}}>
-      <div style={{width:"100%",maxWidth:420,display:"flex",flexDirection:"column",alignItems:"center"}}>
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:28,width:"100%"}}>
-          <div style={{fontSize:13,color:"#9ca3af",fontWeight:600}}>{onboardStep+1} / {onboardSteps.length}</div>
-          <div style={{display:"flex",gap:4}}>
-            {onboardSteps.map((_,i)=>(
-              <div key={i} style={{width:i===onboardStep?20:6,height:6,borderRadius:3,background:i===onboardStep?sc.color:"#e5e7eb",transition:"width .2s"}}/>
-            ))}
-          </div>
-          <button style={{background:"none",border:"none",color:"#9ca3af",fontSize:13,cursor:"pointer",fontWeight:600}} onClick={()=>{try{localStorage.setItem("bpOnboarded","1");}catch(e){}setShowOnboarding(false);}}>
-            {lang==="PT"?"Saltar":"Skip"}
-          </button>
-        </div>
-
-        {onboardSteps.map((step,i)=> i===onboardStep && (
-          <div key={i} style={{textAlign:"center",padding:"0 8px"}}>
-            <div style={{fontSize:56,marginBottom:16}}>{step.icon}</div>
-            <div style={{fontSize:20,fontWeight:900,color:"#111827",marginBottom:10}}>{step.title}</div>
-            <div style={{fontSize:14,color:"#6b7280",lineHeight:1.7,marginBottom:28}}>{step.body}</div>
-          </div>
-        ))}
-
-        <div style={{display:"flex",gap:10}}>
-          {onboardStep > 0 && (
-            <button style={{...S.btnGhost,flex:1}} onClick={()=>setOnboardStep(s=>s-1)}>
-              ←
-            </button>
-          )}
-          <button style={{...S.btnPrimary,flex:2,background:sc.color,border:"none"}}
-            onClick={()=>{
-              if(onboardStep<onboardSteps.length-1){ setOnboardStep(s=>s+1); }
-              else { try{localStorage.setItem("bpOnboarded","1");}catch(e){} setShowOnboarding(false); }
-            }}>
-            {onboardStep<onboardSteps.length-1?(lang==="PT"?"Seguinte →":"Next →"):(lang==="PT"?"Começar!":"Let's go!")}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
 
   if(screen==="loading") return (
     <div style={{display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100vh",background:"#f7f8fa"}}>
@@ -952,7 +820,6 @@ export default function App() {  const [screen, setScreen]       = useState("loa
 
   if(screen==="setup") return (
     <div style={{background:"#f7f8fa",minHeight:"100vh",fontFamily:"-apple-system,'Segoe UI',sans-serif"}}>
-      {onboardingModal}
       <div style={{display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100vh",padding:20}}>
         <div style={{width:"100%",maxWidth:380,background:"#fff",border:"1px solid #e5e7eb",borderRadius:16,padding:"28px 24px",boxShadow:"0 4px 24px rgba(0,0,0,.06)"}}>
           <div style={{fontSize:32,marginBottom:8}}>💼</div>
@@ -961,7 +828,7 @@ export default function App() {  const [screen, setScreen]       = useState("loa
           <div style={{background:"#f0fdf4",border:"1px solid #bbf7d0",borderRadius:8,padding:"8px 12px",fontSize:12,color:"#15803d",marginBottom:12,fontWeight:600,textAlign:"center"}}>
             🎯 7 dias de trial grátis · Preço de lançamento até 31 Ago
           </div>
-          <BRForm form={brForm} setForm={setBRForm} showReset={false} lang={lang} errors={brFormErrors}/>
+          <BRForm form={brForm} setForm={setBRForm} showReset={false} lang={lang}/>
           <button style={{...S.btnPrimary,marginTop:20}} onClick={()=>handleCreateBR(false)}>Criar banca</button>
         </div>
       </div>
@@ -1078,16 +945,9 @@ export default function App() {  const [screen, setScreen]       = useState("loa
                             });
                             const data = await response.json();
                             if(data.error) throw new Error(data.error);
-                            const extracted = data.bets || [];
-                            if(extracted.length===0) throw new Error(lang==="PT"?"Não foi possível identificar nenhuma aposta nesta imagem.":"Could not identify any bet in this image.");
-                            const normalized = extracted.map(b=>{
-                              let units = b.units;
-                              if(!units && b.stakeAmount && unitVal>0) units = Number((b.stakeAmount/unitVal).toFixed(2));
-                              if(!units) units = 1;
-                              return { event:b.event, selection:b.selection, market:b.market||"Outros", odd:b.odd, units, result:"PENDING", notes:b.notes||"" };
-                            });
-                            setImportText(normalized.map(b=>`${b.event} — ${b.selection} @${b.odd} (${b.units}un)`).join("\n"));
-                            setImportBets(normalized);
+                            const text = data.text || "";
+                            setImportText(text);
+                            setImportBets(parseTelegramTips(text));
                           } catch(err) {
                             setImportImageError("Erro ao ler imagem: " + err.message);
                             setImportImage(null);
@@ -1215,7 +1075,46 @@ export default function App() {  const [screen, setScreen]       = useState("loa
       )}
 
 
-      {onboardingModal}
+      {showOnboarding && screen==="app" && isActive && (
+        <div style={{position:"fixed",inset:0,background:"#fff",zIndex:500,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"32px 24px"}}>
+          <div style={{width:"100%",maxWidth:420,display:"flex",flexDirection:"column",alignItems:"center"}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:28,width:"100%"}}>
+              <div style={{fontSize:13,color:"#9ca3af",fontWeight:600}}>{onboardStep+1} / 6</div>
+              <div style={{display:"flex",gap:4}}>
+                {[0,1,2,3,4,5].map(i=>(
+                  <div key={i} style={{width:i===onboardStep?20:6,height:6,borderRadius:3,background:i===onboardStep?sc.color:"#e5e7eb",transition:"width .2s"}}/>
+                ))}
+              </div>
+              <button style={{background:"none",border:"none",color:"#9ca3af",fontSize:13,cursor:"pointer",fontWeight:600}} onClick={()=>{try{localStorage.setItem("bpOnboarded","1");}catch(e){}setShowOnboarding(false);}}>
+                {lang==="PT"?"Saltar":"Skip"}
+              </button>
+            </div>
+
+            {(ONBOARDING_STEPS[lang]||ONBOARDING_STEPS.PT).map((step,i)=> i===onboardStep && (
+              <div key={i} style={{textAlign:"center",padding:"0 8px"}}>
+                <div style={{fontSize:56,marginBottom:16}}>{step.icon}</div>
+                <div style={{fontSize:20,fontWeight:900,color:"#111827",marginBottom:10}}>{step.title}</div>
+                <div style={{fontSize:14,color:"#6b7280",lineHeight:1.7,marginBottom:28}}>{step.body}</div>
+              </div>
+            ))}
+
+            <div style={{display:"flex",gap:10}}>
+              {onboardStep > 0 && (
+                <button style={{...S.btnGhost,flex:1}} onClick={()=>setOnboardStep(s=>s-1)}>
+                  ←
+                </button>
+              )}
+              <button style={{...S.btnPrimary,flex:2,background:sc.color,border:"none"}}
+                onClick={()=>{
+                  if(onboardStep<5){ setOnboardStep(s=>s+1); }
+                  else { try{localStorage.setItem("bpOnboarded","1");}catch(e){} setShowOnboarding(false); }
+                }}>
+                {onboardStep<5?(lang==="PT"?"Seguinte →":"Next →"):(lang==="PT"?"Começar!":"Let's go!")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {confirmModal && (
         <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.5)",zIndex:400,display:"flex",alignItems:"center",justifyContent:"center",padding:20}} onClick={()=>setConfirmModal(null)}>
@@ -1270,6 +1169,94 @@ export default function App() {  const [screen, setScreen]       = useState("loa
             </button>
             <button style={S.btnGhost} onClick={dismissStakeReview}>
               {lang==="PT"?"Manter como está · lembrar em 30 dias":"Keep as is · remind in 30 days"}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {showOnboarding && (
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.8)",zIndex:500,display:"flex",alignItems:"flex-end",justifyContent:"center"}}>
+          <div style={{background:"#fff",borderRadius:"20px 20px 0 0",padding:"28px 24px 36px",width:"100%",maxWidth:500}}>
+            {/* Progress dots */}
+            <div style={{display:"flex",justifyContent:"center",gap:6,marginBottom:24}}>
+              {(ONBOARDING_STEPS[lang]||ONBOARDING_STEPS.PT).map((_,i)=>(
+                <div key={i} style={{width:i===onboardStep?20:8,height:8,borderRadius:4,background:i===onboardStep?sc.color:"#e5e7eb",transition:"all .3s"}}/>
+              ))}
+            </div>
+
+            {/* Step content */}
+            {(()=>{
+              const steps = ONBOARDING_STEPS[lang]||ONBOARDING_STEPS.PT;
+              const step = steps[onboardStep]||{};
+              return (
+                <div style={{textAlign:"center"}}>
+                  <div style={{fontSize:52,marginBottom:16}}>{step.icon}</div>
+                  <div style={{fontSize:20,fontWeight:900,color:"#111827",marginBottom:10}}>{step.title}</div>
+                  <div style={{fontSize:14,color:"#6b7280",lineHeight:1.6,marginBottom:28}}>{step.body}</div>
+                </div>
+              );
+            })()}
+
+            {/* Navigation */}
+            <div style={{display:"flex",gap:10}}>
+              {onboardStep > 0 && (
+                <button style={{...S.btnGhost,flex:1}} onClick={()=>setOnboardStep(s=>s-1)}>
+                  ← {lang==="PT"?"Anterior":"Back"}
+                </button>
+              )}
+              <button style={{...S.btnPrimary,flex:2,background:sc.color,border:"none"}}
+                onClick={()=>{
+                  const steps = ONBOARDING_STEPS[lang]||ONBOARDING_STEPS.PT;
+                  if(onboardStep < steps.length-1){
+                    setOnboardStep(s=>s+1);
+                  } else {
+                    try{ localStorage.setItem("bpOnboarded","1"); }catch(e){}
+                    setShowOnboarding(false);
+                  }
+                }}>
+                {onboardStep < (ONBOARDING_STEPS[lang]||ONBOARDING_STEPS.PT).length-1
+                  ? (lang==="PT"?"Próximo →":"Next →")
+                  : (lang==="PT"?"Começar 🚀":"Get started 🚀")}
+              </button>
+            </div>
+
+            <button style={{width:"100%",background:"none",border:"none",color:"#9ca3af",fontSize:12,cursor:"pointer",marginTop:12,padding:8}}
+              onClick={()=>{ try{localStorage.setItem("bpOnboarded","1");}catch(e){} setShowOnboarding(false); }}>
+              {lang==="PT"?"Saltar tutorial":"Skip tutorial"}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {showTooltip && (
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.3)",zIndex:250,display:"flex",alignItems:"center",justifyContent:"center",padding:20}}
+          onClick={()=>setShowTooltip(null)}>
+          <div style={{background:"#fff",borderRadius:14,padding:24,maxWidth:360,width:"100%",boxShadow:"0 8px 32px rgba(0,0,0,.15)"}} onClick={e=>e.stopPropagation()}>
+            <div style={{fontSize:28,marginBottom:10,textAlign:"center"}}>{showTooltip.ico}</div>
+            <div style={{fontSize:16,fontWeight:800,color:"#111827",marginBottom:8,textAlign:"center"}}>{showTooltip.title}</div>
+            <div style={{fontSize:13,color:"#6b7280",lineHeight:1.6,textAlign:"center"}}>{showTooltip.desc}</div>
+            <button style={{...S.btnPrimary,marginTop:20}} onClick={()=>setShowTooltip(null)}>OK</button>
+          </div>
+        </div>
+      )}
+
+      {showTooltip && (
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.5)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center",padding:"20px"}} onClick={()=>setShowTooltip(null)}>
+          <div style={{background:"#fff",borderRadius:16,padding:"24px 20px 28px",width:"100%",maxWidth:420,boxShadow:"0 20px 60px rgba(0,0,0,.3)"}} onClick={e=>e.stopPropagation()}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+              <div style={{fontSize:13,fontWeight:800,color:"#111827",textTransform:"uppercase",letterSpacing:.8}}>{lang==="PT"?"Como funciona":"How it works"}</div>
+              <button style={{background:"none",border:"none",color:"#9ca3af",fontSize:22,cursor:"pointer"}} onClick={()=>setShowTooltip(null)}>×</button>
+            </div>
+            <p style={{fontSize:14,color:"#374151",lineHeight:1.7,margin:0}}>
+              {showTooltip==="dashboard" && (lang==="PT"?"O separador Banca mostra o teu resumo geral — banca actual, P&L total, ROI, strike rate e odd média. As apostas pendentes aparecem aqui para liquidares rapidamente com ✓ ou ✗.":"The Bankroll tab shows your overall summary — current bankroll, total P&L, ROI, strike rate and average odd. Pending bets appear here for quick settlement with ✓ or ✗.")}
+              {showTooltip==="diary" && (lang==="PT"?"O Diário mostra as tuas apostas dia a dia. Navega por qualquer data, incluindo passadas. Filtra por estratégia (ATP, WTA, etc.). Liquida apostas pendentes com Green / Red / Cashout / Void.":"The Diary shows your bets day by day. Navigate any date including past ones. Filter by strategy (ATP, WTA, etc.). Settle pending bets with Win / Loss / Cashout / Void.")}
+              {showTooltip==="report" && (lang==="PT"?"O Relatório mostra o resumo mensal completo — lucro, ROI, % de acertos, valor investido e retorno. Navega entre meses e filtra por estratégia para ver o desempenho de cada abordagem.":"The Report shows the full monthly summary — profit, ROI, win rate, staked and return. Navigate between months and filter by strategy to see each approach's performance.")}
+              {showTooltip==="chart" && (lang==="PT"?"O Gráfico mostra a evolução da tua banca aposta a aposta e os resultados de cada mês em barras. Inclui a linha de referência da banca inicial para veres claramente se estás acima ou abaixo.":"The Chart shows your bankroll evolution bet by bet and each month's results in bars. Includes the initial bankroll reference line so you can clearly see if you're above or below.")}
+              {showTooltip==="ai" && (lang==="PT"?"A Análise IA lê as tuas apostas individualmente e identifica padrões reais — mercados onde perdes, ranges de odds problemáticos, e recomendações concretas. Precisa de pelo menos 3 apostas liquidadas. Preenche o campo Notas com contexto (ex: 'Alcaraz @1.23, terra') para análises mais precisas.":"AI Analysis reads your bets individually and identifies real patterns — markets where you lose, problematic odd ranges, and concrete recommendations. Needs at least 3 settled bets. Fill in the Notes field with context (e.g. 'Alcaraz @1.23, clay') for more accurate analysis.")}
+              {showTooltip==="sobre" && (lang==="PT"?"A tab Info mostra o teu plano actual, todas as funcionalidades incluídas na app e o contacto de suporte directo.":"The Info tab shows your current plan, all features included in the app and direct support contact.")}
+            </p>
+            <button style={{...S.btnPrimary,marginTop:20,background:sc.color,border:"none"}} onClick={()=>setShowTooltip(null)}>
+              {lang==="PT"?"Percebido 👍":"Got it 👍"}
             </button>
           </div>
         </div>
@@ -1349,13 +1336,13 @@ export default function App() {  const [screen, setScreen]       = useState("loa
                     </div>
                     <span style={{fontSize:13,fontWeight:700,color:bsc?.color}}>{fmt(parseFloat(b.bankroll))}</span>
                   </button>
-                  <button style={{background:"none",border:"none",color:"#d1d5db",cursor:"pointer",padding:"0 4px",fontSize:14}} onClick={()=>{setEditBRTarget(b);setBRForm({name:b.name,sport:b.sport,bankroll:b.bankroll,unit_pct:b.unit_pct,reset:false,stake_mode:b.stake_mode||"variable"});setShowEditBR(true);setDrawerOpen(false);setBrFormErrors({});}}>✏️</button>
+                  <button style={{background:"none",border:"none",color:"#d1d5db",cursor:"pointer",padding:"0 4px",fontSize:14}} onClick={()=>{setEditBRTarget(b);setBRForm({name:b.name,sport:b.sport,bankroll:b.bankroll,unit_pct:b.unit_pct,reset:false,stake_mode:b.stake_mode||"variable"});setShowEditBR(true);setDrawerOpen(false);}}>✏️</button>
                 </div>
               );
             })}
 
             {bankrolls.length<MAX_BANKROLLS && (
-              <button style={{display:"flex",alignItems:"center",width:"100%",padding:"10px",border:"1px dashed #e5e7eb",background:"transparent",cursor:"pointer",borderRadius:10,fontSize:13,marginTop:4,color:"#111827"}} onClick={()=>{setBRForm({name:"",sport:"Ténis",bankroll:"",unit_pct:"2",reset:false,stake_mode:"variable"});setShowNewBR(true);setDrawerOpen(false);setBrFormErrors({});}}>
+              <button style={{display:"flex",alignItems:"center",width:"100%",padding:"10px",border:"1px dashed #e5e7eb",background:"transparent",cursor:"pointer",borderRadius:10,fontSize:13,marginTop:4,color:"#111827"}} onClick={()=>{setBRForm({name:"",sport:"Ténis",bankroll:"",unit_pct:"2",reset:false,stake_mode:"variable"});setShowNewBR(true);setDrawerOpen(false);}}>
                 <span style={{marginRight:8,color:"#9ca3af",fontSize:18}}>+</span>
                 {lang==="PT"?"Nova banca":"New bankroll"} ({bankrolls.length}/{MAX_BANKROLLS})
               </button>
@@ -1378,7 +1365,7 @@ export default function App() {  const [screen, setScreen]       = useState("loa
               <h3 style={{margin:0,fontSize:16,fontWeight:700,color:"#111827"}}>{lang==="PT"?"Nova Banca":"New Bankroll"}</h3>
               <button style={{background:"none",border:"none",color:"#9ca3af",fontSize:22,cursor:"pointer"}} onClick={()=>setShowNewBR(false)}>×</button>
             </div>
-            <BRForm form={brForm} setForm={setBRForm} showReset={false} lang={lang} errors={brFormErrors}/>
+            <BRForm form={brForm} setForm={setBRForm} showReset={false} lang={lang}/>
             <button style={{...S.btnPrimary,marginTop:16}} onClick={()=>handleCreateBR(false)}>Criar banca</button>
           </div>
         </div>
@@ -1391,7 +1378,7 @@ export default function App() {  const [screen, setScreen]       = useState("loa
               <h3 style={{margin:0,fontSize:16,fontWeight:700,color:"#111827"}}>{lang==="PT"?"Editar Banca":"Edit Bankroll"}</h3>
               <button style={{background:"none",border:"none",color:"#9ca3af",fontSize:22,cursor:"pointer"}} onClick={()=>setShowEditBR(false)}>×</button>
             </div>
-            <BRForm form={brForm} setForm={setBRForm} showReset={true} lang={lang} errors={brFormErrors}/>
+            <BRForm form={brForm} setForm={setBRForm} showReset={true} lang={lang}/>
             <div style={{display:"flex",gap:8,marginTop:16}}>
               <button style={{...S.btnPrimary,flex:1}} onClick={()=>handleCreateBR(true)}>{lang==="PT"?"Guardar":"Save"}</button>
               <button style={{padding:"13px 16px",border:"1px solid #fca5a5",background:"#fef2f2",color:"#dc2626",borderRadius:8,cursor:"pointer",fontSize:13,fontWeight:700}} onClick={()=>deleteBankroll(editBRTarget?.id)}>🗑</button>
@@ -1500,7 +1487,7 @@ export default function App() {  const [screen, setScreen]       = useState("loa
           <div style={{background:"#fff",borderRadius:16,padding:24,width:"100%",maxWidth:440,maxHeight:"92vh",overflowY:"auto",boxShadow:"0 20px 60px rgba(0,0,0,.2)"}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
               <h3 style={{margin:0,fontSize:16,fontWeight:700,color:"#111827"}}>{editBet?tx("editRecord"):`${sc.icon} ${tx("newRecord")}`}</h3>
-              <button style={{background:"none",border:"none",color:"#9ca3af",fontSize:22,cursor:"pointer"}} onClick={()=>{setShowForm(false);setEditBet(null);setForm(emptyForm);setFormErrors({});}}>×</button>
+              <button style={{background:"none",border:"none",color:"#9ca3af",fontSize:22,cursor:"pointer"}} onClick={()=>{setShowForm(false);setEditBet(null);setForm(emptyForm);}}>×</button>
             </div>
 
             {!editBet && (
@@ -1538,21 +1525,18 @@ export default function App() {  const [screen, setScreen]       = useState("loa
               </div>
             )}
             <label style={{...S.label,color:"#111827"}}>{betType==="multiple"?"Nome da múltipla":tx("event")}</label>
-            <input style={{...S.input,...(formErrors.event?{border:"1.5px solid #dc2626",background:"#fef2f2"}:{})}} placeholder={betType==="multiple"?lang==="PT"?"ex: Múltipla Ténis 3 jogos":"e.g. Tennis Multi 3 games":lang==="PT"?"ex: Sinner vs Alcaraz":"e.g. Sinner vs Alcaraz"} value={form.event} onChange={e=>setForm(f=>({...f,event:e.target.value}))}/>
-            {formErrors.event && <div style={{fontSize:11,color:"#dc2626",marginTop:-8,marginBottom:8,fontWeight:600}}>{lang==="PT"?"Campo obrigatório":"Required field"}</div>}
+            <input style={S.input} placeholder={betType==="multiple"?lang==="PT"?"ex: Múltipla Ténis 3 jogos":"e.g. Tennis Multi 3 games":lang==="PT"?"ex: Sinner vs Alcaraz":"e.g. Sinner vs Alcaraz"} value={form.event} onChange={e=>setForm(f=>({...f,event:e.target.value}))}/>
             {betType==="multiple" && (
               <div>
                 <label style={{...S.label,color:"#111827"}}>{lang==="PT"?"Seleções (uma por linha)":"Selections (one per line)"}</label>
-                <textarea style={{...S.input,height:80,resize:"none",fontFamily:"inherit",...(formErrors.selection?{border:"1.5px solid #dc2626",background:"#fef2f2"}:{})}} placeholder={lang==="PT"?"ex: Sinner a ganhar":"e.g. Sinner to win"} value={form.selections||""} onChange={e=>{const v=e.target.value;setForm(f=>({...f,selections:v,selection:v.split(/\r?\n/).filter(Boolean).join(" + ")}));}}/>
-                {formErrors.selection && <div style={{fontSize:11,color:"#dc2626",marginTop:4,fontWeight:600}}>{lang==="PT"?"Adiciona pelo menos uma seleção":"Add at least one selection"}</div>}
+                <textarea style={{...S.input,height:80,resize:"none",fontFamily:"inherit"}} placeholder={lang==="PT"?"ex: Sinner a ganhar":"e.g. Sinner to win"} value={form.selections||""} onChange={e=>{const v=e.target.value;setForm(f=>({...f,selections:v,selection:v.split(/\r?\n/).filter(Boolean).join(" + ")}));}}/>
               </div>
             )}
 
             <div style={{display:"flex",gap:10}}>
               <div style={{flex:1}}>
                 <label style={{...S.label,color:"#111827"}}>{tx("odd")}</label>
-                <input style={{...S.input,...(formErrors.odd?{border:"1.5px solid #dc2626",background:"#fef2f2"}:{})}} type="number" step="0.01" min="1.01" placeholder="1.85" value={form.odd} onChange={e=>setForm(f=>({...f,odd:e.target.value}))}/>
-                {formErrors.odd && <div style={{fontSize:11,color:"#dc2626",marginTop:4,fontWeight:600}}>{lang==="PT"?"Odd inválida":"Invalid odd"}</div>}
+                <input style={S.input} type="number" step="0.01" min="1.01" placeholder="1.85" value={form.odd} onChange={e=>setForm(f=>({...f,odd:e.target.value}))}/>
               </div>
               <div style={{flex:1}}>
                 <label style={{...S.label,color:"#111827"}}>{tx("units")}</label>
@@ -1578,8 +1562,7 @@ export default function App() {  const [screen, setScreen]       = useState("loa
                   {markets.map(m=><option key={m}>{m}</option>)}
                 </select>
                 <label style={{...S.label,color:"#111827"}}>{tx("selection")}</label>
-                <input style={{...S.input,...(formErrors.selection?{border:"1.5px solid #dc2626",background:"#fef2f2"}:{})}} placeholder="ex: Sinner / Over 22.5 Games" value={form.selection} onChange={e=>setForm(f=>({...f,selection:e.target.value}))}/>
-                {formErrors.selection && <div style={{fontSize:11,color:"#dc2626",marginTop:4,fontWeight:600}}>{lang==="PT"?"Campo obrigatório":"Required field"}</div>}
+                <input style={S.input} placeholder="ex: Sinner / Over 22.5 Games" value={form.selection} onChange={e=>setForm(f=>({...f,selection:e.target.value}))}/>
               </div>
             )}
 
@@ -1979,71 +1962,6 @@ export default function App() {  const [screen, setScreen]       = useState("loa
                 </div>
               )}
 
-              {feedback && !feedback.error && !loadingFB && (
-                <div style={{position:"relative",marginTop:4}}>
-                  {(!br?.subscribed && !isAdmin) && (
-                    <div style={{position:"absolute",inset:0,zIndex:5,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",background:"linear-gradient(180deg, rgba(255,255,255,.35), rgba(255,255,255,.94) 40%)",borderRadius:14,padding:20}}>
-                      <div style={{fontSize:26,marginBottom:8}}>🔒</div>
-                      <div style={{fontSize:13,fontWeight:800,color:"#111827",marginBottom:4,textAlign:"center"}}>
-                        {lang==="PT"?"Gráficos exclusivos para subscritores":"Charts exclusive to subscribers"}
-                      </div>
-                      <div style={{fontSize:12,color:"#6b7280",marginBottom:14,textAlign:"center",maxWidth:260,lineHeight:1.5}}>
-                        {lang==="PT"?"Desbloqueia gráficos detalhados por mercado, odds, estratégia e evolução mensal.":"Unlock detailed charts by market, odds, strategy and monthly evolution."}
-                      </div>
-                      <a href={STRIPE_MONTHLY} target="_blank" rel="noreferrer" style={{...S.btnPrimary,background:sc.color,border:"none",textDecoration:"none",padding:"11px 28px",fontSize:13,display:"inline-block"}}>
-                        {lang==="PT"?"Subscrever":"Subscribe"}
-                      </a>
-                    </div>
-                  )}
-
-                  <div style={{filter:(!br?.subscribed && !isAdmin)?"blur(5px)":"none",pointerEvents:(!br?.subscribed && !isAdmin)?"none":"auto",userSelect:(!br?.subscribed && !isAdmin)?"none":"auto"}}>
-
-                    <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,fontWeight:800,marginBottom:14}}>
-                      {lang==="PT"?"Onde estás a ganhar / perder valor":"Where you're winning / losing value"}
-                    </div>
-                    <DashboardBarChart data={marketOddBreakdown.byMarketList.map(m=>({label:m.market,value:m.pnl}))} lang={lang}/>
-
-                    <div style={{borderTop:"1px solid #f1f2f4",marginTop:24,paddingTop:24}}>
-                      <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,fontWeight:800,marginBottom:14}}>
-                        {lang==="PT"?"Performance por range de odds":"Performance by odd range"}
-                      </div>
-                      <DashboardBarChart data={marketOddBreakdown.byOddList.map(o=>({label:"@"+o.range,value:o.pnl}))} lang={lang}/>
-                    </div>
-
-                    {marketOddBreakdown.byStrategyList.length>1 && (
-                      <div style={{borderTop:"1px solid #f1f2f4",marginTop:24,paddingTop:24}}>
-                        <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,fontWeight:800,marginBottom:14}}>
-                          {lang==="PT"?"Performance por estratégia":"Performance by strategy"}
-                        </div>
-                        <DashboardBarChart data={marketOddBreakdown.byStrategyList.map(s=>({label:s.strategy,value:s.pnl}))} lang={lang}/>
-                      </div>
-                    )}
-
-                    <div style={{borderTop:"1px solid #f1f2f4",marginTop:24,paddingTop:24}}>
-                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
-                        <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,fontWeight:800}}>
-                          {lang==="PT"?"Evolução anual":"Yearly evolution"}
-                        </div>
-                        {marketOddBreakdown.availableYears.length>1 && (
-                          <div style={{display:"flex",gap:6}}>
-                            {marketOddBreakdown.availableYears.map(y=>(
-                              <button key={y} onClick={()=>setAnalysisYear(y)}
-                                style={{border:"none",borderRadius:6,padding:"3px 9px",fontSize:11,fontWeight:700,cursor:"pointer",background:analysisYear===y?sc.color:"#f1f2f4",color:analysisYear===y?"#fff":"#6b7280"}}>
-                                {y}
-                              </button>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                      <DashboardBarChart data={yearlyEvolution.map(m=>({label:m.label,value:m.pnl}))} lang={lang}/>
-                      <div style={{fontSize:10,color:"#9ca3af",marginTop:10}}>
-                        {lang==="PT"?`Como está a correr ${analysisYear} até agora`:`How ${analysisYear} is going so far`}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
               {!isAdmin && br?.subscribed && aiUsage>=(br?.plan==="annual"?AI_LIMIT_ANNUAL:AI_LIMIT_MONTHLY) ? (
                 <div style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:8,padding:"12px",textAlign:"center",fontSize:13,color:"#dc2626",fontWeight:600}}>
                   Limite mensal atingido · Renova no próximo mês
@@ -2207,18 +2125,17 @@ export default function App() {  const [screen, setScreen]       = useState("loa
 
       <button style={{position:"fixed",bottom:90,right:18,width:44,height:44,borderRadius:"50%",border:"none",color:"#fff",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 16px rgba(0,0,0,.15)",zIndex:20,fontSize:18,background:"#374151"}} onClick={()=>{setShowImport(true);setImportText("");setImportBets([]);setImportDate(today());setImportImage(null);}}>📋</button>
 
-      <button style={{position:"fixed",bottom:24,right:18,width:56,height:56,borderRadius:"50%",border:"none",color:"#fff",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 16px rgba(0,0,0,.2)",zIndex:20,fontSize:28,lineHeight:1,background:sc.color}} onClick={()=>{setForm(emptyForm);setEditBet(null);setBetSport("");setShowForm(true);setFormErrors({});}}>+</button>
+      <button style={{position:"fixed",bottom:24,right:18,width:56,height:56,borderRadius:"50%",border:"none",color:"#fff",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 16px rgba(0,0,0,.2)",zIndex:20,fontSize:28,lineHeight:1,background:sc.color}} onClick={()=>{setForm(emptyForm);setEditBet(null);setBetSport("");setShowForm(true);}}>+</button>
 
     </div>
   );
 }
 
-function BRForm({ form, setForm, showReset, lang="PT", errors={}, T={card:"#fff",cardBorder:"#e5e7eb",inputBg:"#fff",inputBorder:"#e5e7eb",text:"#111827",text2:"#6b7280",bg3:"#f9fafb"} }) {
+function BRForm({ form, setForm, showReset, lang="PT", T={card:"#fff",cardBorder:"#e5e7eb",inputBg:"#fff",inputBorder:"#e5e7eb",text:"#111827",text2:"#6b7280",bg3:"#f9fafb"} }) {
   return (
     <div>
       <label style={{...S.label,color:"#111827"}}>{lang==="PT"?"Nome da banca":"Bankroll name"}</label>
-      <input style={{...S.input,...(errors.name?{border:"1.5px solid #dc2626",background:"#fef2f2"}:{})}} placeholder="ex: Ténis Principal" value={form.name} onChange={e=>setForm(f=>({...f,name:e.target.value}))}/>
-      {errors.name && <div style={{fontSize:11,color:"#dc2626",marginTop:4,fontWeight:600}}>{lang==="PT"?"Dá um nome à tua banca":"Give your bankroll a name"}</div>}
+      <input style={S.input} placeholder="ex: Ténis Principal" value={form.name} onChange={e=>setForm(f=>({...f,name:e.target.value}))}/>
       <label style={{...S.label,color:"#111827"}}>{lang==="PT"?"Desporto":"Sport"}</label>
       <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:6,marginTop:4}}>
         {Object.keys(SPORTS).map(s=>(
@@ -2229,8 +2146,7 @@ function BRForm({ form, setForm, showReset, lang="PT", errors={}, T={card:"#fff"
         ))}
       </div>
       <label style={{...S.label,color:"#111827"}}>{lang==="PT"?`Bankroll ${showReset?"(novo valor se repuser)":""} (€)`:`Bankroll ${showReset?"(reset value)":""} (€)`}</label>
-      <input style={{...S.input,...(errors.bankroll?{border:"1.5px solid #dc2626",background:"#fef2f2"}:{})}} type="number" placeholder="ex: 500" value={form.bankroll} onChange={e=>setForm(f=>({...f,bankroll:e.target.value}))}/>
-      {errors.bankroll && <div style={{fontSize:11,color:"#dc2626",marginTop:4,fontWeight:600}}>{lang==="PT"?"Indica um valor de banca válido":"Enter a valid bankroll amount"}</div>}
+      <input style={S.input} type="number" placeholder="ex: 500" value={form.bankroll} onChange={e=>setForm(f=>({...f,bankroll:e.target.value}))}/>
 
       <label style={{...S.label,color:"#111827"}}>{lang==="PT"?"Tipo de stake":"Stake type"}</label>
       <div style={{display:"flex",gap:8,marginTop:4,marginBottom:4}}>
@@ -2291,15 +2207,11 @@ function LandingQuote() {
 function AdminPanel({ supabase, fmt, daysLeft }) {
   const [data, setData]     = useState(null);
   const [loading, setLoading] = useState(true);
-  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
-  const [confirmRevokeId, setConfirmRevokeId] = useState(null);
-  const [busyId, setBusyId] = useState(null);
-  const [deleteError, setDeleteError] = useState(null);
 
   useEffect(()=>{
     async function load(){
       setLoading(true);
-      const{data:profiles}=await supabase.from("profiles").select("user_id,name,user_name,email,subscribed,plan,trial_start,user_trial_start,bankroll,sport,created_at,amount_paid,is_promo,subscription_start,current_period_end").order("created_at",{ascending:false});
+      const{data:profiles}=await supabase.from("profiles").select("user_id,name,user_name,email,subscribed,plan,trial_start,user_trial_start,bankroll,sport,created_at").order("created_at",{ascending:false});
       if(profiles){
         const users={};
         profiles.forEach(p=>{ if(!users[p.user_id]) users[p.user_id]={...p,bancas:1}; else users[p.user_id].bancas++; });
@@ -2310,37 +2222,6 @@ function AdminPanel({ supabase, fmt, daysLeft }) {
     }
     load();
   },[]);
-
-  async function handleAction(action, user_id){
-    setBusyId(user_id); setDeleteError(null);
-    try{
-      const r = await fetch("/api/admin", {
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({ action, user_id })
-      });
-      const res = await r.json();
-      if(!r.ok || res.error) throw new Error(res.error||"Erro desconhecido");
-      if(action==="delete"){
-        setData(prev=>{
-          const users = prev.users.filter(u=>u.user_id!==user_id);
-          return { total:users.length, paid:users.filter(u=>u.subscribed).length, trial:users.filter(u=>!u.subscribed&&daysLeft(u.user_trial_start||u.trial_start)>0).length, expired:users.filter(u=>!u.subscribed&&daysLeft(u.user_trial_start||u.trial_start)===0).length, users };
-        });
-      } else {
-        setData(prev=>{
-          const users = prev.users.map(u=> u.user_id===user_id
-            ? { ...u, subscribed: action==="vip", plan: action==="vip" ? "vip" : null }
-            : u
-          );
-          return { total:users.length, paid:users.filter(u=>u.subscribed).length, trial:users.filter(u=>!u.subscribed&&daysLeft(u.user_trial_start||u.trial_start)>0).length, expired:users.filter(u=>!u.subscribed&&daysLeft(u.user_trial_start||u.trial_start)===0).length, users };
-        });
-      }
-    }catch(e){
-      setDeleteError(e.message);
-    }finally{
-      setBusyId(null); setConfirmDeleteId(null); setConfirmRevokeId(null);
-    }
-  }
 
   if(loading) return <div style={{textAlign:"center",padding:40}}><div style={{...S.spinner,border:"2px solid #e5e7eb",borderTop:"2px solid #111827"}}/></div>;
 
@@ -2355,23 +2236,12 @@ function AdminPanel({ supabase, fmt, daysLeft }) {
           </div>
         ))}
       </div>
-      {deleteError && (
-        <div style={{background:"#fff1f2",border:"1px solid #fecaca",color:"#991b1b",borderRadius:10,padding:"10px 14px",fontSize:12,marginBottom:12}}>
-          Erro ao apagar: {deleteError}
-        </div>
-      )}
       <div style={{background:"#fff",border:"1px solid #fff",borderRadius:14,padding:16,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
         <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,fontWeight:800,marginBottom:14}}>Utilizadores</div>
         {data?.users.map(u=>{
           const tl=daysLeft(u.user_trial_start||u.trial_start);
           const status=u.subscribed?"Pago":tl>0?`Trial (${tl}d)`:"Expirado";
           const sc=u.subscribed?"#059669":tl>0?"#d97706":"#dc2626";
-          const isConfirming = confirmDeleteId===u.user_id;
-          const isConfirmingRevoke = confirmRevokeId===u.user_id;
-          const isBusy = busyId===u.user_id;
-          const planLabel = u.plan==="vip"?"VIP":u.plan==="annual"?"Anual":u.plan==="monthly"?"Mensal":null;
-          const promoLabel = u.plan!=="vip" && u.is_promo!=null ? (u.is_promo?"Promo":"Normal") : null;
-          const daysRemaining = u.current_period_end ? Math.ceil((new Date(u.current_period_end).getTime()-Date.now())/86400000) : null;
           return (
             <div key={u.user_id} style={{padding:"12px 0",borderBottom:"1px solid #f3f4f6"}}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8}}>
@@ -2379,75 +2249,11 @@ function AdminPanel({ supabase, fmt, daysLeft }) {
                   <div style={{fontSize:13,fontWeight:600,color:"#111827",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{u.user_name||u.email||u.user_id.slice(0,8)+"..."}</div>
                   <div style={{fontSize:11,color:"#111827"}}>{u.email&&u.user_name?u.email:""}</div>
                   <div style={{fontSize:11,color:"#111827"}}>{u.bancas} banca{u.bancas>1?"s":""} · {new Date(u.created_at).toLocaleDateString("pt-PT")}</div>
-                  {u.subscribed && (
-                    <div style={{fontSize:11,color:"#6b7280",marginTop:3}}>
-                      {planLabel}{promoLabel?` · ${promoLabel}`:""}
-                      {u.subscription_start && <> · desde {new Date(u.subscription_start).toLocaleDateString("pt-PT")}</>}
-                      {u.plan==="vip"
-                        ? <> · sem expiração</>
-                        : daysRemaining!=null && <> · {daysRemaining>=0?`expira em ${daysRemaining}d`:"expirado, a aguardar renovação"}</>
-                      }
-                    </div>
-                  )}
                 </div>
                 <div style={{textAlign:"right",flexShrink:0,marginLeft:10}}>
-                  <div style={{fontSize:12,fontWeight:700,color:sc,marginBottom:6}}>{status}</div>
-                  {!isConfirming && !isConfirmingRevoke && (
-                    <div style={{display:"flex",gap:6,flexWrap:"wrap",justifyContent:"flex-end"}}>
-                      {!u.subscribed && (
-                        <button onClick={()=>handleAction("vip",u.user_id)} disabled={isBusy}
-                          style={{border:"1px solid #bbf7d0",background:"#f0fdf4",color:"#065f46",borderRadius:6,padding:"4px 10px",fontSize:11,fontWeight:700,cursor:"pointer"}}>
-                          {isBusy?"...":"VIP"}
-                        </button>
-                      )}
-                      {u.subscribed && u.plan!=="vip" && (
-                        <button onClick={()=>setConfirmRevokeId(u.user_id)} disabled={isBusy}
-                          style={{border:"1px solid #fde68a",background:"#fffbeb",color:"#92400e",borderRadius:6,padding:"4px 10px",fontSize:11,fontWeight:700,cursor:"pointer"}}>
-                          Revogar
-                        </button>
-                      )}
-                      <button onClick={()=>setConfirmDeleteId(u.user_id)} disabled={isBusy}
-                        style={{border:"1px solid #fecaca",background:"#fff1f2",color:"#991b1b",borderRadius:6,padding:"4px 10px",fontSize:11,fontWeight:700,cursor:"pointer"}}>
-                        Apagar
-                      </button>
-                    </div>
-                  )}
+                  <div style={{fontSize:12,fontWeight:700,color:sc}}>{status}</div>
                 </div>
               </div>
-              {isConfirmingRevoke && (
-                <div style={{background:"#fffbeb",border:"1px solid #fde68a",borderRadius:8,padding:10,marginTop:4}}>
-                  <div style={{fontSize:12,color:"#92400e",marginBottom:8,lineHeight:1.5}}>
-                    Revogar a subscrição de {u.user_name||u.email||"este utilizador"}? Ele deixa de ter acesso premium imediatamente.
-                  </div>
-                  <div style={{display:"flex",gap:8}}>
-                    <button onClick={()=>setConfirmRevokeId(null)} disabled={isBusy}
-                      style={{flex:1,border:"1px solid #e5e7eb",background:"#fff",color:"#6b7280",borderRadius:6,padding:"8px",fontSize:12,fontWeight:700,cursor:"pointer"}}>
-                      Cancelar
-                    </button>
-                    <button onClick={()=>handleAction("revoke",u.user_id)} disabled={isBusy}
-                      style={{flex:1,border:"none",background:"#d97706",color:"#fff",borderRadius:6,padding:"8px",fontSize:12,fontWeight:700,cursor:"pointer",opacity:isBusy?.6:1}}>
-                      {isBusy?"A revogar...":"Confirmar"}
-                    </button>
-                  </div>
-                </div>
-              )}
-              {isConfirming && (
-                <div style={{background:"#fff1f2",border:"1px solid #fecaca",borderRadius:8,padding:10,marginTop:4}}>
-                  <div style={{fontSize:12,color:"#991b1b",marginBottom:8,lineHeight:1.5}}>
-                    Apagar {u.user_name||u.email||"este utilizador"} para sempre? Isto remove todas as apostas, o perfil e a conta de login. Não pode ser revertido.
-                  </div>
-                  <div style={{display:"flex",gap:8}}>
-                    <button onClick={()=>setConfirmDeleteId(null)} disabled={isBusy}
-                      style={{flex:1,border:"1px solid #e5e7eb",background:"#fff",color:"#6b7280",borderRadius:6,padding:"8px",fontSize:12,fontWeight:700,cursor:"pointer"}}>
-                      Cancelar
-                    </button>
-                    <button onClick={()=>handleAction("delete",u.user_id)} disabled={isBusy}
-                      style={{flex:1,border:"none",background:"#dc2626",color:"#fff",borderRadius:6,padding:"8px",fontSize:12,fontWeight:700,cursor:"pointer",opacity:isBusy?.6:1}}>
-                      {isBusy?"A apagar...":"Confirmar"}
-                    </button>
-                  </div>
-                </div>
-              )}
             </div>
           );
         })}
