@@ -129,7 +129,7 @@ module.exports = async function handler(req, res) {
         "api-key": BREVO_API_KEY
       },
       body: JSON.stringify({
-        sender: { name: "BankrollPro", email: "noreply@bankrollpro.app" },
+        sender: { name: "BankrollPro", email: "luistome.work@gmail.com" },
         to: [{ email }],
         subject: template.subject,
         htmlContent: template.html
