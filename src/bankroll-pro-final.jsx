@@ -448,6 +448,14 @@ export default function App() {
     if(authMode==="register"){
       const{error}=await supabase.auth.signUp({email:authForm.email,password:authForm.password,options:{data:{name:authForm.name}}});
       if(error){setAuthErr(error.message);setLoading(false);return;}
+      // Send welcome email
+      try {
+        await fetch("/api/send-email", {
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body: JSON.stringify({ type:"welcome", email:authForm.email, name:authForm.name })
+        });
+      } catch(e){}
       setLoading(false);setEmailSent(true);return;
     } else {
       const{error}=await supabase.auth.signInWithPassword({email:authForm.email,password:authForm.password});
