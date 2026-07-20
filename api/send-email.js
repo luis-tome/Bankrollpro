@@ -2,9 +2,6 @@ module.exports = async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   if (req.method !== "POST") return res.status(405).end();
 
-  const RESEND_API_KEY = process.env.RESEND_API_KEY;
-  if (!RESEND_API_KEY) return res.status(200).json({ error: "No Resend key" });
-
   let body;
   try {
     const chunks = [];
@@ -121,24 +118,27 @@ module.exports = async function handler(req, res) {
   const template = templates[type];
   if (!template) return res.status(200).json({ error: "Unknown template" });
 
+  const BREVO_API_KEY = process.env.BREVO_API_KEY;
+  if (!BREVO_API_KEY) return res.status(200).json({ error: "No Brevo key" });
+
   try {
-    const r = await fetch("https://api.resend.com/emails", {
+    const r = await fetch("https://api.brevo.com/v3/smtp/email", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${RESEND_API_KEY}`
+        "api-key": BREVO_API_KEY
       },
       body: JSON.stringify({
-        from: "BankrollPro <onboarding@resend.dev>",
-        to: [email],
+        sender: { name: "BankrollPro", email: "noreply@bankrollpro.app" },
+        to: [{ email }],
         subject: template.subject,
-        html: template.html
+        htmlContent: template.html
       })
     });
 
     const data = await r.json();
-    if (!r.ok) return res.status(200).json({ error: data.message });
-    return res.status(200).json({ success: true, id: data.id });
+    if (!r.ok) return res.status(200).json({ error: data.message || JSON.stringify(data) });
+    return res.status(200).json({ success: true, id: data.messageId });
   } catch(e) {
     return res.status(200).json({ error: e.message });
   }
