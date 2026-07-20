@@ -729,6 +729,23 @@ export default function App() {
           </div>
         </div>
 
+        {/* PROVA SOCIAL */}
+        <div style={{background:"#fff",border:"1px solid #e5e7eb",borderRadius:14,padding:"16px 18px",marginBottom:12,boxShadow:"0 1px 4px rgba(0,0,0,.06)"}}>
+          <div style={{fontSize:12,fontWeight:800,color:"#111827",textTransform:"uppercase",letterSpacing:.8,marginBottom:12}}>💬 O que dizem os apostadores</div>
+          {[
+            ["Miguel F.","Finalmente sei exatamente onde estou a perder dinheiro. A análise IA apontou logo os mercados problemáticos.","🇵🇹"],
+            ["André C.","Uso com o meu grupo de tips. A importação do Telegram poupa-me imenso tempo — é colar e está feito.","🇧🇷"],
+            ["Lucas R.","Simples de usar e vejo o ROI real de cada estratégia. Devia ter começado há muito tempo.","🇧🇷"],
+          ].map(([name,text,flag])=>(
+            <div key={name} style={{padding:"10px 0",borderBottom:"1px solid #f9fafb"}}>
+              <div style={{fontSize:13,color:"#374151",lineHeight:1.5,fontStyle:"italic"}}>"{text}"</div>
+              <div style={{fontSize:12,color:"#9ca3af",marginTop:4,fontWeight:600}}>{flag} {name} · Utilizador BankrollPro</div>
+            </div>
+          ))}
+          <div style={{textAlign:"center",marginTop:12,fontSize:12,color:"#6b7280",fontWeight:600}}>
+            ⭐ Junta-te aos apostadores que já gerem a banca como profissionais
+          </div>
+        </div>
 
         <div style={{background:"#fff",border:"1px solid #e5e7eb",borderRadius:14,padding:"16px 18px",marginBottom:20,boxShadow:"0 1px 4px rgba(0,0,0,.06)"}}>
           <div style={{fontSize:12,fontWeight:800,color:"#111827",textTransform:"uppercase",letterSpacing:.8,marginBottom:12}}>✅ O que está incluído</div>
@@ -850,7 +867,16 @@ export default function App() {
           <div style={{fontSize:40,marginBottom:8,textAlign:"center"}}>⏰</div>
           <h2 style={{fontSize:20,fontWeight:800,color:"#111827",margin:"0 0 4px",textAlign:"center"}}>Trial terminado</h2>
           <p style={{fontSize:13,color:"#9ca3af",textAlign:"center",marginBottom:4}}>Escolhe um plano para continuar.</p>
-          <div style={{background:"#fef3c7",border:"1px solid #fde68a",borderRadius:8,padding:"8px 12px",fontSize:12,color:"#92400e",fontWeight:600,textAlign:"center",marginBottom:16}}>🔥 Preço de lançamento até 31 de Agosto</div>
+          <div style={{background:"#fef3c7",border:"1px solid #fde68a",borderRadius:8,padding:"8px 12px",fontSize:12,color:"#92400e",fontWeight:600,textAlign:"center",marginBottom:10}}>🔥 Preço de lançamento até 31 de Agosto</div>
+
+          {/* LOSS AVERSION — dados em risco */}
+          {bets.length > 0 && (
+            <div style={{background:"#f0f9ff",border:"1px solid #bae6fd",borderRadius:8,padding:"10px 14px",fontSize:12,color:"#0369a1",textAlign:"center",marginBottom:16,lineHeight:1.5}}>
+              💾 {lang==="PT"
+                ? <>As tuas <strong>{bets.length} apostas</strong> e todo o histórico estão guardados em segurança. Subscreve para voltares a ter acesso completo.</>
+                : <>Your <strong>{bets.length} bets</strong> and full history are safely stored. Subscribe to regain full access.</>}
+            </div>
+          )}
 
           <div style={{display:"flex",gap:4,background:"#f7f8fa",padding:4,borderRadius:10,marginBottom:12}}>
             <button style={{flex:1,padding:"8px 10px",borderRadius:8,border:"none",background:subView==="monthly"?"#fff":"transparent",color:subView==="monthly"?"#111827":"#9ca3af",cursor:"pointer",fontSize:13,fontWeight:700,boxShadow:subView==="monthly"?"0 1px 3px rgba(0,0,0,.1)":"none"}} onClick={()=>setSubView("monthly")}>Mensal</button>
@@ -890,7 +916,7 @@ export default function App() {
           </div>
 
           <div style={{background:"#f0fdf4",border:"1px solid #bbf7d0",borderRadius:8,padding:"10px 12px",fontSize:12,color:"#15803d",textAlign:"center",marginBottom:8}}>
-            ✓ Acesso imediato · ✓ Cancela quando quiseres
+            ✓ Acesso imediato · ✓ Cancela quando quiseres · ✓ Garantia de 7 dias
           </div>
           <button style={S.btnGhost} onClick={()=>supabase.auth.signOut()}>{tx("logout")}</button>
         </div>
@@ -1618,7 +1644,7 @@ export default function App() {
 
       {isInTrial && trialLeft<=3 && !isAdmin && (
         <div style={{background:"#111827",padding:"8px 14px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-          <span style={{fontSize:12,color:"#e5e7eb",fontWeight:600}}>⏰ Trial termina em {trialLeft} {trialLeft===1?"dia":"dias"}</span>
+          <span style={{fontSize:12,color:"#e5e7eb",fontWeight:600}}>⏰ {bets.length>0 ? (lang==="PT"?`${trialLeft} ${trialLeft===1?"dia":"dias"} para manteres as tuas ${bets.length} apostas`:`${trialLeft} day${trialLeft===1?"":"s"} to keep your ${bets.length} bets`) : (lang==="PT"?`Trial termina em ${trialLeft} ${trialLeft===1?"dia":"dias"}`:`Trial ends in ${trialLeft} day${trialLeft===1?"":"s"}`)}</span>
           <a href={STRIPE_ANNUAL} target="_blank" rel="noreferrer" style={{fontSize:11,fontWeight:800,textDecoration:"none",background:"#fff",color:"#111827",padding:"4px 10px",borderRadius:6}}>€{PROMO_ANNUAL}/ano →</a>
         </div>
       )}
@@ -1947,6 +1973,37 @@ export default function App() {
                   <div style={{fontSize:12,color:"#111827",lineHeight:1.5}}>{lang==="PT"?"Preenche o campo":"Fill in the"} <strong>{tx("notes").replace(" (opcional)","").replace(" (optional)","")}</strong> {lang==="PT"?"nas apostas com contexto extra":"field in bets with extra context"} — ex: <em>{lang==="PT"?'"Alcaraz @1.23, terra"':' "Alcaraz @1.23, clay"'}</em> {lang==="PT"?"ou":"or"} <em>'indoor, top 10'</em>. {lang==="PT"?"A IA usa esse contexto para identificar padrões cruzados.":"The AI uses this context to identify cross-patterns."}</div>
                 </div>
               </div>
+
+              {/* PROGRESSO PARA DESBLOQUEAR IA */}
+              {(()=>{
+                const settledCount = bets.filter(b=>b.result!=="PENDING"&&b.result!=="VOID").length;
+                if(settledCount >= 3) return null;
+                const remaining = 3 - settledCount;
+                return (
+                  <div style={{background:"#fffbeb",border:"1px solid #fde68a",borderRadius:10,padding:"14px 16px",marginBottom:16}}>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+                      <span style={{fontSize:13,fontWeight:700,color:"#92400e"}}>🎯 {lang==="PT"?`Falta${remaining>1?"m":""} ${remaining} aposta${remaining>1?"s":""} para a tua primeira análise`:`${remaining} more bet${remaining>1?"s":""} to unlock your first analysis`}</span>
+                    </div>
+                    <div style={{background:"#fef3c7",borderRadius:20,height:8,overflow:"hidden"}}>
+                      <div style={{background:"#f59e0b",height:"100%",width:`${(settledCount/3)*100}%`,transition:"width .3s",borderRadius:20}}/>
+                    </div>
+                    <div style={{fontSize:11,color:"#92400e",marginTop:6}}>{settledCount}/3 {lang==="PT"?"apostas liquidadas":"settled bets"}</div>
+                  </div>
+                );
+              })()}
+
+              {/* PREVIEW DO QUE A IA ENTREGA */}
+              {bets.filter(b=>b.result!=="PENDING"&&b.result!=="VOID").length < 3 && (
+                <div style={{background:"#f9fafb",border:"1px dashed #d1d5db",borderRadius:10,padding:"14px 16px",marginBottom:16,position:"relative",overflow:"hidden"}}>
+                  <div style={{fontSize:11,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:800,marginBottom:10}}>👀 {lang==="PT"?"Exemplo do que vais receber":"Preview of what you'll get"}</div>
+                  <div style={{fontSize:13,color:"#374151",lineHeight:1.6,fontStyle:"italic",opacity:.85}}>
+                    {lang==="PT"
+                      ? '"As tuas apostas em Over 2.5 Sets com odds acima de 3.0 têm 1 acerto em 6 tentativas — perdeste €22 nesse padrão. Em contraste, as apostas a vencedor direto com odds 1.5-2.0 têm 70% de acerto. Concentra-te aí."'
+                      : '"Your Over 2.5 Sets bets with odds above 3.0 have 1 win in 6 attempts — you lost €22 on that pattern. In contrast, straight winner bets at 1.5-2.0 odds have a 70% hit rate. Focus there."'}
+                  </div>
+                  <div style={{fontSize:11,color:"#9ca3af",marginTop:8}}>— {lang==="PT"?"Análise IA baseada nas tuas apostas reais":"AI analysis based on your real bets"}</div>
+                </div>
+              )}
 
               {!br?.subscribed && !isAdmin && (
                 <div style={{background:"#f0fdf4",border:"1px solid #bbf7d0",borderRadius:10,padding:"14px 16px",marginBottom:16}}>
