@@ -2059,19 +2059,17 @@ export default function App() {
 
         {tab==="sobre" && (
           <div>
-            <div style={{background:"#fff",border:"1px solid #fff",borderRadius:14,padding:24,textAlign:"center",boxShadow:"0 1px 2px rgba(0,0,0,.04)",marginBottom:10}}>
+            {/* USER PROFILE CARD */}
+            <UserProfile supabase={supabase} user={user} lang={lang} S={S}/>
+
+            <div style={{background:"#fff",border:"1px solid #f3f4f6",borderRadius:14,padding:24,textAlign:"center",boxShadow:"0 1px 2px rgba(0,0,0,.04)",marginBottom:10}}>
               <div style={{fontSize:48,marginBottom:12}}>📊</div>
               <div style={{fontSize:20,fontWeight:900,color:"#111827",marginBottom:4}}>BankrollPro</div>
-              <div style={{fontSize:13,color:"#9ca3af",marginBottom:16}}>Gestão profissional de banca desportiva</div>
-              <div style={{background:"#f7f8fa",border:"1px solid #fff",borderRadius:10,padding:"12px 16px",marginBottom:16,textAlign:"left"}}>
-                <div style={{fontSize:11,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,marginBottom:8}}>Desenvolvido por</div>
-                <div style={{fontSize:14,fontWeight:700,color:"#111827"}}>BankrollPro Team</div>
-                <div style={{fontSize:12,color:"#6b7280",marginTop:2}}>Todos os direitos reservados</div>
-              </div>
-              <div style={{background:"#f7f8fa",border:"1px solid #fff",borderRadius:10,padding:"12px 16px",marginBottom:20,textAlign:"left"}}>
-                <div style={{fontSize:11,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,marginBottom:8}}>Plano atual</div>
+              <div style={{fontSize:13,color:"#9ca3af",marginBottom:16}}>{lang==="PT"?"Gestão profissional de banca desportiva":"Professional sports bankroll management"}</div>
+              <div style={{background:"#f9fafb",border:"1px solid #f3f4f6",borderRadius:10,padding:"12px 16px",marginBottom:20,textAlign:"left"}}>
+                <div style={{fontSize:11,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,marginBottom:8}}>{lang==="PT"?"Plano atual":"Current plan"}</div>
                 <div style={{fontSize:14,fontWeight:700,color:br?.subscribed?"#059669":"#d97706"}}>{br?.subscribed?lang==="PT"?`Plano ${br?.plan==="annual"?"Anual":"Mensal"} · Ativo`:`${br?.plan==="annual"?"Annual":"Monthly"} Plan · Active`:lang==="PT"?`Trial · ${trialLeft} dias restantes`:`Trial · ${trialLeft} days remaining`}</div>
-                {br?.subscribed&&<div style={{fontSize:12,color:"#6b7280",marginTop:2}}>Análises IA: {br?.plan==="annual"?AI_LIMIT_ANNUAL:AI_LIMIT_MONTHLY}/mês</div>}
+                {br?.subscribed&&<div style={{fontSize:12,color:"#6b7280",marginTop:2}}>{lang==="PT"?"Análises IA":"AI analyses"}: {br?.plan==="annual"?AI_LIMIT_ANNUAL:AI_LIMIT_MONTHLY}/{lang==="PT"?"mês":"month"}</div>}
               </div>
               <a href={`mailto:tome.luis.pt@gmail.com?subject=Suporte BankrollPro&body=Olá BankrollPro Team,%0A%0A`}
                 style={{display:"flex",alignItems:"center",justifyContent:"center",gap:10,background:"#111827",color:"#fff",textDecoration:"none",padding:"14px",borderRadius:10,fontSize:14,fontWeight:700}}>
@@ -2212,60 +2210,258 @@ function LandingQuote() {
   );
 }
 
-function AdminPanel({ supabase, fmt, daysLeft }) {
-  const [data, setData]     = useState(null);
-  const [loading, setLoading] = useState(true);
+function UserProfile({ supabase, user, lang, S }) {
+  const [editing, setEditing] = useState(false);
+  const [form, setForm] = useState({ name: user?.user_metadata?.name||"", email: user?.email||"" });
+  const [newPassword, setNewPassword] = useState("");
+  const [avatar, setAvatar] = useState(user?.user_metadata?.avatar_url||null);
+  const [saving, setSaving] = useState(false);
+  const [msg, setMsg] = useState("");
 
-  useEffect(()=>{
-    async function load(){
-      setLoading(true);
-      const{data:profiles}=await supabase.from("profiles").select("user_id,name,user_name,email,subscribed,plan,trial_start,user_trial_start,bankroll,sport,created_at").order("created_at",{ascending:false});
-      if(profiles){
-        const users={};
-        profiles.forEach(p=>{ if(!users[p.user_id]) users[p.user_id]={...p,bancas:1}; else users[p.user_id].bancas++; });
-        const list=Object.values(users);
-        setData({ total:list.length, paid:list.filter(u=>u.subscribed).length, trial:list.filter(u=>!u.subscribed&&daysLeft(u.user_trial_start||u.trial_start)>0).length, expired:list.filter(u=>!u.subscribed&&daysLeft(u.user_trial_start||u.trial_start)===0).length, users:list });
-      }
-      setLoading(false);
+  async function saveProfile(){
+    setSaving(true);
+    setMsg("");
+    try {
+      const updates = { data: { name: form.name } };
+      if(form.email !== user?.email) updates.email = form.email;
+      if(newPassword) updates.password = newPassword;
+      const { error } = await supabase.auth.updateUser(updates);
+      if(error) setMsg("Erro: " + error.message);
+      else { setMsg(lang==="PT"?"Perfil actualizado!":"Profile updated!"); setEditing(false); setNewPassword(""); }
+    } catch(e){ setMsg("Erro: " + e.message); }
+    setSaving(false);
+  }
+
+  async function uploadAvatar(file){
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const base64 = e.target.result;
+      await supabase.auth.updateUser({ data: { avatar_url: base64 } });
+      setAvatar(base64);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  const initials = (form.name||user?.email||"U")[0].toUpperCase();
+
+  return (
+    <div style={{background:"#fff",border:"1px solid #f3f4f6",borderRadius:14,padding:20,marginBottom:10,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
+      <div style={{display:"flex",alignItems:"center",gap:14,marginBottom:16}}>
+        <div style={{position:"relative"}}>
+          <div style={{width:56,height:56,borderRadius:"50%",background:"#f3f4f6",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,fontWeight:800,color:"#374151",overflow:"hidden",flexShrink:0}}>
+            {avatar ? <img src={avatar} style={{width:"100%",height:"100%",objectFit:"cover"}}/> : initials}
+          </div>
+          {editing && (
+            <label style={{position:"absolute",bottom:-2,right:-2,width:20,height:20,background:"#111827",borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",fontSize:10}}>
+              📷
+              <input type="file" accept="image/*" style={{display:"none"}} onChange={e=>uploadAvatar(e.target.files[0])}/>
+            </label>
+          )}
+        </div>
+        <div style={{flex:1}}>
+          <div style={{fontSize:15,fontWeight:700,color:"#111827"}}>{form.name||user?.email?.split("@")[0]}</div>
+          <div style={{fontSize:12,color:"#9ca3af"}}>{user?.email}</div>
+        </div>
+        <button style={{padding:"6px 14px",border:"1px solid #e5e7eb",borderRadius:8,background:"#f9fafb",color:"#374151",cursor:"pointer",fontSize:12,fontWeight:600}} onClick={()=>setEditing(!editing)}>
+          {editing?(lang==="PT"?"Cancelar":"Cancel"):"✏️ " + (lang==="PT"?"Editar":"Edit")}
+        </button>
+      </div>
+
+      {editing && (
+        <div>
+          <label style={S.label}>{lang==="PT"?"Nome":"Name"}</label>
+          <input style={S.input} value={form.name} onChange={e=>setForm(f=>({...f,name:e.target.value}))}/>
+
+          <label style={S.label}>Email</label>
+          <input style={S.input} type="email" value={form.email} onChange={e=>setForm(f=>({...f,email:e.target.value}))}/>
+
+          <label style={S.label}>{lang==="PT"?"Nova password (opcional)":"New password (optional)"}</label>
+          <input style={S.input} type="password" placeholder="••••••••" value={newPassword} onChange={e=>setNewPassword(e.target.value)}/>
+
+          {msg && <p style={{fontSize:12,color:msg.includes("Erro")?"#dc2626":"#059669",margin:"8px 0",background:msg.includes("Erro")?"#fef2f2":"#f0fdf4",padding:"8px 10px",borderRadius:6}}>{msg}</p>}
+
+          <button style={{...S.btnPrimary,marginTop:16,background:"#111827",border:"none"}} onClick={saveProfile} disabled={saving}>
+            {saving?"...":(lang==="PT"?"Guardar alterações":"Save changes")}
+          </button>
+        </div>
+      )}
+
+      {!editing && msg && <p style={{fontSize:12,color:"#059669",margin:"4px 0",background:"#f0fdf4",padding:"8px 10px",borderRadius:6}}>{msg}</p>}
+    </div>
+  );
+}
+
+function AdminPanel({ supabase, fmt, daysLeft }) {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [editUser, setEditUser] = useState(null);
+  const [editForm, setEditForm] = useState({});
+  const [saving, setSaving] = useState(false);
+  const [search, setSearch] = useState("");
+
+  async function load(){
+    setLoading(true);
+    const{data:profiles}=await supabase.from("profiles")
+      .select("user_id,name,user_name,email,subscribed,plan,trial_start,user_trial_start,bankroll,sport,created_at,unit_pct,stake_mode,stripe_customer_id")
+      .is("deleted_at",null)
+      .order("created_at",{ascending:false});
+
+    if(profiles){
+      // Get bet counts per user
+      const{data:bets}=await supabase.from("bets").select("user_id,result,stake,odd").is("deleted_at",null);
+      const betsByUser={};
+      if(bets) bets.forEach(b=>{
+        if(!betsByUser[b.user_id]) betsByUser[b.user_id]={count:0,pnl:0,staked:0};
+        betsByUser[b.user_id].count++;
+        if(b.result==="WIN") betsByUser[b.user_id].pnl+=b.stake*(b.odd-1);
+        else if(b.result==="LOSS") betsByUser[b.user_id].pnl-=b.stake;
+        if(b.result!=="PENDING"&&b.result!=="VOID") betsByUser[b.user_id].staked+=b.stake;
+      });
+
+      const users={};
+      profiles.forEach(p=>{
+        if(!users[p.user_id]) users[p.user_id]={...p, bancas:1, bets:betsByUser[p.user_id]||{count:0,pnl:0,staked:0}};
+        else users[p.user_id].bancas++;
+      });
+      const list=Object.values(users);
+      setData({
+        total:list.length,
+        paid:list.filter(u=>u.subscribed).length,
+        trial:list.filter(u=>!u.subscribed&&daysLeft(u.user_trial_start||u.trial_start)>0).length,
+        expired:list.filter(u=>!u.subscribed&&daysLeft(u.user_trial_start||u.trial_start)===0).length,
+        totalBets:bets?.length||0,
+        users:list
+      });
     }
-    load();
-  },[]);
+    setLoading(false);
+  }
+
+  useEffect(()=>{ load(); },[]);
+
+  async function saveEditUser(){
+    setSaving(true);
+    await supabase.from("profiles").update({
+      user_name: editForm.user_name,
+      email: editForm.email,
+      subscribed: editForm.subscribed,
+      plan: editForm.plan||null,
+    }).eq("user_id", editUser.user_id);
+    await load();
+    setSaving(false);
+    setEditUser(null);
+  }
 
   if(loading) return <div style={{textAlign:"center",padding:40}}><div style={{...S.spinner,border:"2px solid #e5e7eb",borderTop:"2px solid #111827"}}/></div>;
 
+  const filtered = (data?.users||[]).filter(u=>
+    !search || (u.user_name||"").toLowerCase().includes(search.toLowerCase()) ||
+    (u.email||"").toLowerCase().includes(search.toLowerCase())
+  );
+
   return (
     <div>
+      {editUser && (
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.5)",zIndex:300,display:"flex",alignItems:"center",justifyContent:"center",padding:20}} onClick={()=>setEditUser(null)}>
+          <div style={{background:"#fff",borderRadius:16,padding:24,width:"100%",maxWidth:400,maxHeight:"90vh",overflowY:"auto"}} onClick={e=>e.stopPropagation()}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+              <h3 style={{margin:0,fontSize:16,fontWeight:700}}>✏️ Editar utilizador</h3>
+              <button style={{background:"none",border:"none",fontSize:22,cursor:"pointer",color:"#9ca3af"}} onClick={()=>setEditUser(null)}>×</button>
+            </div>
+
+            <label style={S.label}>Nome</label>
+            <input style={S.input} value={editForm.user_name||""} onChange={e=>setEditForm(f=>({...f,user_name:e.target.value}))}/>
+
+            <label style={S.label}>Email</label>
+            <input style={S.input} value={editForm.email||""} onChange={e=>setEditForm(f=>({...f,email:e.target.value}))}/>
+
+            <label style={S.label}>Plano</label>
+            <select style={S.input} value={editForm.plan||""} onChange={e=>setEditForm(f=>({...f,plan:e.target.value}))}>
+              <option value="">Trial</option>
+              <option value="monthly">Mensal</option>
+              <option value="annual">Anual</option>
+            </select>
+
+            <label style={S.label}>Subscrito</label>
+            <div style={{display:"flex",gap:8,marginTop:4}}>
+              <button style={{flex:1,padding:"10px",border:`1px solid ${editForm.subscribed?"#059669":"#e5e7eb"}`,borderRadius:8,background:editForm.subscribed?"#f0fdf4":"#f9fafb",color:editForm.subscribed?"#059669":"#6b7280",cursor:"pointer",fontWeight:700}} onClick={()=>setEditForm(f=>({...f,subscribed:true}))}>✓ Activo</button>
+              <button style={{flex:1,padding:"10px",border:`1px solid ${!editForm.subscribed?"#dc2626":"#e5e7eb"}`,borderRadius:8,background:!editForm.subscribed?"#fef2f2":"#f9fafb",color:!editForm.subscribed?"#dc2626":"#6b7280",cursor:"pointer",fontWeight:700}} onClick={()=>setEditForm(f=>({...f,subscribed:false}))}>✗ Inactivo</button>
+            </div>
+
+            <div style={{background:"#f9fafb",borderRadius:10,padding:12,marginTop:16,fontSize:12,color:"#6b7280"}}>
+              <div>User ID: <code style={{fontSize:10}}>{editUser.user_id}</code></div>
+              <div>Stripe: <code style={{fontSize:10}}>{editUser.stripe_customer_id||"—"}</code></div>
+              <div>Registo: {new Date(editUser.created_at).toLocaleDateString("pt-PT")}</div>
+              <div>Bancas: {editUser.bancas}</div>
+              <div>Apostas: {editUser.bets?.count||0}</div>
+            </div>
+
+            <button style={{...S.btnPrimary,marginTop:16,background:"#059669",border:"none"}} onClick={saveEditUser} disabled={saving}>
+              {saving?"A guardar...":"Guardar alterações"}
+            </button>
+          </div>
+        </div>
+      )}
+
       <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,fontWeight:800,marginBottom:14}}>Painel de Administração</div>
+
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:12}}>
-        {[["Total Utilizadores",data?.total,"#111827"],["Subscritores Pagos",data?.paid,"#059669"],["Em Trial",data?.trial,"#d97706"],["Trial Expirado",data?.expired,"#dc2626"]].map(([l,v,c])=>(
-          <div key={l} style={{background:"#fff",border:"1px solid #fff",borderRadius:14,padding:"14px 16px",boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
+        {[
+          ["Utilizadores",data?.total,"#111827"],
+          ["Pagos",data?.paid,"#059669"],
+          ["Em Trial",data?.trial,"#d97706"],
+          ["Expirados",data?.expired,"#dc2626"],
+        ].map(([l,v,c])=>(
+          <div key={l} style={{background:"#fff",border:"1px solid #f3f4f6",borderRadius:14,padding:"14px 16px",boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
             <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,marginBottom:5}}>{l}</div>
             <div style={{fontSize:28,fontWeight:900,color:c}}>{v||0}</div>
           </div>
         ))}
       </div>
-      <div style={{background:"#fff",border:"1px solid #fff",borderRadius:14,padding:16,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
-        <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,fontWeight:800,marginBottom:14}}>Utilizadores</div>
-        {data?.users.map(u=>{
+
+      <div style={{background:"#fff",border:"1px solid #f3f4f6",borderRadius:14,padding:16,marginBottom:12,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
+        <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
+          <span style={{fontSize:12,color:"#9ca3af"}}>Total apostas registadas</span>
+          <strong style={{fontSize:14,color:"#111827"}}>{data?.totalBets||0}</strong>
+        </div>
+        <div style={{display:"flex",justifyContent:"space-between"}}>
+          <span style={{fontSize:12,color:"#9ca3af"}}>MRR estimado</span>
+          <strong style={{fontSize:14,color:"#059669"}}>€{((data?.paid||0)*3.99).toFixed(2)}/mês</strong>
+        </div>
+      </div>
+
+      <input style={{...S.input,marginBottom:12}} placeholder="🔍 Pesquisar utilizador..." value={search} onChange={e=>setSearch(e.target.value)}/>
+
+      <div style={{background:"#fff",border:"1px solid #f3f4f6",borderRadius:14,padding:16,boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
+        <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:1,fontWeight:800,marginBottom:14}}>Utilizadores ({filtered.length})</div>
+        {filtered.map(u=>{
           const tl=daysLeft(u.user_trial_start||u.trial_start);
           const status=u.subscribed?"Pago":tl>0?`Trial (${tl}d)`:"Expirado";
           const sc=u.subscribed?"#059669":tl>0?"#d97706":"#dc2626";
+          const roi=u.bets?.staked>0?((u.bets.pnl/u.bets.staked)*100).toFixed(1):null;
           return (
-            <div key={u.user_id} style={{padding:"12px 0",borderBottom:"1px solid #f3f4f6"}}>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8}}>
+            <div key={u.user_id} style={{padding:"14px 0",borderBottom:"1px solid #f3f4f6"}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:6}}>
                 <div style={{flex:1,minWidth:0}}>
-                  <div style={{fontSize:13,fontWeight:600,color:"#111827",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{u.user_name||u.email||u.user_id.slice(0,8)+"..."}</div>
-                  <div style={{fontSize:11,color:"#111827"}}>{u.email&&u.user_name?u.email:""}</div>
-                  <div style={{fontSize:11,color:"#111827"}}>{u.bancas} banca{u.bancas>1?"s":""} · {new Date(u.created_at).toLocaleDateString("pt-PT")}</div>
+                  <div style={{fontSize:13,fontWeight:700,color:"#111827"}}>{u.user_name||u.email?.split("@")[0]||"—"}</div>
+                  <div style={{fontSize:11,color:"#6b7280"}}>{u.email}</div>
+                  <div style={{fontSize:11,color:"#9ca3af",marginTop:2}}>
+                    {u.bancas} banca{u.bancas>1?"s":""} · {u.bets?.count||0} apostas
+                    {roi!==null && <span style={{color:parseFloat(roi)>=0?"#059669":"#dc2626"}}> · ROI {roi}%</span>}
+                  </div>
+                  <div style={{fontSize:11,color:"#9ca3af"}}>
+                    {u.sport} · {fmt(parseFloat(u.bankroll||0))} · Registo {new Date(u.created_at).toLocaleDateString("pt-PT")}
+                  </div>
                 </div>
-                <div style={{textAlign:"right",flexShrink:0,marginLeft:10}}>
-                  <div style={{fontSize:12,fontWeight:700,color:sc}}>{status}</div>
+                <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:6,marginLeft:10}}>
+                  <span style={{fontSize:12,fontWeight:700,color:sc,background:sc+"15",padding:"2px 8px",borderRadius:10}}>{status}</span>
+                  <button style={{padding:"4px 10px",border:"1px solid #e5e7eb",borderRadius:6,background:"#f9fafb",color:"#374151",cursor:"pointer",fontSize:11,fontWeight:600}} onClick={()=>{setEditUser(u);setEditForm({user_name:u.user_name,email:u.email,subscribed:u.subscribed,plan:u.plan||""});}}>✏️ Editar</button>
                 </div>
               </div>
             </div>
           );
         })}
-        {!data?.users.length && <div style={{textAlign:"center",color:"#9ca3af",padding:20}}>Nenhum utilizador ainda.</div>}
+        {!filtered.length && <div style={{textAlign:"center",color:"#9ca3af",padding:20}}>Nenhum utilizador encontrado.</div>}
       </div>
     </div>
   );
