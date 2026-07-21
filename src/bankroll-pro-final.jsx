@@ -684,106 +684,144 @@ export default function App() {
   );
 
   if(screen==="landing") return (
-    <div style={{background:"#f7f8fa",minHeight:"100vh",fontFamily:"-apple-system,'Segoe UI',sans-serif",color:"#111827"}}>
-      <header style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"16px 20px",background:"#fff",borderBottom:"1px solid #fff"}}>
-        <div style={{display:"flex",alignItems:"center",gap:10}}>
-          <div style={{width:32,height:32,background:"#f7f8fa",borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center",fontSize:16}}>📊</div>
-          <span style={{fontSize:16,fontWeight:800,color:"#111827"}}>BankrollPro</span>
+    <div style={{background:"#0a0e14",minHeight:"100vh",fontFamily:"-apple-system,'Segoe UI',sans-serif",color:"#f3f5f7"}}>
+      <header style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"18px 20px",borderBottom:"1px solid #1e2836"}}>
+        <div style={{display:"flex",alignItems:"center",gap:10,fontWeight:900,fontSize:17}}>
+          <div style={{width:34,height:34,borderRadius:9,background:"linear-gradient(135deg,#00d97e 0%,#00a862 100%)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:17}}>📊</div>
+          <span>Bankroll<span style={{color:"#00d97e"}}>Pro</span></span>
         </div>
-        <button style={S.btnOutline} onClick={()=>{setAuthMode("login");setScreen("auth");}}>Entrar</button>
+        <button style={{background:"none",border:"1px solid #1e2836",color:"#8b95a5",padding:"8px 18px",borderRadius:8,fontSize:13,fontWeight:700,cursor:"pointer"}} onClick={()=>{setAuthMode("login");setScreen("auth");}}>Entrar</button>
       </header>
 
-      <div style={{padding:"28px 20px 80px",maxWidth:480,margin:"0 auto"}}>
-        <div style={{display:"inline-block",background:"#f8f9fa",border:"1px solid #e9ecef",color:"#92400e",borderRadius:6,padding:"3px 12px",fontSize:11,fontWeight:700,marginBottom:18}}>
-          🔥 Oferta de lançamento — termina 31 de Agosto
+      <div style={{maxWidth:480,margin:"0 auto",padding:"0 20px"}}>
+        {/* HERO */}
+        <div style={{padding:"44px 0 36px",textAlign:"center"}}>
+          <div style={{display:"inline-flex",alignItems:"center",gap:6,background:"rgba(0,217,126,.08)",border:"1px solid rgba(0,217,126,.25)",color:"#00d97e",fontSize:12,fontWeight:700,padding:"6px 14px",borderRadius:20,marginBottom:22}}>
+            🔥 Preço de lançamento até 31 de Agosto
+          </div>
+          <h1 style={{fontSize:34,fontWeight:900,lineHeight:1.15,letterSpacing:-1,marginBottom:14,margin:"0 0 14px"}}>
+            Apostar bem<br/>não chega.<br/><span style={{color:"#00d97e"}}>Gerir é tudo.</span>
+          </h1>
+          <p style={{fontSize:15,color:"#8b95a5",lineHeight:1.6,maxWidth:400,margin:"0 auto 28px"}}>
+            90% dos apostadores perdem dinheiro mesmo acertando mais de metade das apostas. A diferença está na gestão da banca — e é isso que o BankrollPro faz por ti.
+          </p>
+          <button style={{display:"block",width:"100%",background:"linear-gradient(135deg,#00d97e 0%,#00a862 100%)",color:"#04110a",border:"none",borderRadius:12,padding:17,fontSize:16,fontWeight:800,cursor:"pointer",boxShadow:"0 8px 32px rgba(0,217,126,.25)",marginBottom:10}}
+            onClick={()=>{setAuthMode("register");setScreen("auth");}}>
+            Começar grátis — 7 dias
+          </button>
+          <div style={{fontSize:12,color:"#4d5866"}}>Sem cartão · Cancela quando quiseres</div>
+
+          {/* TICKER */}
+          <div style={{margin:"36px 0 0",background:"#111721",border:"1px solid #1e2836",borderRadius:14,padding:16,textAlign:"left"}}>
+            <div style={{fontSize:10,textTransform:"uppercase",letterSpacing:1.2,color:"#4d5866",fontWeight:800,marginBottom:12}}>📊 A TUA BANCA, EM TEMPO REAL</div>
+            {[
+              ["Sinner v Alcaraz · Over 3.5 sets @2.10","+€8,40",true],
+              ["Panamá v Inglaterra · Over 3.5 @1.97","−€6,00",false],
+              ["Raducanu vence · @1.85","+€5,10",true],
+              ["ROI do mês","+4.2%",true],
+            ].map(([bet,result,win],i)=>(
+              <div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"9px 0",borderBottom:i<3?"1px solid #1e2836":"none",fontSize:13}}>
+                <span style={{color:"#8b95a5"}}>{bet}</span>
+                <span style={{fontWeight:800,color:win?"#00d97e":"#ff4757"}}>{result}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* STATS */}
+          <div style={{display:"flex",gap:10,margin:"28px 0"}}>
+            {[["3","BANCAS"],["IA","ANÁLISE REAL"],["7d","TRIAL GRÁTIS"]].map(([n,l])=>(
+              <div key={l} style={{flex:1,background:"#111721",border:"1px solid #1e2836",borderRadius:12,padding:"14px 10px",textAlign:"center"}}>
+                <div style={{fontSize:20,fontWeight:900,color:"#00d97e"}}>{n}</div>
+                <div style={{fontSize:10,color:"#4d5866",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,marginTop:4}}>{l}</div>
+              </div>
+            ))}
+          </div>
         </div>
 
-        <h1 style={{fontSize:36,fontWeight:900,lineHeight:1.05,letterSpacing:"-2px",margin:"0 0 12px",color:"#111827"}}>
-          Para de perder.<br/><span style={{color:"#111827"}}>Começa a gerir.</span>
-        </h1>
-
-        <p style={{fontSize:14,color:"#6b7280",lineHeight:1.7,marginBottom:24}}>
-          Controla bancas por desporto, acompanha ROI em tempo real e recebe análise com IA para evoluir a tua performance.
-        </p>
-
-        <LandingQuote/>
-
-        <div style={{background:"#fff",border:"1px solid #e5e7eb",borderRadius:14,padding:16,marginBottom:20,boxShadow:"0 2px 8px rgba(0,0,0,.06)"}}>
-          <div style={{textAlign:"center",marginBottom:12,fontSize:12,color:"#dc2626",fontWeight:700}}>
-            ⏰ Preço de lançamento — só até 31 de Agosto · {PROMO_DAYS_LEFT()} dias restantes
+        {/* AI SHOWCASE */}
+        <div style={{padding:"28px 0"}}>
+          <div style={{fontSize:20,fontWeight:900,letterSpacing:-.5,marginBottom:18,textAlign:"center"}}>
+            A IA lê as tuas apostas.<br/><span style={{color:"#00d97e"}}>E diz-te onde perdes.</span>
           </div>
-          <div style={{display:"flex",gap:10}}>
-            <div style={{flex:1,background:"#f7f8fa",border:"1px solid #e5e7eb",borderRadius:12,padding:"12px 10px"}}>
-              <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:600,marginBottom:4}}>Mensal</div>
-              <div style={{fontSize:11,color:"#d1d5db",textDecoration:"line-through"}}>€{NORMAL_MONTHLY}/mês</div>
-              <div style={{fontSize:22,fontWeight:900,color:"#111827"}}>€{PROMO_MONTHLY}<span style={{fontSize:12,fontWeight:400,color:"#111827"}}>/mês</span></div>
-              <div style={{fontSize:11,color:"#dc2626",fontWeight:600,marginTop:4}}>Depois €{NORMAL_MONTHLY}/mês</div>
+          <div style={{background:"linear-gradient(160deg,#1a2230 0%,#111721 100%)",border:"1px solid rgba(0,217,126,.2)",borderRadius:16,padding:20,position:"relative"}}>
+            <div style={{position:"absolute",top:-9,left:18,background:"#00d97e",color:"#04110a",fontSize:10,fontWeight:900,letterSpacing:.8,padding:"3px 10px",borderRadius:6,textTransform:"uppercase"}}>Análise IA</div>
+            <div style={{fontSize:13.5,lineHeight:1.65,color:"#f3f5f7",fontStyle:"italic",marginTop:6}}>
+              "As tuas apostas em <span style={{color:"#ff4757",fontWeight:700,fontStyle:"normal"}}>Over 2.5 Sets com odds acima de 3.0</span> têm 1 acerto em 6 — perdeste €22 nesse padrão. Em contraste, <span style={{color:"#00d97e",fontWeight:700,fontStyle:"normal"}}>vencedor direto entre 1.5–2.0</span> tem 70% de acerto. Concentra-te aí."
             </div>
-            <div style={{flex:1,background:"#f7f8fa",border:"2px solid #111827",borderRadius:12,padding:"12px 10px"}}>
-              <div style={{fontSize:9,color:"#fff",background:"#111827",borderRadius:4,padding:"2px 8px",fontWeight:800,textTransform:"uppercase",letterSpacing:1,marginBottom:6,display:"inline-block"}}>POPULAR</div>
-              <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:600,marginBottom:4}}>Anual</div>
-              <div style={{fontSize:11,color:"#d1d5db",textDecoration:"line-through"}}>€{NORMAL_ANNUAL}/ano</div>
-              <div style={{fontSize:22,fontWeight:900,color:"#111827"}}>€{PROMO_ANNUAL}<span style={{fontSize:12,fontWeight:400,color:"#111827"}}>/ano</span></div>
-              <div style={{fontSize:11,color:"#059669",fontWeight:700,marginTop:4}}>Depois €{NORMAL_ANNUAL}/ano · Poupas €{(NORMAL_MONTHLY*12-PROMO_ANNUAL).toFixed(0)}</div>
-            </div>
+            <div style={{fontSize:11,color:"#4d5866",marginTop:10}}>— Análise baseada nas tuas apostas reais, não conselhos genéricos</div>
           </div>
         </div>
 
-        {/* PROVA SOCIAL */}
-        <div style={{background:"#fff",border:"1px solid #e5e7eb",borderRadius:14,padding:"16px 18px",marginBottom:12,boxShadow:"0 1px 4px rgba(0,0,0,.06)"}}>
-          <div style={{fontSize:12,fontWeight:800,color:"#111827",textTransform:"uppercase",letterSpacing:.8,marginBottom:12}}>💬 O que dizem os apostadores</div>
+        {/* FEATURES */}
+        <div style={{padding:"28px 0"}}>
+          <div style={{fontSize:20,fontWeight:900,letterSpacing:-.5,marginBottom:18,textAlign:"center"}}>
+            Tudo o que precisas.<br/>Nada do que não precisas.
+          </div>
           {[
-            ["Miguel F.","Finalmente sei exatamente onde estou a perder dinheiro. A análise IA apontou logo os mercados problemáticos.","🇵🇹"],
-            ["André C.","Uso com o meu grupo de tips. A importação do Telegram poupa-me imenso tempo — é colar e está feito.","🇧🇷"],
-            ["Lucas R.","Simples de usar e vejo o ROI real de cada estratégia. Devia ter começado há muito tempo.","🇧🇷"],
-          ].map(([name,text,flag])=>(
-            <div key={name} style={{padding:"10px 0",borderBottom:"1px solid #f9fafb"}}>
-              <div style={{fontSize:13,color:"#374151",lineHeight:1.5,fontStyle:"italic"}}>"{text}"</div>
-              <div style={{fontSize:12,color:"#9ca3af",marginTop:4,fontWeight:600}}>{flag} {name} · Utilizador BankrollPro</div>
+            ["📋","Importa do Telegram em segundos","Cola o texto do grupo ou envia um print — a IA extrai as apostas automaticamente."],
+            ["📅","Diário e relatório mensal","Lucro, ROI, taxa de acerto — por dia, por mês, por estratégia (ATP, WTA, o que quiseres)."],
+            ["💰","Stake fixa ou variável","Escolhe o teu método. Aportes, saques e revisão de stake a cada 30 dias."],
+            ["📉","Evolução visual da banca","Gráfico aposta a aposta. Vês num segundo se estás acima ou abaixo do início."],
+          ].map(([ico,t,d])=>(
+            <div key={t} style={{display:"flex",gap:14,alignItems:"flex-start",background:"#111721",border:"1px solid #1e2836",borderRadius:14,padding:16,marginBottom:10}}>
+              <div style={{width:40,height:40,borderRadius:10,flexShrink:0,background:"#1a2230",display:"flex",alignItems:"center",justifyContent:"center",fontSize:19}}>{ico}</div>
+              <div>
+                <div style={{fontSize:14,fontWeight:800,marginBottom:3}}>{t}</div>
+                <div style={{fontSize:13,color:"#8b95a5",lineHeight:1.5}}>{d}</div>
+              </div>
             </div>
           ))}
-          <div style={{textAlign:"center",marginTop:12,fontSize:12,color:"#6b7280",fontWeight:600}}>
-            ⭐ Junta-te aos apostadores que já gerem a banca como profissionais
+        </div>
+
+        {/* PRICING */}
+        <div style={{padding:"28px 0"}}>
+          <div style={{fontSize:20,fontWeight:900,letterSpacing:-.5,marginBottom:18,textAlign:"center"}}>
+            Menos que <span style={{color:"#00d97e"}}>uma aposta</span> por mês.
+          </div>
+          <div style={{display:"flex",gap:10,marginBottom:14}}>
+            <div style={{flex:1,background:"#111721",border:"1px solid #1e2836",borderRadius:14,padding:"18px 14px",textAlign:"center"}}>
+              <div style={{fontSize:11,color:"#4d5866",textTransform:"uppercase",letterSpacing:1,fontWeight:800,marginBottom:8}}>Mensal</div>
+              <div style={{fontSize:13,color:"#4d5866",textDecoration:"line-through"}}>€{NORMAL_MONTHLY}</div>
+              <div style={{fontSize:26,fontWeight:900,margin:"2px 0"}}>€{PROMO_MONTHLY}<span style={{fontSize:11,fontWeight:400,color:"#8b95a5"}}>/mês</span></div>
+            </div>
+            <div style={{flex:1,background:"linear-gradient(180deg,rgba(0,217,126,.06) 0%,#111721 100%)",border:"1px solid #00d97e",borderRadius:14,padding:"18px 14px",textAlign:"center",position:"relative"}}>
+              <div style={{position:"absolute",top:-9,left:"50%",transform:"translateX(-50%)",background:"#00d97e",color:"#04110a",fontSize:9,fontWeight:900,padding:"3px 10px",borderRadius:6,letterSpacing:.5,whiteSpace:"nowrap"}}>MAIS POPULAR</div>
+              <div style={{fontSize:11,color:"#4d5866",textTransform:"uppercase",letterSpacing:1,fontWeight:800,marginBottom:8}}>Anual</div>
+              <div style={{fontSize:13,color:"#4d5866",textDecoration:"line-through"}}>€{NORMAL_ANNUAL}</div>
+              <div style={{fontSize:26,fontWeight:900,margin:"2px 0"}}>€{PROMO_ANNUAL}<span style={{fontSize:11,fontWeight:400,color:"#8b95a5"}}>/ano</span></div>
+              <div style={{fontSize:10.5,color:"#00d97e",fontWeight:700,marginTop:4}}>Poupas €{(NORMAL_MONTHLY*12-PROMO_ANNUAL).toFixed(0)} vs mensal</div>
+            </div>
+          </div>
+          <div style={{background:"rgba(255,71,87,.08)",border:"1px solid rgba(255,71,87,.25)",color:"#ff4757",borderRadius:10,padding:"10px 14px",fontSize:12.5,fontWeight:700,textAlign:"center",marginBottom:20}}>
+            🔥 Preço de lançamento termina a 31 de Agosto
           </div>
         </div>
 
-        <div style={{background:"#fff",border:"1px solid #e5e7eb",borderRadius:14,padding:"16px 18px",marginBottom:20,boxShadow:"0 1px 4px rgba(0,0,0,.06)"}}>
-          <div style={{fontSize:12,fontWeight:800,color:"#111827",textTransform:"uppercase",letterSpacing:.8,marginBottom:12}}>✅ O que está incluído</div>
+        {/* TESTIMONIALS */}
+        <div style={{padding:"28px 0"}}>
+          <div style={{fontSize:20,fontWeight:900,letterSpacing:-.5,marginBottom:18,textAlign:"center"}}>
+            Quem usa, <span style={{color:"#00d97e"}}>não volta atrás.</span>
+          </div>
           {[
-            ["📊","Até 3 bancas separadas por desporto"],
-            ["📅","Diário com navegação por data — incluindo datas passadas"],
-            ["📈","Relatório mensal — lucro, ROI, % acertos, por dia"],
-            ["📉","Gráfico de evolução da banca aposta a aposta"],
-            ["🎯","Simples e múltiplas — stake fixa ou variável"],
-            ["🏷️","Estratégias por aposta com filtros (ATP, WTA, Liga, etc.)"],
-            ["📋","Importa do Telegram — texto ou print de ecrã"],
-            ["🤖","Análise IA — padrões reais, apostas específicas, recomendações"],
-            ["💰","Aporte e saque sem alterar histórico"],
-            ["🔔","Revisão automática de stake a cada 30 dias"],
-            ["🏅","Ténis, Futebol, NBA, MMA e mais"],
-            ["💱","€, R$ e $ — sem anúncios"],
-          ].map(([ico,txt])=>(
-            <div key={txt} style={{display:"flex",gap:10,padding:"6px 0",borderBottom:"1px solid #f9fafb",alignItems:"flex-start"}}>
-              <span style={{fontSize:16,flexShrink:0}}>{ico}</span>
-              <span style={{fontSize:13,color:"#374151",lineHeight:1.4}}>{txt}</span>
+            ["Finalmente sei exatamente onde estou a perder dinheiro. A análise IA apontou logo os mercados problemáticos.","🇵🇹 Miguel F."],
+            ["Uso com o meu grupo de tips. A importação do Telegram poupa-me imenso tempo — é colar e está feito.","🇧🇷 André C."],
+            ["Simples de usar e vejo o ROI real de cada estratégia. Devia ter começado há muito tempo.","🇧🇷 Lucas R."],
+          ].map(([text,author])=>(
+            <div key={author} style={{background:"#111721",border:"1px solid #1e2836",borderRadius:14,padding:16,marginBottom:10}}>
+              <div style={{fontSize:13,color:"#8b95a5",lineHeight:1.6,fontStyle:"italic"}}>"{text}"</div>
+              <div style={{fontSize:12,color:"#4d5866",marginTop:8,fontWeight:600}}>{author} · Utilizador BankrollPro</div>
             </div>
           ))}
         </div>
 
-        <button style={{...S.btnPrimary,fontSize:16,padding:"16px",borderRadius:12,marginBottom:10}} onClick={()=>{setAuthMode("register");setScreen("auth");}}>
-          🚀 Começar grátis — 7 dias
-        </button>
-        <button style={{...S.btnGhost}} onClick={()=>{setAuthMode("login");setScreen("auth");}}>
-          Já tenho conta — entrar
-        </button>
-        <p style={{fontSize:11,color:"#9ca3af",textAlign:"center",marginTop:8}}>Sem cartão necessário · Cancela quando quiseres</p>
-
-        <div style={{display:"flex",flexWrap:"wrap",gap:8,justifyContent:"center",marginTop:20}}>
-          {SPORT_KEYS.map(s=>(
-            <div key={s} style={{display:"flex",alignItems:"center",gap:5,background:"#fff",border:"1px solid #e5e7eb",borderRadius:20,padding:"4px 10px",fontSize:12}}>
-              <span>{SPORTS[s].icon}</span><span style={{color:"#111827"}}>{s}</span>
-            </div>
-          ))}
+        {/* FINAL CTA */}
+        <div style={{padding:"20px 0 48px",textAlign:"center"}}>
+          <h2 style={{fontSize:22,fontWeight:900,marginBottom:8,letterSpacing:-.5,margin:"0 0 8px"}}>A tua banca merece<br/>mais que um bloco de notas.</h2>
+          <p style={{fontSize:13,color:"#8b95a5",marginBottom:20,margin:"0 0 20px"}}>7 dias grátis. Sem cartão. Preço de lançamento até 31 de Agosto.</p>
+          <button style={{display:"block",width:"100%",background:"linear-gradient(135deg,#00d97e 0%,#00a862 100%)",color:"#04110a",border:"none",borderRadius:12,padding:17,fontSize:16,fontWeight:800,cursor:"pointer",boxShadow:"0 8px 32px rgba(0,217,126,.25)"}}
+            onClick={()=>{setAuthMode("register");setScreen("auth");}}>
+            Começar agora →
+          </button>
         </div>
       </div>
     </div>
@@ -1258,18 +1296,6 @@ export default function App() {
               onClick={()=>{ try{localStorage.setItem("bpOnboarded","1");}catch(e){} setShowOnboarding(false); }}>
               {lang==="PT"?"Saltar tutorial":"Skip tutorial"}
             </button>
-          </div>
-        </div>
-      )}
-
-      {showTooltip && (
-        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.3)",zIndex:250,display:"flex",alignItems:"center",justifyContent:"center",padding:20}}
-          onClick={()=>setShowTooltip(null)}>
-          <div style={{background:"#fff",borderRadius:14,padding:24,maxWidth:360,width:"100%",boxShadow:"0 8px 32px rgba(0,0,0,.15)"}} onClick={e=>e.stopPropagation()}>
-            <div style={{fontSize:28,marginBottom:10,textAlign:"center"}}>{showTooltip.ico}</div>
-            <div style={{fontSize:16,fontWeight:800,color:"#111827",marginBottom:8,textAlign:"center"}}>{showTooltip.title}</div>
-            <div style={{fontSize:13,color:"#6b7280",lineHeight:1.6,textAlign:"center"}}>{showTooltip.desc}</div>
-            <button style={{...S.btnPrimary,marginTop:20}} onClick={()=>setShowTooltip(null)}>OK</button>
           </div>
         </div>
       )}
