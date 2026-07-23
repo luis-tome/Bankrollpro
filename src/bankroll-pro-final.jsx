@@ -532,13 +532,42 @@ export default function App() {
           })
         });
       } catch(e){ console.error("Backup email failed:", e); }
-      // Soft delete
-      await supabase.from("bets").update({deleted_at: now}).eq("bankroll_id",id);
-      await supabase.from("profiles").update({deleted_at: now}).eq("id",id);
+
       const remaining=bankrolls.filter(b=>b.id!==id);
-      setBankrolls(remaining);
-      if(remaining.length>0){setActiveBR(remaining[0].id);await loadBets(remaining[0].id);}
-      else{setActiveBR(null);setBets([]);setScreen("setup");}
+
+      // Soft delete das apostas sempre
+      await supabase.from("bets").update({deleted_at: now}).eq("bankroll_id",id);
+
+      if(remaining.length>0){
+        // Há outras bancas — pode apagar o perfil desta com segurança.
+        // Mas antes: se ESTA banca tem a subscrição, transfere-a para outra banca do user.
+        const deleted = bankrolls.find(b=>b.id===id);
+        if(deleted?.subscribed){
+          await supabase.from("profiles").update({
+            subscribed: true,
+            plan: deleted.plan,
+            stripe_customer_id: deleted.stripe_customer_id||null,
+            stripe_subscription_id: deleted.stripe_subscription_id||null
+          }).eq("id", remaining[0].id);
+          setBankrolls(prev=>prev.map(b=>b.id===remaining[0].id?{...b,subscribed:true,plan:deleted.plan}:b).filter(b=>b.id!==id));
+        } else {
+          setBankrolls(remaining);
+        }
+        await supabase.from("profiles").update({deleted_at: now}).eq("id",id);
+        setActiveBR(remaining[0].id);
+        await loadBets(remaining[0].id);
+      } else {
+        // É a ÚLTIMA banca — NUNCA apagar o perfil (perderia a subscrição/conta).
+        // Em vez disso, faz reset aos dados da banca mantendo subscrição intacta.
+        await supabase.from("profiles").update({
+          name: "Principal",
+          bankroll: 0,
+          // subscribed, plan, stripe ids ficam INTOCADOS
+        }).eq("id",id);
+        setBankrolls(prev=>prev.map(b=>b.id===id?{...b,name:"Principal",bankroll:0}:b));
+        setBets([]);
+        setScreen("setup");
+      }
       setShowEditBR(false);setDrawerOpen(false);
     }});
   }
@@ -1082,7 +1111,7 @@ export default function App() {
                     for(const b of importBets){
                       const stake=unitVal*b.units;
                       await supabase.from("bets").insert({
-                        user_id:user.id,bankroll_id:activeBR,sport:br.sport,
+                        user_id:user.id,bankroll_id:activeBR,sport:br?.sport||"Outros",
                         event:b.event,market:b.market,selection:b.selection,
                         odd:b.odd,stake,units:b.units,result:"PENDING",
                         notes:b.notes,created_at:importTimestamp
