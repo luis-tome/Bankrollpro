@@ -406,8 +406,11 @@ export default function App() {
   const fmtPct  = v => (v>=0?"+":"")+v.toFixed(1)+"%";
   const trialLeft = br?.user_trial_start ? daysLeft(br.user_trial_start) : (br?.trial_start ? daysLeft(br.trial_start) : TRIAL_DAYS);
   const isAdmin   = user?.email === ADMIN_EMAIL;
-  const isActive  = br?.subscribed || trialLeft > 0 || isAdmin;
-  const isInTrial = !br?.subscribed && trialLeft > 0;
+  // Subscrição é ao nível da CONTA, não da banca: se qualquer banca do user está subscrita, todas contam como subscritas
+  const accountSubscribed = bankrolls.some(b=>b.subscribed);
+  const accountPlan = bankrolls.find(b=>b.subscribed)?.plan || br?.plan || null;
+  const isActive  = accountSubscribed || trialLeft > 0 || isAdmin;
+  const isInTrial = !accountSubscribed && trialLeft > 0;
   const effectiveSport = br?.sport==="Geral" ? (betSport||"Ténis") : (br?.sport||"Ténis");
   const markets   = SPORTS[effectiveSport]?.markets||["Outros"];
   const formSC    = SPORTS[effectiveSport]||sc;
@@ -475,11 +478,17 @@ export default function App() {
     } else {
       const{data:{session}}=await supabase.auth.getSession();
       const uid=session?.user?.id||user?.id;
-      const{data:existing}=await supabase.from("profiles").select("user_trial_start,trial_start").eq("user_id",uid).order("created_at",{ascending:true});
+      const{data:existing}=await supabase.from("profiles").select("user_trial_start,trial_start,subscribed,plan,stripe_customer_id,stripe_subscription_id").eq("user_id",uid).is("deleted_at",null).order("created_at",{ascending:true});
       const earliestTrial=existing?.[0]?.user_trial_start||existing?.[0]?.trial_start||new Date().toISOString();
+      // Herdar estado de subscrição: se QUALQUER banca do user está subscrita, a nova também fica
+      const subscribedProfile = existing?.find(p=>p.subscribed);
+      const inheritSubscribed = !!subscribedProfile;
+      const inheritPlan = subscribedProfile?.plan||null;
+      const inheritCustomerId = subscribedProfile?.stripe_customer_id||null;
+      const inheritSubId = subscribedProfile?.stripe_subscription_id||null;
       const userEmail=session?.user?.email||user?.email||"";
       const userDisplayName=session?.user?.user_metadata?.name||user?.user_metadata?.name||"";
-      const{data}=await supabase.from("profiles").insert({user_id:uid,name:brForm.name,sport:brForm.sport,bankroll:brv,unit_pct:parseFloat(brForm.unit_pct),trial_start:new Date().toISOString(),user_trial_start:earliestTrial,subscribed:false,email:userEmail,user_name:userDisplayName,last_stake_review:new Date().toISOString(),stake_mode:brForm.stake_mode||"variable"}).select().single();
+      const{data}=await supabase.from("profiles").insert({user_id:uid,name:brForm.name,sport:brForm.sport,bankroll:brv,unit_pct:parseFloat(brForm.unit_pct),trial_start:new Date().toISOString(),user_trial_start:earliestTrial,subscribed:inheritSubscribed,plan:inheritPlan,stripe_customer_id:inheritCustomerId,stripe_subscription_id:inheritSubId,email:userEmail,user_name:userDisplayName,last_stake_review:new Date().toISOString(),stake_mode:brForm.stake_mode||"variable"}).select().single();
       if(data){setBankrolls(prev=>[...prev,data]);setActiveBR(data.id);setBets([]);setShowNewBR(false);setShowEditBR(false);setDrawerOpen(false);setBRForm({name:"",sport:"Ténis",bankroll:"",unit_pct:"2",reset:false,stake_mode:"variable"});setScreen("app");}
     }
   }
@@ -1439,7 +1448,7 @@ export default function App() {
 
             <div style={{flex:1}}/>
 
-            {br?.subscribed && (
+            {accountSubscribed && (
               <div style={{background:"#f0fdf4",border:"1px solid #bbf7d0",borderRadius:8,padding:"10px 12px",marginTop:16,fontSize:12,color:"#15803d",fontWeight:600,textAlign:"center"}}>{tx("activePlan")}</div>
             )}
             <button style={{...S.btnGhost,marginTop:10,fontSize:12,border:"1.5px solid #e5e7eb",color:"#6b7280",background:"transparent"}} onClick={()=>supabase.auth.signOut()}>{tx("logout")}</button>
@@ -2014,7 +2023,7 @@ export default function App() {
                 </div>
                 <div style={{textAlign:"right",flexShrink:0}}>
                   <div style={{fontSize:10,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700}}>Análises</div>
-                  <div style={{fontSize:16,fontWeight:900,color:sc.color}}>{isAdmin?"∞":aiUsage+"/"+(br?.plan==="annual"?AI_LIMIT_ANNUAL:AI_LIMIT_MONTHLY)}</div>
+                  <div style={{fontSize:16,fontWeight:900,color:sc.color}}>{isAdmin?"∞":aiUsage+"/"+(accountPlan==="annual"?AI_LIMIT_ANNUAL:AI_LIMIT_MONTHLY)}</div>
                   <div style={{fontSize:10,color:"#111827"}}>{lang==="PT"?"este mês":"this month"}</div>
                 </div>
               </div>
@@ -2060,7 +2069,7 @@ export default function App() {
                 </div>
               )}
 
-              {!br?.subscribed && !isAdmin && (
+              {!accountSubscribed && !isAdmin && (
                 <div style={{background:"#f0fdf4",border:"1px solid #bbf7d0",borderRadius:10,padding:"14px 16px",marginBottom:16}}>
                   <div style={{fontSize:13,fontWeight:700,color:"#15803d",marginBottom:10}}>🔒 Funcionalidade exclusiva para subscritores</div>
                   <div style={{display:"flex",flexDirection:"column",gap:8}}>
@@ -2082,7 +2091,7 @@ export default function App() {
                 </div>
               )}
 
-              {!isAdmin && br?.subscribed && aiUsage>=(br?.plan==="annual"?AI_LIMIT_ANNUAL:AI_LIMIT_MONTHLY) ? (
+              {!isAdmin && accountSubscribed && aiUsage>=(accountPlan==="annual"?AI_LIMIT_ANNUAL:AI_LIMIT_MONTHLY) ? (
                 <div style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:8,padding:"12px",textAlign:"center",fontSize:13,color:"#dc2626",fontWeight:600}}>
                   Limite mensal atingido · Renova no próximo mês
                 </div>
@@ -2180,8 +2189,8 @@ export default function App() {
               <div style={{fontSize:13,color:"#9ca3af",marginBottom:16}}>{lang==="PT"?"Gestão profissional de banca desportiva":"Professional sports bankroll management"}</div>
               <div style={{background:"#f9fafb",border:"1px solid #f3f4f6",borderRadius:10,padding:"12px 16px",marginBottom:20,textAlign:"left"}}>
                 <div style={{fontSize:11,color:"#9ca3af",textTransform:"uppercase",letterSpacing:.8,fontWeight:700,marginBottom:8}}>{lang==="PT"?"Plano atual":"Current plan"}</div>
-                <div style={{fontSize:14,fontWeight:700,color:br?.subscribed?"#059669":"#d97706"}}>{br?.subscribed?lang==="PT"?`Plano ${br?.plan==="annual"?"Anual":"Mensal"} · Ativo`:`${br?.plan==="annual"?"Annual":"Monthly"} Plan · Active`:lang==="PT"?`Trial · ${trialLeft} dias restantes`:`Trial · ${trialLeft} days remaining`}</div>
-                {br?.subscribed&&<div style={{fontSize:12,color:"#6b7280",marginTop:2}}>{lang==="PT"?"Análises IA":"AI analyses"}: {br?.plan==="annual"?AI_LIMIT_ANNUAL:AI_LIMIT_MONTHLY}/{lang==="PT"?"mês":"month"}</div>}
+                <div style={{fontSize:14,fontWeight:700,color:accountSubscribed?"#059669":"#d97706"}}>{accountSubscribed?lang==="PT"?`Plano ${accountPlan==="annual"?"Anual":"Mensal"} · Ativo`:`${accountPlan==="annual"?"Annual":"Monthly"} Plan · Active`:lang==="PT"?`Trial · ${trialLeft} dias restantes`:`Trial · ${trialLeft} days remaining`}</div>
+                {accountSubscribed&&<div style={{fontSize:12,color:"#6b7280",marginTop:2}}>{lang==="PT"?"Análises IA":"AI analyses"}: {accountPlan==="annual"?AI_LIMIT_ANNUAL:AI_LIMIT_MONTHLY}/{lang==="PT"?"mês":"month"}</div>}
               </div>
               <a href={`mailto:tome.luis.pt@gmail.com?subject=Suporte BankrollPro&body=Olá BankrollPro Team,%0A%0A`}
                 style={{display:"flex",alignItems:"center",justifyContent:"center",gap:10,background:"#111827",color:"#fff",textDecoration:"none",padding:"14px",borderRadius:10,fontSize:14,fontWeight:700}}>
